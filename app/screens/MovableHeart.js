@@ -18,7 +18,8 @@ export class Movable extends Component {
     this.state.animate.y.addListener(({value})=> this.state.aniValueY = value)
 
     this.state.animate.setValue({ x: 0, y: 0 });
-    
+    props.position(this.state.aniValueX, this.state.aniValueY);
+
     // Initialize panResponder and configure handlers
     this._panResponder = PanResponder.create({
       //     

@@ -62,7 +62,11 @@ export class Movable extends Component {
           Animated.spring(this.state.animate, {
             toValue: 0,
             useNativeDriver: false,
-          }).start();    
+          }).start(({finished})=>{
+            if(finished){
+              props.position(this.state.aniValueX, this.state.aniValueY)
+            }
+          });    
 
         }
 

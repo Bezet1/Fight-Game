@@ -26,7 +26,8 @@ function Homescreen( {navigation}) {
     const [oppID, setOppID] = useState('');
 
     
-    const progress = useRef(new Animated.Value(0)).current;
+    const aniScale = useRef(new Animated.Value(0.8)).current;
+    const aniOpacity = useRef(new Animated.Value(0)).current;
     const damianUP = useRef(new Animated.Value(-2)).current;
     const rudyUP = useRef(new Animated.Value(-5)).current;
 
@@ -65,8 +66,10 @@ function Homescreen( {navigation}) {
 
     //animations
     useEffect(()=> { 
-        progress.setValue(0);
-        Animated.spring(progress, {toValue: 1, useNativeDriver: true}).start();
+        aniScale.setValue(0.8);
+        aniOpacity.setValue(0);
+        Animated.spring(aniScale, {toValue: 1, useNativeDriver: true}).start();
+        Animated.timing(aniOpacity, {toValue: 1, duration: 200,useNativeDriver: true}).start();
 
     }, [isHomeScreen, isChooseCharacter, isChooseOpponent, isChooseDifficulty])
 
@@ -101,7 +104,7 @@ function Homescreen( {navigation}) {
       function Home_Screen(){
         if(isHomeScreen){
             return(
-            <Animated.View style={[styles.container, {opacity: progress}]}>
+            <Animated.View style={[styles.container, {opacity: aniOpacity}]}>
             <View press style={styles.titleContainer}>
                 <Text style={[styles.title,{top: 30}]} adjustsFontSizeToFit={true} numberOfLines={1}>Fight</Text>
                 <Text style={styles.title} adjustsFontSizeToFit={true} numberOfLines={1}>game</Text>          
@@ -136,7 +139,7 @@ function Homescreen( {navigation}) {
                     <Text style={styles.backText}>BACK</Text>   
                 </Pressable>
             </View>
-            <Animated.View style={{flex: 1, justifyContent: "center", transform: [{scale: progress}], opacity: progress}}>
+            <Animated.View style={{flex: 1, justifyContent: "center", transform: [{scale: aniScale}], opacity: aniOpacity}}>
                 <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHOOSE YOUR</Text>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHARACTER</Text>
@@ -205,7 +208,7 @@ function Homescreen( {navigation}) {
                     <Text style={styles.backText}>BACK</Text>   
                 </Pressable>
             </View>
-            <Animated.View style={{flex: 1, justifyContent: "center", transform: [{scale: progress}], opacity: progress}}>
+            <Animated.View style={{flex: 1, justifyContent: "center", transform: [{scale: aniScale}], opacity: aniOpacity}}>
                 <View style={{justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHOOSE YOUR</Text>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>OPPONENT</Text>
@@ -267,7 +270,7 @@ function Homescreen( {navigation}) {
             <Pressable onPress={backChooseDifficulty} style={({pressed})=>[styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
                 <Text style={styles.backText}>BACK</Text>   
             </Pressable>
-            <Animated.View style={{flex: 1, top: 15, transform: [{scale: progress}], opacity: progress}}>
+            <Animated.View style={{flex: 1, top: 15, transform: [{scale: aniScale}], opacity: aniOpacity}}>
                 <View style={{justifyContent: 'center', alignItems: 'center', margin: 20}}>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHOOSE</Text>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>DIFFICULTY</Text>
@@ -308,7 +311,8 @@ function Homescreen( {navigation}) {
             return;
         }
 
-        progress.stopAnimation(); 
+        aniScale.stopAnimation(); 
+        aniOpacity.stopAnimation(); 
         damianUP.stopAnimation(); 
         rudyUP.stopAnimation(); 
         spinValue.stopAnimation(); 
@@ -329,7 +333,8 @@ function Homescreen( {navigation}) {
             return;
         }
 
-        progress.stopAnimation(); 
+        aniScale.stopAnimation(); 
+        aniOpacity.stopAnimation(); 
         damianUP.stopAnimation(); 
         rudyUP.stopAnimation(); 
         spinValue.stopAnimation(); 

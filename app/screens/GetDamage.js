@@ -155,7 +155,7 @@ function enemyHit(evt){
         if(isText){
             return(
                 <Animated.View
-                style={{opponentPosition: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
+                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TAP ENEMY</Text>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO GET DAMAGE!</Text>
                 </Animated.View>

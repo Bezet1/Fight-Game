@@ -11,22 +11,22 @@ function EnemyRound({navigation, route}) {
 
     const windowWidth = useRef(Dimensions.get('window'));
     
-    const lineSpeedVertical = useRef(800);
-    const lineSpeedHorizontal = useRef(6000);
+    const lineSpeedVertical = useRef(2500);
+    const lineSpeedHorizontal = useRef(2000);
     const viewX = useRef(0);
     const viewY = useRef(0);
     const viewWidth = useRef(0);
     const viewHeight = useRef(0);
     const heartX = useRef(0);
     const heartY = useRef(0);
-    const ballX = useRef(0);
-    const ballY = useRef(0);
-    const [viewWidth_s, setViewWidth_s] = useState(0);
+    const [isHeart, setIsHeart] = useState(false);
     const [viewHeight_s, setViewHeight_s] = useState(0);
     const line1Y = useRef(0);
     const line1X = useRef(0);
     const line2Y = useRef(0);
     const line2X = useRef(0);
+    const changeColorLine1 = useRef();
+    const changeColorLine2 = useRef();
     
     const [wasHit, setWasHit] = useState(false);
     const firstUpdate_line1 = useRef(false);
@@ -40,14 +40,16 @@ function EnemyRound({navigation, route}) {
 
     const randomHeight1 = useRef(0);
     const randomHeight2 = useRef(0);
-
     const UpDown1 = useRef();
     const UpDown2 = useRef();
 
-    const ballPosition = useRef(new Animated.ValueXY({x: 20, y: -50})).current;
+    const[isText, setIsText] = useState(false);
+    const textProgress = useRef(new Animated.Value(0)).current;
 
     const linePosition1 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const linePosition2 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
+
+    const[firstRound, setFirstRound] = useState(true);
 
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
@@ -60,7 +62,6 @@ function EnemyRound({navigation, route}) {
         viewWidth.current = layout.width;
         viewHeight.current = layout.height;
         setViewHeight_s(()=>layout.height);
-        setViewWidth_s(()=> layout.width);
         
         heartX.current = layout.width/2;
         heartY.current = layout.height/2;
@@ -75,16 +76,34 @@ function EnemyRound({navigation, route}) {
         UpDown1.current = Math.random();
         UpDown2.current = Math.random();
 
+        if(firstRound){
+            setIsText(() => true)
+            textProgress.setValue(0);
+            Animated.spring(textProgress, {toValue: 1, useNativeDriver: true, delay: 500}).start();
+            setTimeout(() => {
+                Animated.spring(textProgress, {toValue: 0, useNativeDriver: true}).start(() => {
+                    setIsText(() => false)
+                    setIsHeart(()=>true);
+                });
+            }, 2500);
+        }
+        else{
+            setTimeout(() => {
+                setIsHeart(()=>true);
+            }, 500);
+        }
+        
+
         //start of aniamtions
         setTimeout(() => {
             Animated.timing(linePosition1.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current,easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical1((current)=> !current)
-        }, 1000);
+        }, firstRound ? 5500: 2500);
 
         setTimeout(() => {
             Animated.timing(linePosition2.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current, easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical2((current)=> !current)
-        }, 1000 + lineSpeedHorizontal.current/2);
+        }, firstRound? 5500 + lineSpeedHorizontal.current/2: 2500 + lineSpeedHorizontal.current/2);
 
 }
     
@@ -96,26 +115,18 @@ function EnemyRound({navigation, route}) {
 
     //all listeners
     useEffect(()=> {
-        /*
-        ballPosition.x.addListener(({value}) => {
-            ballX.current = value + viewWidth.current/2;
-        });
-        
-        ballPosition.y.addListener(({value}) => {
-            ballY.current = value + viewHeight.current/2
-        });
-        */
 
         //LINE1
         linePosition1.x.removeAllListeners();
         linePosition1.x.addListener(({value}) => {
             line1X.current = value + viewWidth.current/2;
 
-            
-
             //line on the end of view
             if(line1X.current > viewWidth.current + 10){
                 linePosition1.stopAnimation();
+
+                clearTimeout(changeColorLine1.current);
+                setLine1IMG(()=>require('../assets/lineHorizontal.png'))
 
                 randomHeight1.current = randomNumber((-viewHeight.current * 0.75)/2, (viewHeight.current * 0.75)/2);
 
@@ -132,15 +143,18 @@ function EnemyRound({navigation, route}) {
             line1Y.current = value + viewHeight.current/2;
 
             //when hit heart
-            if(line1X.current + 30 > heartX.current && line1X.current - 30 < heartX.current && (line1Y.current + 30 < heartY.current || line1Y.current - 30 > heartY.current)){
+            if(line1X.current + 30 > heartX.current && line1X.current - 30 < heartX.current && (line1Y.current + 17 < heartY.current || line1Y.current - 17 > heartY.current)){
                 linePosition1.y.removeAllListeners();
                 linePosition2.y.removeAllListeners();
 
-                setLine1IMG(()=>require('../assets/lineHorizontalRed.png'))
+                setLine1IMG(()=>require('../assets/lineHorizontalRed.png'));
 
-                setHealth((c)=> c + 1)
+                setHealth((c)=> c + 1);
                 setTimeout(() => {
                     setWasHit((c) => !c)
+                }, 500);
+
+                changeColorLine1.current = setTimeout(() => {
                     setLine1IMG(()=>require('../assets/lineHorizontal.png'))
                 }, 500);
             }
@@ -154,6 +168,9 @@ function EnemyRound({navigation, route}) {
             //line on the end of view
             if(line2X.current > viewWidth.current + 10){
                 linePosition2.stopAnimation();
+
+                clearTimeout(changeColorLine2.current);
+                setLine2IMG(()=>require('../assets/lineHorizontal.png'))
 
                 randomHeight2.current = randomNumber((-viewHeight.current * 0.75)/2, (viewHeight.current * 0.75)/2);
 
@@ -170,7 +187,7 @@ function EnemyRound({navigation, route}) {
             line2Y.current = value + viewHeight.current/2;
 
             //when hit heart
-            if(line2X.current + 30 > heartX.current && line2X.current - 30 < heartX.current && (line2Y.current + 30 < heartY.current || line2Y.current - 30 > heartY.current)){
+            if(line2X.current + 30 > heartX.current && line2X.current - 30 < heartX.current && (line2Y.current + 17 < heartY.current || line2Y.current - 17 > heartY.current)){
                 linePosition1.y.removeAllListeners();
                 linePosition2.y.removeAllListeners();
 
@@ -179,6 +196,9 @@ function EnemyRound({navigation, route}) {
                 setHealth((c)=> c + 1)
                 setTimeout(() => {
                     setWasHit((c) => !c)
+                }, 500);
+
+                changeColorLine2.current = setTimeout(() => {
                     setLine2IMG(()=>require('../assets/lineHorizontal.png'))
                 }, 500);
             }
@@ -219,8 +239,6 @@ function EnemyRound({navigation, route}) {
                 viewForLine1.current = -viewHeight.current;
             }
         }
-
-        //console.log('LINE1= duration: ', duration1.current, '  ','height: ', randomHeight1.current, 'updown: ', UpDown1.current > 0.5)
         
         Animated.sequence([
             Animated.timing(linePosition1.y, {toValue: (-viewForLine1.current * 0.75)/2, duration: duration1.current, easing: Easing.linear, useNativeDriver: true}),
@@ -263,7 +281,6 @@ function EnemyRound({navigation, route}) {
             }
         }
         
-        //console.log('LINE2= duration: ', duration2.current, '  ','height: ', randomHeight2.current, 'updown: ', UpDown2.current > 0.5)
         
         Animated.sequence([
             Animated.timing(linePosition2.y, {toValue: (-viewForLine2.current * 0.75)/2, duration: duration2.current, easing: Easing.linear, useNativeDriver: true}),
@@ -277,6 +294,14 @@ function EnemyRound({navigation, route}) {
         });
     }, [startVertical2])
 
+    function heart(){
+        if(isHeart){
+            return(
+                <Movable position={takeHeartPosition} viewX={viewX} viewY={viewY} viewWidth={viewWidth} viewHeight={viewHeight}/>
+            )
+        }
+    }
+
     function opponent(){
         return(
             <View style={styles.opponent}>
@@ -285,11 +310,7 @@ function EnemyRound({navigation, route}) {
         )
     }
 
-    function ball(){
-        return(
-            <Animated.View style={[styles.ball, {transform: [{translateX: ballPosition.x}, {translateY: ballPosition.y}]}]}/>
-        )
-    }
+    
 
     function line1(){
         return(
@@ -307,6 +328,18 @@ function EnemyRound({navigation, route}) {
         )
     }
 
+    function middleText(){
+        if(isText){
+            return(
+                <Animated.View
+                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>AVOID</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>LINES!</Text>
+                </Animated.View>
+            )
+        }
+    }
+
     return (
         <ImageBackground style={styles.background} source={require("../assets/flame34k.jpg")}>
             <SafeAreaView style={styles.background}>
@@ -316,7 +349,8 @@ function EnemyRound({navigation, route}) {
                 <View onLayout={(event) => getDimentions(event.nativeEvent.layout)} style={styles.fieldContainer}>
                     {line1()}
                     {line2()}
-                    <Movable position={takeHeartPosition} viewX={viewX} viewY={viewY} viewWidth={viewWidth} viewHeight={viewHeight}/>
+                    {heart()}
+                {middleText()}
                 </View>
                 <View style={{marginBottom: 10}}>
                     <Text style={styles.healhText} adjustsFontSizeToFit={true} numberOfLines={1}>HP: {health}</Text>
@@ -375,19 +409,18 @@ const styles = StyleSheet.create({
         fontFamily:'Buttons',
         fontSize: 50,
       },
-      ball:{
-        width: 30, 
-        height: 30, 
-        borderRadius: 15, 
-        backgroundColor: 'blue',
-        position: "absolute"
-      },
       lineVertical:{
         position: "absolute",
         height: 1000,
         justifyContent: 'center',
         alignItems: 'center',
-      }
+      },
+      middleText: {
+        fontSize: 60,
+        color: "white",
+        fontFamily: "Buttons",
+        textAlign: "center",
+    },
 })
 
 export default EnemyRound;

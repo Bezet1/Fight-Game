@@ -1,5 +1,6 @@
-import {React, useState, useEffect, useRef} from 'react';
+import {React, useState, useEffect, useRef, useCallback} from 'react';
 import { Image, Text, View, StyleSheet, ImageBackground, Pressable, SafeAreaView, Animated, Dimensions} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Menu from "./Menu";
 import Win from './Win';
 import Lose from './Lose';
@@ -11,15 +12,15 @@ import EnemyRound from './EnemyRound';
 
 function Game({navigation, route}) {
     let timerValue = 1;
-    let opponentAmountHealth = route.params.health;
-    let myAmountHealth = route.params.health;
+    let opponentAmountHealth = route?.params?.health;
+    let myAmountHealth = route?.params?.health;
     let windowWidth = Dimensions.get("window").width;
     
-    const difficulty = useRef(route.params.difficulty);
-    const charID = useRef(route.params.char);
-    const oppID = useRef(route.params.opp);
-    const myName = useRef(route.params.myname.toUpperCase());
-    const oppName = useRef(route.params.oppname);
+    const difficulty = useRef(route?.params?.difficulty);
+    const charID = useRef(route?.params?.char);
+    const oppID = useRef(route?.params?.opp);
+    const myName = useRef(route?.params?.myname?.toUpperCase());
+    const oppName = useRef(route?.params?.oppname);
     const oppPath = useRef();
     const charPath = useRef();
     
@@ -29,7 +30,6 @@ function Game({navigation, route}) {
     const [IsWin, setIsWin] = useState(false);
     const [IsLoose, setIsLoose] = useState(false);
     const [IsMenu, setIsMenu] = useState(false);
-    const [IsEnemyRound, setIsEnemyRound] = useState(false);
     const [startEnemyRound, setStartEnemyRound] = useState(false);
     const [healthMinusValue, setHealthMinusValue] = useState([])
     const [damageMinusValue, setDamageMinusValue] = useState([])
@@ -38,13 +38,15 @@ function Game({navigation, route}) {
     const [myTurn, setMyTurn] = useState(true);
     const [startTimer, setStartTimer] = useState(false);
     const [isTimer, setIsTimer] = useState(true);
-    const [myHealth, setMyHealth] = useState(myAmountHealth-10);
+    const [myHealth, setMyHealth] = useState(myAmountHealth);
     const [opponentHealth, setopponentHealth] = useState(opponentAmountHealth);
     const [timer, setTimer] = useState(timerValue);
     const [menuIsShown, setMenuIsShown] = useState(true);opponentUPDOWN
     const [startAnimations, setStartAnimations] = useState(false);
     const [stopAnimations, setStopAnimations] = useState(false);
-
+    const [isFirstOpponentRound, setIsFirstOpponentRound] = useState(true);
+    const ER_healthPassed = useRef(myAmountHealth);
+    
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
     const playerLeft = useRef(new Animated.Value(-windowWidth)).current;
@@ -52,6 +54,7 @@ function Game({navigation, route}) {
     const TimmerOpacity = useRef(new Animated.Value(0)).current;
     const opponentUPDOWN = useRef(new Animated.Value(0)).current;
     
+    const wasFirstFocus = useRef(false);
     const firstUpdateForstopAnim = useRef(false);
     const intervalForTimer = useRef(null);
     const intervalForOpponentHealth = useRef(null);
@@ -130,9 +133,9 @@ function Game({navigation, route}) {
         }
 
 
-        setTimeout(() => {
-            navigation.navigate("EnemyRound", {path: oppPath.current})
-        }, 2000);
+        //setTimeout(() => {
+        //    navigation.navigate("EnemyRound", {path: oppPath.current})
+       // }, 2000);
     }, [])
     
     //find random number
@@ -319,26 +322,47 @@ function Game({navigation, route}) {
         
         setMyTurn(() => false)
         setTimeout(() => {
-            var opponentAttack = Math.round(randomNumber(5, 15))
-            setMyHealth((current)=> current - opponentAttack);
-            setMy_DamageMinusValue(() => -opponentAttack)
-            setTimeout(() => {
-                setButtonsActive(() => true)
-                setMyTurn(() => true)
-                setMy_DamageMinusValue([])
-            }, 1000);
+            navigation.navigate("EnemyRound", {difficulty: difficulty.current, path: oppPath.current, health: myHealth, isFirstRound: isFirstOpponentRound})
         }, randomNumber(700,1000));
+
     },[startEnemyRound])
 
-    function closeEnemyRound(){
+    //when screen is back after enemys round
+    useEffect(() => {
+      if (route.params?.EN_health) {
+          ER_healthPassed.current = route.params.EN_health;
+          console.log('zmiana', route.params?.EN_health)
+          console.log(ER_healthPassed.current);
+      }
+    }, [route.params?.EN_health]);
+   
+    useFocusEffect(
+        useCallback(() => {    
+            if(!wasFirstFocus.current){
+                wasFirstFocus.current = true;
+                return;
+            }
 
-    }
+            setIsFirstOpponentRound(()=>false);
+
+            setTimeout(() => {
+                setMyHealth((current)=> ER_healthPassed.current);
+                setMy_DamageMinusValue(() => -(myHealth- ER_healthPassed.current));
+                setTimeout(() => {
+                    setButtonsActive(() => true)
+                    setMyTurn(() => true)
+                    setMy_DamageMinusValue([])
+                }, 1000);
+            }, 1000);
+        }, [])
+      );
+
 
     //when menu botton pressed
     function MenuPressed() {
 
         setIsAlertHealth(() => false)
-        if(menuIsShown){
+        if(menuIsShown){ 
             setButtonsActive(()=> false)
             progress.setValue(0);
             setIsMenu(() => true);    

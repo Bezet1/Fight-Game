@@ -46,8 +46,6 @@ export default function App() {
         <Stack.Screen name="Homescreen" component={Homescreen} options={{headerShown: false}}/>
         <Stack.Screen name="HowToPlay" component={HowToPlay} options={{headerShown: false}}/>
         <Stack.Screen name="Game" component={Game} options={{headerShown: false}}/>
-        <Stack.Screen name="Menu" component={Menu} options={{headerShown: false}}/>
-        <Stack.Screen name="Win" component={Win} options={{headerShown: false}}/>
         <Stack.Screen name="EnemyRound" component={EnemyRound} options={{headerShown: false, animation: 'slide_from_bottom'} } />
       </Stack.Navigator>
     </NavigationContainer>

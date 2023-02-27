@@ -1,18 +1,18 @@
-import {React, useState, useRef, Component, useEffect, useReducer} from 'react';
+import {React, useState, useRef, Component, useEffect, useReducer, useCallback} from 'react';
 import { View, Image, Animated, ImageBackground, StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, Easing} from 'react-native';
-import { useGestureHandlerRef } from 'react-navigation-stack';
+import { useFocusEffect } from '@react-navigation/native';
 
 import Movable from './MovableHeart';
 
 function EnemyRound({navigation, route}) {
 
-    const oppPath = useRef(route.params.path);
-    const [health, setHealth] = useState(0);
-
+    const oppPath = useRef(route?.params?.path);
+    const [health, setHealth] = useState(route?.params?.health);
+    const healthPass = useRef(route?.params?.health)
     const windowWidth = useRef(Dimensions.get('window'));
     
-    const lineSpeedVertical = useRef(2500);
-    const lineSpeedHorizontal = useRef(2000);
+    const lineSpeedVertical = useRef(0);
+    const lineSpeedHorizontal = useRef(0);
     const viewX = useRef(0);
     const viewY = useRef(0);
     const viewWidth = useRef(0);
@@ -49,19 +49,38 @@ function EnemyRound({navigation, route}) {
     const linePosition1 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const linePosition2 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
 
-    const[firstRound, setFirstRound] = useState(true);
+    const[firstRound, setFirstRound] = useState(route?.params?.isFirstRound);
 
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     }
-
+    useEffect(()=> {
+        setTimeout(() => {
+            navigation.navigate({
+                name: 'Game',
+                params: { EN_health: healthPass.current },
+                merge: true,
+              });
+        }, 10000);
+    }, [])
+  
     //on layout when start of screen
     function getDimentions(layout){
+
+        
         viewX.current = layout.x;
         viewY.current = layout.y;
         viewWidth.current = layout.width;
         viewHeight.current = layout.height;
         setViewHeight_s(()=>layout.height);
+    
+        if(route?.params?.difficulty == 'easy'){
+            lineSpeedVertical.current = 3500;
+            lineSpeedHorizontal.current = 3000;
+        }else{
+            lineSpeedVertical.current = 2500;
+            lineSpeedHorizontal.current = 2000;
+        }
         
         heartX.current = layout.width/2;
         heartY.current = layout.height/2;
@@ -93,7 +112,6 @@ function EnemyRound({navigation, route}) {
             }, 500);
         }
         
-
         //start of aniamtions
         setTimeout(() => {
             Animated.timing(linePosition1.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current,easing: Easing.linear ,useNativeDriver: true}).start();
@@ -149,7 +167,9 @@ function EnemyRound({navigation, route}) {
 
                 setLine1IMG(()=>require('../assets/lineHorizontalRed.png'));
 
-                setHealth((c)=> c + 1);
+                setHealth((c)=> c - 1);
+                healthPass.current = healthPass.current - 1;
+
                 setTimeout(() => {
                     setWasHit((c) => !c)
                 }, 500);
@@ -193,7 +213,9 @@ function EnemyRound({navigation, route}) {
 
                 setLine2IMG(()=>require('../assets/lineHorizontalRed.png'))
 
-                setHealth((c)=> c + 1)
+                setHealth((c)=> c - 1)
+                healthPass.current = healthPass.current - 1;
+
                 setTimeout(() => {
                     setWasHit((c) => !c)
                 }, 500);

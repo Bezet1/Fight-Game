@@ -3,7 +3,7 @@ import { ImageBackground, StyleSheet, View, Animated, Text, Pressable, BackHandl
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 
-function Homescreen( {navigation}) {
+function Homescreen({navigation}) {
     const[isHomeScreen, setIsHomeScreen] = useState(true);
     const[isChooseCharacter, setIsChooseCharacter] = useState(false);
     const[isChooseOpponent, setisChooseOpponent] = useState(false);
@@ -49,6 +49,7 @@ function Homescreen( {navigation}) {
             setIs50Pressed(()=>false);
             setIs100Pressed(()=>false);
             setMyName(()=>"");
+            setOppName(()=>'');
             setNoName(()=>false);
             setNoCharacter(()=>false);
             setNoOpponent(()=>false);

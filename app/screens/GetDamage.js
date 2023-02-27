@@ -4,19 +4,11 @@ import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, SafeA
 
 const GetDamage = (props) => {
 
-    let GetDamageDuration = 8000;
+    let GetDamageDuration = 3000; //8000
     const restSpeedThreshold_value = useRef(null);
     const restDisplacementThreshold_value = useRef(null);
     const oppPath = useRef(props.imgpath);
 
-    if(props.difficulty === "easy"){
-        restSpeedThreshold_value.current = 0.5;
-        restDisplacementThreshold_value.current = 0.9;
-    }
-    else{
-        restSpeedThreshold_value.current = 10;
-        restDisplacementThreshold_value.current = 2;
-    }
     
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
@@ -35,7 +27,7 @@ const GetDamage = (props) => {
     const viewWidth = useRef(Dimensions.get('window').width);
     const oppX = useRef();
     const oppY = useRef();
-
+    
     const textProgress = useRef(new Animated.Value(0)).current;
     const pointPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
     const pointOpacity =  useRef(new Animated.Value(0)).current
@@ -46,8 +38,17 @@ const GetDamage = (props) => {
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg']
     })
-
+    
     function startOfModal(){
+        if(props.difficulty === "easy"){
+            restSpeedThreshold_value.current = 0.5;
+            restDisplacementThreshold_value.current = 0.9;
+        }
+        else{
+            restSpeedThreshold_value.current = 10;
+            restDisplacementThreshold_value.current = 2;
+        }
+        
         setDamage(() => 0);
         damagePass.current = 0;
         opponentPosition.setValue({x: viewWidth.current/2, y: viewHeight.current * 1.5})
@@ -65,7 +66,7 @@ const GetDamage = (props) => {
         setTimeout(()=> {
             intervalForOpponent();
         }, firstRound ? 3000: 1000)
-
+        
         
         setTimeout(() => {
             setFirstRound(() => false);

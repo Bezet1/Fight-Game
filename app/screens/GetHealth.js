@@ -30,23 +30,23 @@ function GetHealth(props) {
     const bonusOpacity = useRef(new Animated.Value(0)).current;
     const bonusPosition =  useRef(new Animated.Value(-20)).current
 
-    //set game diffuculty
-    if(props.difficulty === "easy"){
-        howFastIsChange.current = 600;
-        
-    }
-    else{
-        howFastIsChange.current = 500;
-    }
-
+    
     
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     } 
-
+    
     //start
     function startOfModal(){
-
+        //set game diffuculty
+        if(props.difficulty === "easy"){
+            howFastIsChange.current = 600;
+            
+        }
+        else{
+            howFastIsChange.current = 500;
+        }
+        
         if(firstRound){
             setIsText(() => true)
             textProgress.setValue(0);

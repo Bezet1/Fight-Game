@@ -13,7 +13,9 @@ import EnemyRound from './EnemyRound';
 function Game({navigation, route}) {
     let timerValue = 1;
     let opponentAmountHealth = route?.params?.health;
-    let myAmountHealth = route?.params?.health;
+    //let myAmountHealth = route?.params?.health;
+    let myAmountHealth = 5;
+
     let windowWidth = Dimensions.get("window").width;
     
     const difficulty = useRef(route?.params?.difficulty);
@@ -45,7 +47,7 @@ function Game({navigation, route}) {
     const [startAnimations, setStartAnimations] = useState(false);
     const [stopAnimations, setStopAnimations] = useState(false);
     const [isFirstOpponentRound, setIsFirstOpponentRound] = useState(true);
-    const ER_healthPassed = useRef(myAmountHealth);
+    const ER_healthPassed = useRef(0);
     
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -60,6 +62,7 @@ function Game({navigation, route}) {
     const intervalForOpponentHealth = useRef(null);
     const intervalForMyHealth = useRef(null);
     const FirstUpdate_enemyRound = useRef(false);
+    const myHealthRef = useRef(myAmountHealth);
 
     //AIMATIONS
     useEffect(()=>{
@@ -132,10 +135,6 @@ function Game({navigation, route}) {
             oppPath.current = require("../assets/opp3.png")
         }
 
-
-        //setTimeout(() => {
-        //    navigation.navigate("EnemyRound", {path: oppPath.current})
-       // }, 2000);
     }, [])
     
     //find random number
@@ -196,7 +195,7 @@ function Game({navigation, route}) {
             setButtonsActive(()=>false); 
 
             //stop animations
-            setStopAnimations(()=>true)
+            setStopAnimations((current) => !current)
         }
     },[myHealth])
 
@@ -225,7 +224,6 @@ function Game({navigation, route}) {
 
     //restart pressed
     function restart(){
-
         //increase health
         if(opponentHealth < opponentAmountHealth){
             intervalForOpponentHealth.current = setInterval(() => {
@@ -250,9 +248,21 @@ function Game({navigation, route}) {
         setIsTimer(() => true);
         Animated.spring(TimmerOpacity, {toValue: 1, useNativeDriver: true}).start();
         setButtonsActive(() => true);
-        setMenuIsShown(() => false);
+        //setMenuIsShown(() => false);
         setMenuIsShown((current) => !current);
-        setStartAnimations((c)=>!c);
+        setStartAnimations((current)=>!current);
+
+        setHealthMinusValue(()=>[])
+        setDamageMinusValue(()=>[])
+        setMy_DamageMinusValue(()=>[])
+        setMyTurn(()=>true);
+        setIsFirstOpponentRound(()=>true);
+        
+        myHealthRef.current = myAmountHealth;
+        
+        navigation.setParams({
+            EN_health: 999,
+        });
     }
 
     //when attack, opens getDamage
@@ -286,7 +296,7 @@ function Game({navigation, route}) {
         setIsGetDamage(()=>false);
         
         setTimeout(() => {
-            setDamageMinusValue(() => [-damagePassed])
+            setDamageMinusValue(() => ["-" + damagePassed])
             setopponentHealth((current) => current - damagePassed)
             setTimeout(() => {
                 setDamageMinusValue(() => []);
@@ -306,6 +316,8 @@ function Game({navigation, route}) {
 
             setHealthMinusValue(() => ["+" + healthPassed])
             setMyHealth((current) => current + healthPassed)
+            myHealthRef.current = myHealthRef.current + healthPassed;
+
             setTimeout(() => {
                 setHealthMinusValue(() => [])
                 setStartEnemyRound((current)=> !current);
@@ -331,8 +343,6 @@ function Game({navigation, route}) {
     useEffect(() => {
       if (route.params?.EN_health) {
           ER_healthPassed.current = route.params.EN_health;
-          console.log('zmiana', route.params?.EN_health)
-          console.log(ER_healthPassed.current);
       }
     }, [route.params?.EN_health]);
    
@@ -342,16 +352,19 @@ function Game({navigation, route}) {
                 wasFirstFocus.current = true;
                 return;
             }
-
+    
             setIsFirstOpponentRound(()=>false);
 
             setTimeout(() => {
-                setMyHealth((current)=> ER_healthPassed.current);
-                setMy_DamageMinusValue(() => -(myHealth- ER_healthPassed.current));
+                setMy_DamageMinusValue(() => '-' + ER_healthPassed.current);
+                myHealthRef.current = myHealthRef.current - ER_healthPassed.current;
+
+                setMyHealth(()=> myHealthRef.current)
                 setTimeout(() => {
                     setButtonsActive(() => true)
                     setMyTurn(() => true)
                     setMy_DamageMinusValue([])
+                    ER_healthPassed.current = 0;
                 }, 1000);
             }, 1000);
         }, [])

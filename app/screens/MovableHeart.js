@@ -12,6 +12,7 @@ export class Movable extends Component {
       isActivated: true,
       aniValueX: 0,
       aniValueY: 0,
+      isBorder: true,
     };
 
     this.state.animate.x.addListener(({value})=> this.state.aniValueX = value)
@@ -59,12 +60,17 @@ export class Movable extends Component {
           this.state.isActivated = false;
           this.state.animate.flattenOffset();
 
+          if(this.state.isBorder){
+            props.borderHit();
+            this.state.isBorder = false;
+          }
+
           Animated.spring(this.state.animate, {
             toValue: 0,
             useNativeDriver: false,
           }).start(({finished})=>{
             if(finished){
-              props.position(this.state.aniValueX, this.state.aniValueY)
+              props.position(this.state.aniValueX, this.state.aniValueY)          
             }
           });    
 
@@ -92,6 +98,7 @@ export class Movable extends Component {
         //
         this.state.isActivated = true;
         this.state.animate.flattenOffset();
+        this.state.isBorder = true;
       }
     });
   } // End of constructor
@@ -102,6 +109,7 @@ export class Movable extends Component {
         this.state.aniValueY < -(this.props.viewHeight.current/2 - 30) ||
         this.state.aniValueY > this.props.viewHeight.current/2 - 30
     ){
+      
       return true;
     }
   }

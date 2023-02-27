@@ -8,8 +8,7 @@ function EnemyRound({navigation, route}) {
 
     const oppPath = useRef(route?.params?.path);
     const [health, setHealth] = useState(route?.params?.health);
-    const healthPass = useRef(route?.params?.health)
-    const windowWidth = useRef(Dimensions.get('window'));
+    const healthPass = useRef(0);
     
     const lineSpeedVertical = useRef(0);
     const lineSpeedHorizontal = useRef(0);
@@ -48,12 +47,16 @@ function EnemyRound({navigation, route}) {
 
     const linePosition1 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const linePosition2 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
+    const oppPosition = useRef(new Animated.ValueXY({x: -100, y: -5})).current;
+    const oppOpacity = useRef(new Animated.Value(0)).current;
 
     const[firstRound, setFirstRound] = useState(route?.params?.isFirstRound);
 
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     }
+
+    //end of round
     useEffect(()=> {
         setTimeout(() => {
             navigation.navigate({
@@ -61,13 +64,29 @@ function EnemyRound({navigation, route}) {
                 params: { EN_health: healthPass.current },
                 merge: true,
               });
-        }, 10000);
+        },firstRound ? 18500: 15000);
     }, [])
+
+    //when loose
+    useEffect(()=> {
+        if(health < 1){
+            setHealth(()=>0);
+            linePosition1.y.removeAllListeners();
+            linePosition2.y.removeAllListeners();
+
+            setTimeout(() => {
+                navigation.navigate({
+                    name: 'Game',
+                    params: { EN_health: healthPass.current },
+                    merge: true,
+                  });
+            }, 300);
+        }
+    }, [health])
   
     //on layout when start of screen
     function getDimentions(layout){
 
-        
         viewX.current = layout.x;
         viewY.current = layout.y;
         viewWidth.current = layout.width;
@@ -75,11 +94,11 @@ function EnemyRound({navigation, route}) {
         setViewHeight_s(()=>layout.height);
     
         if(route?.params?.difficulty == 'easy'){
-            lineSpeedVertical.current = 3500;
-            lineSpeedHorizontal.current = 3000;
+            lineSpeedVertical.current = 2000;
+            lineSpeedHorizontal.current = 2500;
         }else{
-            lineSpeedVertical.current = 2500;
-            lineSpeedHorizontal.current = 2000;
+            lineSpeedVertical.current = 1200;
+            lineSpeedHorizontal.current = 1700;
         }
         
         heartX.current = layout.width/2;
@@ -116,12 +135,29 @@ function EnemyRound({navigation, route}) {
         setTimeout(() => {
             Animated.timing(linePosition1.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current,easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical1((current)=> !current)
-        }, firstRound ? 5500: 2500);
+        }, firstRound ? 5500: 2000);
 
         setTimeout(() => {
             Animated.timing(linePosition2.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current, easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical2((current)=> !current)
-        }, firstRound? 5500 + lineSpeedHorizontal.current/2: 2500 + lineSpeedHorizontal.current/2);
+        }, firstRound? 5500 + lineSpeedHorizontal.current/2: 2000 + lineSpeedHorizontal.current/2);
+
+        
+        Animated.spring(oppOpacity, {toValue: 1, useNativeDriver: true, delay: 1000}).start();
+
+        Animated.loop(
+            Animated.sequence([
+                Animated.spring(oppPosition.x, {toValue: 100, speed: 3 ,useNativeDriver: true}),
+                Animated.spring(oppPosition.x, {toValue: -100, speed: 3, useNativeDriver: true}),
+            ])
+        ).start();
+
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(oppPosition.y, {toValue: 5, useNativeDriver: true}),
+                Animated.timing(oppPosition.y, {toValue: -5, useNativeDriver: true}),
+            ])
+        ).start();
 
 }
     
@@ -168,7 +204,7 @@ function EnemyRound({navigation, route}) {
                 setLine1IMG(()=>require('../assets/lineHorizontalRed.png'));
 
                 setHealth((c)=> c - 1);
-                healthPass.current = healthPass.current - 1;
+                healthPass.current = healthPass.current + 1;
 
                 setTimeout(() => {
                     setWasHit((c) => !c)
@@ -183,7 +219,7 @@ function EnemyRound({navigation, route}) {
         //LINE2
         linePosition2.x.removeAllListeners();
         linePosition2.x.addListener(({value}) => {
-            line2X.current = value + viewWidth.current/2;
+        line2X.current = value + viewWidth.current/2;
 
             //line on the end of view
             if(line2X.current > viewWidth.current + 10){
@@ -214,7 +250,7 @@ function EnemyRound({navigation, route}) {
                 setLine2IMG(()=>require('../assets/lineHorizontalRed.png'))
 
                 setHealth((c)=> c - 1)
-                healthPass.current = healthPass.current - 1;
+                healthPass.current = healthPass.current + 1;
 
                 setTimeout(() => {
                     setWasHit((c) => !c)
@@ -280,7 +316,7 @@ function EnemyRound({navigation, route}) {
             firstUpdate_line2.current = true;
             return;
         }
-        
+
         //LINE2 logic
         if(!randomHeight2.current){
             if(UpDown2.current > 0.5){
@@ -303,7 +339,6 @@ function EnemyRound({navigation, route}) {
             }
         }
         
-        
         Animated.sequence([
             Animated.timing(linePosition2.y, {toValue: (-viewForLine2.current * 0.75)/2, duration: duration2.current, easing: Easing.linear, useNativeDriver: true}),
             Animated.timing(linePosition2.y, {toValue: (viewForLine2.current * 0.75)/2, duration: lineSpeedVertical.current, easing: Easing.linear, useNativeDriver: true})
@@ -316,19 +351,24 @@ function EnemyRound({navigation, route}) {
         });
     }, [startVertical2])
 
+    function borderHit(){
+        setHealth((current)=> current - 2);
+        healthPass.current = healthPass.current + 2;
+    }
+
     function heart(){
         if(isHeart){
             return(
-                <Movable position={takeHeartPosition} viewX={viewX} viewY={viewY} viewWidth={viewWidth} viewHeight={viewHeight}/>
+                <Movable position={takeHeartPosition} borderHit={borderHit} viewX={viewX} viewY={viewY} viewWidth={viewWidth} viewHeight={viewHeight}/>
             )
         }
     }
 
     function opponent(){
         return(
-            <View style={styles.opponent}>
+            <Animated.View style={[styles.opponent, {opacity: oppOpacity, transform: [{translateX: oppPosition.x}, {translateY: oppPosition.y}]}]}>
                 <Image source={oppPath.current}  style={styles.image100} />
-            </View>
+            </Animated.View>
         )
     }
 
@@ -355,8 +395,8 @@ function EnemyRound({navigation, route}) {
             return(
                 <Animated.View
                 style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
-                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>AVOID</Text>
-                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>LINES!</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>MOVE THE HEART</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO AVOID ATTACK!</Text>
                 </Animated.View>
             )
         }
@@ -372,7 +412,7 @@ function EnemyRound({navigation, route}) {
                     {line1()}
                     {line2()}
                     {heart()}
-                {middleText()}
+                    {middleText()}
                 </View>
                 <View style={{marginBottom: 10}}>
                     <Text style={styles.healhText} adjustsFontSizeToFit={true} numberOfLines={1}>HP: {health}</Text>
@@ -391,6 +431,7 @@ const styles = StyleSheet.create({
     },
     opponenContainer:{
         justifyContent: 'flex-end',
+        alignItems:'center',
     },
     opponent: {
         height: 100,

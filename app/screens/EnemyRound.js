@@ -26,6 +26,7 @@ function EnemyRound({navigation, route}) {
     const line2X = useRef(0);
     const changeColorLine1 = useRef();
     const changeColorLine2 = useRef();
+    const [maxHealth, setMaxHealth] = useState(route?.params?.maxHealth)
     
     const [wasHit, setWasHit] = useState(false);
     const firstUpdate_line1 = useRef(false);
@@ -64,7 +65,7 @@ function EnemyRound({navigation, route}) {
                 params: { EN_health: healthPass.current },
                 merge: true,
               });
-        },firstRound ? 18500: 15000);
+        },12000)//firstRound ? 18500: 15000);
     }, [])
 
     //when loose
@@ -86,7 +87,6 @@ function EnemyRound({navigation, route}) {
   
     //on layout when start of screen
     function getDimentions(layout){
-
         viewX.current = layout.x;
         viewY.current = layout.y;
         viewWidth.current = layout.width;
@@ -94,8 +94,8 @@ function EnemyRound({navigation, route}) {
         setViewHeight_s(()=>layout.height);
     
         if(route?.params?.difficulty == 'easy'){
-            lineSpeedVertical.current = 2000;
-            lineSpeedHorizontal.current = 2500;
+            lineSpeedVertical.current = 10000//2000;
+            lineSpeedHorizontal.current = 10000//2500;
         }else{
             lineSpeedVertical.current = 1200;
             lineSpeedHorizontal.current = 1700;
@@ -203,8 +203,8 @@ function EnemyRound({navigation, route}) {
 
                 setLine1IMG(()=>require('../assets/lineHorizontalRed.png'));
 
-                setHealth((c)=> c - 1);
-                healthPass.current = healthPass.current + 1;
+                setHealth((c)=> c - 2);
+                healthPass.current = healthPass.current + 2;
 
                 setTimeout(() => {
                     setWasHit((c) => !c)
@@ -249,8 +249,8 @@ function EnemyRound({navigation, route}) {
 
                 setLine2IMG(()=>require('../assets/lineHorizontalRed.png'))
 
-                setHealth((c)=> c - 1)
-                healthPass.current = healthPass.current + 1;
+                setHealth((c)=> c - 2)
+                healthPass.current = healthPass.current + 2;
 
                 setTimeout(() => {
                     setWasHit((c) => !c)
@@ -352,8 +352,8 @@ function EnemyRound({navigation, route}) {
     }, [startVertical2])
 
     function borderHit(){
-        setHealth((current)=> current - 2);
-        healthPass.current = healthPass.current + 2;
+        setHealth((current)=> current - 4);
+        healthPass.current = healthPass.current + 4;
     }
 
     function heart(){
@@ -395,7 +395,7 @@ function EnemyRound({navigation, route}) {
             return(
                 <Animated.View
                 style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
-                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>MOVE THE HEART</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>MOVE HEART</Text>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO AVOID ATTACK!</Text>
                 </Animated.View>
             )
@@ -415,7 +415,7 @@ function EnemyRound({navigation, route}) {
                     {middleText()}
                 </View>
                 <View style={{marginBottom: 10}}>
-                    <Text style={styles.healhText} adjustsFontSizeToFit={true} numberOfLines={1}>HP: {health}</Text>
+                    <Text style={styles.healhText} adjustsFontSizeToFit={true} numberOfLines={1}>HP {health}/{maxHealth}</Text>
                 </View>
             </SafeAreaView>
         </ImageBackground>

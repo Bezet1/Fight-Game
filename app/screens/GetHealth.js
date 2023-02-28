@@ -6,9 +6,8 @@ function GetHealth(props) {
 
     const howFastIsChange = useRef(null);
     const healthPass = useRef(0);
-    const [health, setHealth] = useState(0);
+    const [health, setHealth] = useState(props.health);
     const [isMedKit, setIsMedKit] = useState(false);
-    const [healthBigger, setHealthBigger] = useState(false);
     const[isPoint, setIsPoint] = useState(false);
     const changeTimeout1 = useRef();
     const changeTimeout2 = useRef();
@@ -16,11 +15,12 @@ function GetHealth(props) {
     const [firstUpdateInterval, setFirstUpdateInterval] = useState();
     const [counterOfKit, setCounterOfKit] = useState(0);
     const[isText, setIsText] = useState(false);
-    const[firstRound, setFirstRound] = useState(true);
+    const firstRound = useRef(true);
     const[bonus, setBonus] = useState(1);
     const bonusCounter = useRef(0);
     const viewWidth = useRef();
     const viewHeight = useRef();
+    const maxHealth = useRef(props.maxHealth)
 
     const medKitPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
     const pointPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
@@ -28,15 +28,13 @@ function GetHealth(props) {
     const kitOpacity = useRef(new Animated.Value(0)).current
     const textProgress = useRef(new Animated.Value(0)).current;
     const bonusOpacity = useRef(new Animated.Value(0)).current;
-    const bonusPosition =  useRef(new Animated.Value(-20)).current
-
-    
+    const bonusPosition =  useRef(new Animated.Value(-20)).current 
     
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     } 
     
-    //start
+    //start of modal
     function startOfModal(){
         //set game diffuculty
         if(props.difficulty === "easy"){
@@ -47,7 +45,9 @@ function GetHealth(props) {
             howFastIsChange.current = 500;
         }
         
-        if(firstRound){
+        firstRound.current = props.firstRound;
+
+        if(firstRound.current){
             setIsText(() => true)
             textProgress.setValue(0);
             Animated.spring(textProgress, {toValue: 1, useNativeDriver: true, delay: 500}).start();
@@ -56,8 +56,9 @@ function GetHealth(props) {
             }, 2500);
         }
 
-        healthPass.current = 0;
-        setHealth(()=> 0);
+        healthPass.current = props.health;
+        setHealth(()=> props.health);
+        maxHealth.current = props.maxHealth;
 
         Animated.loop(
             Animated.sequence([
@@ -68,7 +69,7 @@ function GetHealth(props) {
 
         setTimeout(()=> {
             setKitHit((c)=> !c);
-        }, firstRound ? 3000: 1000)
+        }, firstRound ? 3000: 0)
         
     }
     
@@ -108,12 +109,9 @@ function GetHealth(props) {
         if(counterOfKit == 6){     
             setTimeout(() => {
                 props.close(healthPass.current);
-                setFirstRound(()=>false);
                 clearTimeout(changeTimeout1.current);
                 clearTimeout(changeTimeout2.current);
                 setIsMedKit(()=>false);
-                setHealthBigger(()=>false);
-                setHealth(()=> 0);
                 setCounterOfKit(()=>0);
                 bonusCounter.current = 0;
                 setBonus(()=>1);
@@ -135,7 +133,10 @@ function GetHealth(props) {
 
     //when healthPass kit pressed
     function kitPressed(evt){
-        
+        if(healthPass.current == maxHealth.current){
+            return;
+        }
+
         bonusCounter.current = bonusCounter.current + 1;
         
         if(bonusCounter.current == 1){
@@ -155,8 +156,32 @@ function GetHealth(props) {
             setBonus(()=>2);
         }
 
-        if(healthPass.current > 0){
-            setHealthBigger(()=>true);
+        //end if max
+        if(healthPass.current >= maxHealth.current){
+            healthPass.current = maxHealth.current;
+            setHealth(()=>maxHealth.current);
+
+            setTimeout(() => {
+                props.close(healthPass.current);
+                clearTimeout(changeTimeout1.current);
+                clearTimeout(changeTimeout2.current);
+                setIsMedKit(()=>false);
+                setCounterOfKit(()=>0);
+                bonusCounter.current = 0;
+                setBonus(()=>1);
+                bonusOpacity.setValue(0);
+                bonusPosition.stopAnimation();
+
+                //stop animations
+                medKitPosition.stopAnimation(); 
+                pointPosition.stopAnimation();
+                pointOpacity.stopAnimation();
+                kitOpacity.stopAnimation();
+                textProgress.stopAnimation();
+                bonusOpacity.stopAnimation();
+                bonusPosition.stopAnimation();
+
+            }, 300);
         }
 
         setIsMedKit(()=>false);
@@ -229,12 +254,10 @@ function GetHealth(props) {
                 <SafeAreaView style={styles.background}>
                 <View style={styles.container}>
                     <View style={[styles.textContainer, {height: 50 + StatusBar.currentHeight}]}>
-                        <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>NEW HEALTH: </Text>
-                        <Text style={[styles.valueText, healthBigger && {color: "#9e00a1"}]} adjustsFontSizeToFit={true} numberOfLines={1}>+{health}</Text>
+                        <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>HP {health}/{maxHealth.current}</Text>
                     </View>
                     <Animated.View style={[styles.textContainer, {opacity: bonusOpacity, transform: [{translateX: bonusPosition}]}]}>
-                        <Text style={styles.bonusText} adjustsFontSizeToFit={true} numberOfLines={1}>BONUS: </Text>
-                        <Text style={styles.bonusText} adjustsFontSizeToFit={true} numberOfLines={1}>+{bonus}</Text>
+                        <Text style={styles.bonusText} adjustsFontSizeToFit={true} numberOfLines={1}>BONUS: +{bonus}</Text>
                     </Animated.View>
                     <View onLayout={(event) => getDimentions(event.nativeEvent.layout)} style={styles.fieldContainer} collapsable={false}>
                         {medkit()} 
@@ -282,8 +305,7 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         justifyContent: 'flex-end',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
+        alignItems: 'center',
     },
     point:{
         fontFamily: "Buttons", 
@@ -291,7 +313,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
     },
     middleText: {
-        fontSize: 40,
+        fontSize: 60,
         color: "white",
         fontFamily: "Buttons",
         textAlign: "center",

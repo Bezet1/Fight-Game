@@ -7,8 +7,8 @@ function AlertHealth(props) {
                 <View style={styles.exclamationMark}>
                     <Image source={require("../assets/wykrzyknik.gif")} style={{opacity: 0.5}}></Image>
                 </View>
-                <Text style={styles.text2}>YOU ALREADY HAVE A FULL HEALTH </Text>
-                <Text style={styles.text2}>CAN'T ADD MORE </Text>
+                <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text1}</Text>
+                <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text2}</Text>
                 <Pressable style={({pressed}) => [styles.buttons, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(0, 0, 0, 0.6)",}]} onPress={props.close}>
                     <Text style={styles.text}>BACK</Text>
                 </Pressable>   
@@ -46,13 +46,11 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 20,
-        fontWeight: "400",
         fontFamily: "Buttons",
         color: "white"
     },
     text2: {
         fontSize: 25,
-        fontWeight: "400",
         fontFamily: "Buttons",
         textAlign: "center",
         color: "rgb(40,40,40)",

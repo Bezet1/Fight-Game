@@ -10,7 +10,7 @@ function Homescreen({navigation}) {
     const[isChooseDifficulty, setIsChooseDifficulty] = useState(false);
     const[alertText, setAlertText] = useState([""]);
     const[is50Pressed, setIs50Pressed] = useState(false);
-    const[is100Pressed, setIs100Pressed] = useState(false);
+    const[is30Pressed, setIs30Pressed] = useState(false);
     const [myName, setMyName] = useState("");
     const [oppName, setOppName] = useState("");
     const [noName, setNoName] = useState(false);
@@ -47,7 +47,7 @@ function Homescreen({navigation}) {
             setIsChooseDifficulty(()=>true);
             setAlertText(()=>false);
             setIs50Pressed(()=>false);
-            setIs100Pressed(()=>false);
+            setIs30Pressed(()=>false);
             setMyName(()=>"");
             setOppName(()=>'');
             setNoName(()=>false);
@@ -280,11 +280,11 @@ function Homescreen({navigation}) {
                     <View style={styles.difficultyButtonsContainer}>
                         <Text style={styles.healthText}>AMOUNT OF HEALTH:</Text>
                         <View style={styles.healthContainer}>
+                            <Pressable onPress={pressed30} style={[styles.buttonHealth, is30Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
+                            <Text style={styles.singleHealthText}>30</Text>
+                            </Pressable>
                             <Pressable onPress={pressed50} style={[styles.buttonHealth, is50Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
                                 <Text style={styles.singleHealthText}>50</Text>
-                            </Pressable>
-                            <Pressable onPress={pressed100} style={[styles.buttonHealth, is100Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
-                            <Text style={styles.singleHealthText}>100</Text>
                             </Pressable>
                         </View>
                         <View style={{height: 17,}}>
@@ -307,7 +307,7 @@ function Homescreen({navigation}) {
       
       //when easy level pressed
       function goEasyLevel(){
-          if(!is50Pressed && !is100Pressed){
+          if(!is50Pressed && !is30Pressed){
             setAlertText(()=>["CHOOSE HEALTH!"]);
             return;
         }
@@ -322,14 +322,14 @@ function Homescreen({navigation}) {
             navigation.navigate("Game", {difficulty: "easy", health: 50, char: charID, opp: oppID, myname: myName, oppname: oppName})
         }
         else{
-            navigation.navigate("Game", {difficulty: "easy", health: 100, char: charID, opp: oppID, myname: myName, oppname: oppName})
+            navigation.navigate("Game", {difficulty: "easy", health: 30, char: charID, opp: oppID, myname: myName, oppname: oppName})
         }
         
       }
 
       //when hard level pressed
       function goHardLevel(){
-        if(!is50Pressed && !is100Pressed){
+        if(!is50Pressed && !is30Pressed){
             setAlertText(()=>["CHOOSE HEALTH!"]);
             return;
         }
@@ -344,32 +344,32 @@ function Homescreen({navigation}) {
             navigation.navigate("Game", {difficulty: "hard", health: 50, char: charID, opp: oppID, myname: myName, oppname: oppName})
         }
         else{
-            navigation.navigate("Game", {difficulty: "hard", health: 100, char: charID, opp: oppID, myname: myName, oppname: oppName})
+            navigation.navigate("Game", {difficulty: "hard", health: 30, char: charID, opp: oppID, myname: myName, oppname: oppName})
         }
       }
 
       //when 50 health pressed
       function pressed50(){
-        if(is100Pressed){
-            setIs100Pressed(()=>false)
+        if(is30Pressed){
+            setIs30Pressed(()=>false)
         }
         setIs50Pressed(() => true)
 
       }
 
       //when 100 health pressed
-      function pressed100(){
+      function pressed30(){
         if(is50Pressed){
             setIs50Pressed(()=>false)
         }
-        setIs100Pressed(() => true)
+        setIs30Pressed(() => true)
       }
 
       //go back pressed
       function backChooseDifficulty(){
         setIsChooseDifficulty(()=>false)
         setisChooseOpponent(()=>true);
-        setIs100Pressed(()=> false);
+        setIs30Pressed(()=> false);
         setIs50Pressed(()=> false);
         setAlertText(()=> []);
       }

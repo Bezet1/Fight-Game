@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, SafeA
 
 const GetDamage = (props) => {
 
-    let GetDamageDuration = 3000; //8000
+    let GetDamageDuration = 8000;
     const restSpeedThreshold_value = useRef(null);
     const restDisplacementThreshold_value = useRef(null);
     const oppPath = useRef(props.imgpath);
@@ -18,16 +18,18 @@ const GetDamage = (props) => {
         return Math.random() * (max - min) + min;
     } 
     
-    const damagePass = useRef(0);
-    const[damage, setDamage] =  useState(0);
+    const healthPass = useRef(0);
+    const[health, setHealth] =  useState(0);
     const[isPoint, setIsPoint] = useState(false);
     const[isText, setIsText] = useState(false);
-    const[firstRound, setFirstRound] = useState(true);
     const viewHeight = useRef(Dimensions.get('window').height - (50 + StatusBar.currentHeight));
     const viewWidth = useRef(Dimensions.get('window').width);
     const oppX = useRef();
     const oppY = useRef();
-    
+    const firstRound = useRef(true);
+    const maxHealth = useRef(props.maxHealth)
+    const oppName = useRef(props.oppName);
+
     const textProgress = useRef(new Animated.Value(0)).current;
     const pointPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
     const pointOpacity =  useRef(new Animated.Value(0)).current
@@ -49,12 +51,14 @@ const GetDamage = (props) => {
             restDisplacementThreshold_value.current = 2;
         }
         
-        setDamage(() => 0);
-        damagePass.current = 0;
+        setHealth(() => props.health);
+        healthPass.current = props.health;
+        maxHealth.current = props.maxHealth;
+        firstRound.current = props.firstRound;
         opponentPosition.setValue({x: viewWidth.current/2, y: viewHeight.current * 1.5})
         oppPath.current = props.imgpath;
-        
-        if(firstRound){
+
+        if(firstRound.current){
             setIsText(() => true)
             textProgress.setValue(0);
             Animated.spring(textProgress, {toValue: 1, useNativeDriver: true, delay: 500}).start();
@@ -65,21 +69,19 @@ const GetDamage = (props) => {
         
         setTimeout(()=> {
             intervalForOpponent();
-        }, firstRound ? 3000: 1000)
+        }, firstRound.current ? 3000: 1000)
         
-        
+        //end of round
         setTimeout(() => {
-            setFirstRound(() => false);
-
             textProgress.stopAnimation();
             pointPosition.stopAnimation();
             pointOpacity.stopAnimation();
             opponentPosition.stopAnimation();
             spinValue.stopAnimation();
 
-            props.close(damagePass.current);
+            props.close(healthPass.current);
             opponentPosition.setValue({x: viewWidth.current/2, y: 2 * viewHeight.current});
-        }, firstRound ? GetDamageDuration + 2000: GetDamageDuration);
+        }, firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
         
     }
     
@@ -107,13 +109,32 @@ const GetDamage = (props) => {
             }
     })
     
-}
+    }
 
-function enemyHit(evt){
-        damagePass.current = damagePass.current + 1;
-        setDamage((val) => val + 1); 
+    function enemyHit(evt){
+
+       if(healthPass.current <= 0){
+            return;
+       }
         
-        opponentPosition.stopAnimation();
+        healthPass.current = healthPass.current - 1;
+        setHealth((val) => val - 1); 
+
+        //when beat
+        if(healthPass.current <= 0){
+            setTimeout(() => {
+                textProgress.stopAnimation();
+                pointPosition.stopAnimation();
+                pointOpacity.stopAnimation();
+                opponentPosition.stopAnimation();
+                spinValue.stopAnimation();
+                
+                props.close(healthPass.current);
+                opponentPosition.setValue({x: viewWidth.current/2, y: 2 * viewHeight.current});
+            }, 300);
+        }
+    
+        opponentPosition.stopAnimation();   
         opponentPosition.stopAnimation();
 
         //point position
@@ -167,7 +188,7 @@ function enemyHit(evt){
         if(isPoint){
             return(
                 <Animated.View style={{transform: [{translateX: pointPosition.x}, {translateY: pointPosition.y}], opacity: pointOpacity}}>
-                    <Text style={styles.point}>+1</Text>
+                    <Text style={styles.point}>-1</Text>
                 </Animated.View>
             )
         }
@@ -180,7 +201,7 @@ function enemyHit(evt){
             <SafeAreaView style={styles.background}>
                 <View style={styles.container}>
                     <View style={[styles.damageContainer, {height: 50 + StatusBar.currentHeight}]}>
-                        <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>DAMAGE: {damage}</Text>
+                        <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current} {health}/{maxHealth.current}</Text>
                     </View>
                     <View style={styles.fieldContainer}>       
                         {opponent()}
@@ -228,14 +249,14 @@ const styles = StyleSheet.create({
         fontWeight: "300",
     },
     middleText: {
-        fontSize: 40,
+        fontSize: 60,
         color: "white",
         fontFamily: "Buttons",
         textAlign: "center",
     },
     point:{
         fontFamily: "Buttons", 
-        color: "#00ff00",
+        color: "#ff0000",
         fontSize: 30,
     }
 })

@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import Homescreen from './app/screens/Homescreen';
 import HowToPlay from './app/screens/HowToPlay';
 import Game from './app/screens/Game'
-import Menu from './app/screens/Menu';
-import Win from './app/screens/Win';
 import EnemyRound from './app/screens/EnemyRound';
 
 import {useFonts} from 'expo-font';

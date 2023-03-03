@@ -1,6 +1,7 @@
 import {React, useState, useEffect, useRef, useCallback} from 'react';
 import { Image, Text, View, StyleSheet, ImageBackground, Pressable, SafeAreaView, Animated, Dimensions} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import * as SQLite from 'expo-sqlite';
 import Menu from "./Menu";
 import Win from './Win';
 import Lose from './Lose';
@@ -142,6 +143,8 @@ function Game({navigation, route}) {
             oppPath.current = require("../assets/opp3.png")
         }
 
+
+        console.log(route.params)
     }, [])
     
     //find random number
@@ -263,7 +266,7 @@ function Game({navigation, route}) {
         setDamageMinusValue(()=>[])
         setMy_DamageMinusValue(()=>[])
         setMyTurn(()=>true);
-        setIsFirstRound(()=>true);
+        setIsFirstRound((obj)=>({...obj, GetDamage: true, GetHealth: true, EnemyRound: true}));
         setHealthUsedCounter(()=>usesOfGetHealth)
         
         myHealthRef.current = myAmountHealth;

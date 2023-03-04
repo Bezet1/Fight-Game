@@ -9,23 +9,13 @@ import Countdown from './Countdown';
 import GetDamage from './GetDamage';
 import GetHealth from './GetHealth';
 import AlertHealth from './AlertHealth';
-import EnemyRound from './EnemyRound';
 
 function Game({navigation, route}) {
     let timerValue = 1;
     let opponentAmountHealth = route?.params?.health;
     let myAmountHealth = route?.params?.health;
     let usesOfGetHealth = 2;
-    
     let windowWidth = Dimensions.get("window").width;
-    
-    const difficulty = useRef(route?.params?.difficulty);
-    const charID = useRef(route?.params?.char);
-    const oppID = useRef(route?.params?.opp);
-    const myName = useRef(route?.params?.myname?.toUpperCase());
-    const oppName = useRef(route?.params?.oppname);
-    const oppPath = useRef();
-    const charPath = useRef();
     
     const [isAlertHealthMax, setIsAlertHealthMax] = useState(false);
     const [isAlertHealthLimit, setIsAlertHealthLimit] = useState(false);
@@ -54,14 +44,14 @@ function Game({navigation, route}) {
         GetDamage: true,
     });
     const [healthUsedCounter, setHealthUsedCounter] = useState(usesOfGetHealth);
-
-    const progress = useRef(new Animated.Value(0)).current;
-    const playerRight = useRef(new Animated.Value(windowWidth)).current;
-    const playerLeft = useRef(new Animated.Value(-windowWidth)).current;
-    const healthRound = useRef(new Animated.Value(5)).current;
-    const TimmerOpacity = useRef(new Animated.Value(0)).current;
-    const opponentUPDOWN = useRef(new Animated.Value(0)).current;
     
+    const difficulty = useRef(route?.params?.difficulty);
+    const charID = useRef(route?.params?.char);
+    const oppID = useRef(route?.params?.opp);
+    const myName = useRef(route?.params?.myname?.toUpperCase());
+    const oppName = useRef(route?.params?.oppname);
+    const oppPath = useRef(0);
+    const charPath = useRef(0);
     const wasFirstFocus = useRef(false);
     const firstUpdateForstopAnim = useRef(false);
     const intervalForTimer = useRef(null);
@@ -71,6 +61,13 @@ function Game({navigation, route}) {
     const myHealthRef = useRef(myAmountHealth);
     const ER_healthPassed = useRef(0);
     const maxHealth = useRef(route?.params?.health)
+
+    const progress = useRef(new Animated.Value(0)).current;
+    const playerRight = useRef(new Animated.Value(windowWidth)).current;
+    const playerLeft = useRef(new Animated.Value(-windowWidth)).current;
+    const healthRound = useRef(new Animated.Value(5)).current;
+    const TimmerOpacity = useRef(new Animated.Value(0)).current;
+    const opponentUPDOWN = useRef(new Animated.Value(0)).current;
     
     //AIMATIONS
     useEffect(()=>{

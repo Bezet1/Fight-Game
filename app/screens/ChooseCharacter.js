@@ -1,9 +1,9 @@
 import React from 'react';
 import {View, Text, Pressable, Image, TextInput, StyleSheet, Animated} from 'react-native';
 
-
 function ChooseCharacter(props) {
 
+    //input logic
     function inputChange (newText) {
         props.setNoName(false);
         props.setMyName(newText); 

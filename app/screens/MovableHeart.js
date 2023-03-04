@@ -15,9 +15,11 @@ export class Movable extends Component {
       isBorder: true,
     };
 
-    this.state.animate.x.addListener(({value})=> this.state.aniValueX = value)
-    this.state.animate.y.addListener(({value})=> this.state.aniValueY = value)
+    //track position
+    this.state.listenerX = this.state.animate.x.addListener(({value})=> this.state.aniValueX = value);
+    this.state.listenerY = this.state.animate.y.addListener(({value})=> this.state.aniValueY = value);
 
+    //set position and pass at the begining
     this.state.animate.setValue({ x: 0, y: 0 });
     props.position(this.state.aniValueX, this.state.aniValueY);
 
@@ -56,19 +58,26 @@ export class Movable extends Component {
       // The user is moving their finger
       //
       onPanResponderMove: (e, gesture) => {
+
+        //chceck if component hit edge of view
         if(this.ifOnBorder(this.state.animate)){
+
+          //deactivate touch
           this.state.isActivated = false;
           this.state.animate.flattenOffset();
 
+          //passing information once
           if(this.state.isBorder){
             props.borderHit();
             this.state.isBorder = false;
           }
 
+          //start animation of reseting to middle 
           Animated.spring(this.state.animate, {
             toValue: 0,
             useNativeDriver: false,
           }).start(({finished})=>{
+            //pass cordinates after reseting position
             if(finished){
               props.position(this.state.aniValueX, this.state.aniValueY)          
             }
@@ -76,13 +85,14 @@ export class Movable extends Component {
 
         }
 
+        //update cordinates
         if(this.state.isActivated){
-
           this.state.animate.setValue({
             x: gesture.dx,
             y: gesture.dy
           });
           
+          //pass cordinates
           props.position(this.state.aniValueX, this.state.aniValueY)
         }
         
@@ -96,8 +106,10 @@ export class Movable extends Component {
         // base value and resets the offset
         // to zero
         //
-        this.state.isActivated = true;
         this.state.animate.flattenOffset();
+
+        //reset values
+        this.state.isActivated = true;
         this.state.isBorder = true;
       }
     });
@@ -113,7 +125,7 @@ export class Movable extends Component {
       return true;
     }
   }
-  
+
   render() {
     return (
       <Animated.View

@@ -6,10 +6,20 @@ import Movable from './MovableHeart';
 
 function EnemyRound({navigation, route}) {
 
-    const oppPath = useRef(route?.params?.path);
     const [health, setHealth] = useState(route?.params?.health);
-    const healthPass = useRef(0);
+    const [isHeart, setIsHeart] = useState(false);
+    const [viewHeight_s, setViewHeight_s] = useState(0);
+    const [maxHealth, setMaxHealth] = useState(route?.params?.maxHealth)
+    const [wasHit, setWasHit] = useState(false);
+    const [startVertical1, setStartVertical1] = useState(false);
+    const [startVertical2, setStartVertical2] = useState(false);
+    const [line1IMG, setLine1IMG] = useState(require('../assets/lineHorizontal.png'));
+    const [line2IMG, setLine2IMG] = useState(require('../assets/lineHorizontal.png'));
+    const [isText, setIsText] = useState(false);
     
+    const firstRound = useRef(route?.params?.isFirstRound);
+    const oppPath = useRef(route?.params?.path);
+    const healthPass = useRef(0);
     const lineSpeedVertical = useRef(0);
     const lineSpeedHorizontal = useRef(0);
     const viewX = useRef(0);
@@ -18,41 +28,25 @@ function EnemyRound({navigation, route}) {
     const viewHeight = useRef(0);
     const heartX = useRef(0);
     const heartY = useRef(0);
-    const [isHeart, setIsHeart] = useState(false);
-    const [viewHeight_s, setViewHeight_s] = useState(0);
     const line1Y = useRef(0);
     const line1X = useRef(0);
     const line2Y = useRef(0);
     const line2X = useRef(0);
-    const changeColorLine1 = useRef();
-    const changeColorLine2 = useRef();
-    const [maxHealth, setMaxHealth] = useState(route?.params?.maxHealth)
-    
-    const [wasHit, setWasHit] = useState(false);
+    const changeColorLine1 = useRef(null);
+    const changeColorLine2 = useRef(null);
     const firstUpdate_line1 = useRef(false);
     const firstUpdate_line2 = useRef(false);
-    
-    const [startVertical1, setStartVertical1] = useState(false);
-    const [startVertical2, setStartVertical2] = useState(false);
-
-    const [line1IMG, setLine1IMG] = useState(require('../assets/lineHorizontal.png'));
-    const [line2IMG, setLine2IMG] = useState(require('../assets/lineHorizontal.png'));
-
     const randomHeight1 = useRef(0);
     const randomHeight2 = useRef(0);
-    const UpDown1 = useRef();
-    const UpDown2 = useRef();
-
-    const[isText, setIsText] = useState(false);
+    const UpDown1 = useRef(0.0);
+    const UpDown2 = useRef(0.0);
+    
     const textProgress = useRef(new Animated.Value(0)).current;
-
     const linePosition1 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const linePosition2 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const oppPosition = useRef(new Animated.ValueXY({x: -100, y: -5})).current;
     const oppOpacity = useRef(new Animated.Value(0)).current;
-
-    const[firstRound, setFirstRound] = useState(route?.params?.isFirstRound);
-
+    
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     }
@@ -65,7 +59,7 @@ function EnemyRound({navigation, route}) {
                 params: { EN_health: healthPass.current },
                 merge: true,
               });
-        },12000)//firstRound ? 18500: 15000);
+        },firstRound.current ? 18500: 15000);
     }, [])
 
     //when loose
@@ -94,8 +88,8 @@ function EnemyRound({navigation, route}) {
         setViewHeight_s(()=>layout.height);
     
         if(route?.params?.difficulty == 'easy'){
-            lineSpeedVertical.current = 10000//2000;
-            lineSpeedHorizontal.current = 10000//2500;
+            lineSpeedVertical.current = 2000;
+            lineSpeedHorizontal.current = 2500;
         }else{
             lineSpeedVertical.current = 1200;
             lineSpeedHorizontal.current = 1700;
@@ -114,7 +108,7 @@ function EnemyRound({navigation, route}) {
         UpDown1.current = Math.random();
         UpDown2.current = Math.random();
 
-        if(firstRound){
+        if(firstRound.current){
             setIsText(() => true)
             textProgress.setValue(0);
             Animated.spring(textProgress, {toValue: 1, useNativeDriver: true, delay: 500}).start();
@@ -135,12 +129,12 @@ function EnemyRound({navigation, route}) {
         setTimeout(() => {
             Animated.timing(linePosition1.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current,easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical1((current)=> !current)
-        }, firstRound ? 5500: 2000);
+        }, firstRound.current ? 5500: 2000);
 
         setTimeout(() => {
             Animated.timing(linePosition2.x, {toValue: viewWidth.current/2 + 20, duration: lineSpeedHorizontal.current, easing: Easing.linear ,useNativeDriver: true}).start();
             setStartVertical2((current)=> !current)
-        }, firstRound? 5500 + lineSpeedHorizontal.current/2: 2000 + lineSpeedHorizontal.current/2);
+        }, firstRound.current? 5500 + lineSpeedHorizontal.current/2: 2000 + lineSpeedHorizontal.current/2);
 
         
         Animated.spring(oppOpacity, {toValue: 1, useNativeDriver: true, delay: 1000}).start();

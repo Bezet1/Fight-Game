@@ -1,20 +1,26 @@
-import {React, useEffect, useRef, useState} from 'react';
+import {React, useRef, useState} from 'react';
 import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-native';
 
 function Win(props) {
 
+    const [toRefresh, setToRefresh] = useState(false)
+    
     const imgPath = useRef(props.imgpath);
     const myName = useRef(props.name);
     const score = useRef(0);
-    const [toRefresh, setToRefresh] = useState(false)
 
     const imageOpacity =  useRef(new Animated.Value(0)).current
 
+    //when star of modal
     function startOfModal(){
-        setToRefresh((c)=> !c)
+
+        //set values and start animation
         imgPath.current = props.imgpath;
         imageOpacity.setValue(0);
         Animated.timing(imageOpacity, {toValue: 1, useNativeDriver: true, duration: 500, delay: 300}).start();
+        
+        //update sreen
+        setToRefresh((c)=> !c)
     }
 
     return (

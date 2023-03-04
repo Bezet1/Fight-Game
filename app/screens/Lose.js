@@ -1,23 +1,28 @@
 import {React, useRef, useState} from 'react';
-import { flushSync } from 'react-dom';
 import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-native';
 
 function Lose(props) {
 
-    const imagePath = useRef(props.path);
+    const [toRefresh, setToRefresh] = useState(false)
+    
     const oppName = useRef(props.name);
     const imgPath = useRef(props.imgpath);
-    const [toRefresh, setToRefresh] = useState(false)
 
     const imageOpacity =  useRef(new Animated.Value(0)).current
     const imageUP =  useRef(new Animated.Value(-2)).current
 
+    //when start of modal
     function startOfModal(){
-        setToRefresh((c)=> !c)
+        
+        //set values and start animation
         imgPath.current = props.imgpath;
         imageOpacity.setValue(0);
         Animated.timing(imageOpacity, {toValue: 1, useNativeDriver: true, duration: 500, delay: 300}).start();
+        
+        //update screen
+        setToRefresh((c)=> !c)
 
+        //loop opponent animation
         Animated.loop(
             Animated.sequence([
                 Animated.spring(imageUP, {toValue: 2, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
@@ -25,13 +30,17 @@ function Lose(props) {
             ])
         ).start();
     }
+
+    //menu button clicked
     function gomenu(){
         imageUP.stopAnimation();
         props.goMenu();
     }
+
+    //restart button clicked
     function replay(){
-        props.restart();
         imageUP.stopAnimation();
+        props.restart();
     }
 
     return (

@@ -3,16 +3,20 @@ import {View, Text, Pressable, StyleSheet, Animated} from 'react-native';
 
 function Home(props) {
 
+    //start button clicked
     function start(){
         props.setIsHomeScreen(false);
         props.setIsChooseCharacter(true);
     }
 
-    function howToPlay(){navigation.navigate("HowToPlay")}
+    //how to play button clicked
+    function howToPlay(){console.log('how to play')}
 
+    //ranking button clicked
     function ranking(){console.log("ranking")}
 
-    function exit() {setTimeout(() => BackHandler.exitApp(), 100)}
+    //exit button clicked
+    function exit() {props.exit()}
 
     return (
         <Animated.View style={[styles.container, {opacity: props.aniOpacity}]}>
@@ -58,8 +62,7 @@ const styles = StyleSheet.create({
     },
     options: {
         alignItems: "center",
-        backgroundColor: 'rgba(20, 20, 20, 0.5)',
-        borderRadius: 15,
+         borderRadius: 15,
         justifyContent: "space-evenly",
         paddingTop: 30,
         paddingBottom: 30,

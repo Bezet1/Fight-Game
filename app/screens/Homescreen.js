@@ -78,10 +78,7 @@ function Homescreen({navigation}) {
                 ])
             ).start();
         }
-        else {
-            damianUP.stopAnimation();
-
-        }
+        else {damianUP.stopAnimation()}
     }, [isScreen.chooseOpponent])
 
       //homescreen element
@@ -89,7 +86,8 @@ function Homescreen({navigation}) {
         if(isScreen.homeScreen){
             return(
                 <Home aniOpacity={aniOpacity} setIsHomeScreen={(val)=> setIsScreen((obj)=> ({...obj, homeScreen: false}))} 
-                setIsChooseCharacter={(val)=> setIsScreen((obj)=> ({...obj, chooseCharacter: true}))} />
+                setIsChooseCharacter={(val)=> setIsScreen((obj)=> ({...obj, chooseCharacter: true}))}
+                exit={()=> setTimeout(() => BackHandler.exitApp(), 100)} />
             )
         }
       }
@@ -223,7 +221,6 @@ function Homescreen({navigation}) {
             setNoElem((obj)=> ({...obj, char: true}))
             return;
         }
-
         setIsScreen((obj)=>({...obj, chooseCharacter: false, chooseOpponent: true}));
       }
 

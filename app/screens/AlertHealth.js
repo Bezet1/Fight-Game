@@ -1,4 +1,4 @@
-import {React, useState} from 'react';
+import {React} from 'react';
 import { Text, View, Image, StyleSheet, Pressable } from 'react-native';
 
 function AlertHealth(props) {

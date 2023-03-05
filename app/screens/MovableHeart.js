@@ -1,7 +1,6 @@
 import {React, Component } from "react";
 import { Animated, PanResponder, StyleSheet, Image} from "react-native";
 
-
 export class Movable extends Component {
   constructor(props) {
     super(props);
@@ -10,19 +9,41 @@ export class Movable extends Component {
     this.state = {
       animate: new Animated.ValueXY(),
       isActivated: true,
+      isBorder: true,
       aniValueX: 0,
       aniValueY: 0,
-      isBorder: true,
+      x: 0
     };
-
-    //track position
-    this.state.listenerX = this.state.animate.x.addListener(({value})=> this.state.aniValueX = value);
-    this.state.listenerY = this.state.animate.y.addListener(({value})=> this.state.aniValueY = value);
 
     //set position and pass at the begining
     this.state.animate.setValue({ x: 0, y: 0 });
     props.position(this.state.aniValueX, this.state.aniValueY);
+    
+    function throttle (func, limit){
+      let inThrottle;
+      return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      }
+    }
 
+    //this.state.animate.x.addListener(({value})=> this.state.aniValueX = value);
+    //this.state.animate.y.addListener(({value})=> this.state.aniValueY = value);
+
+    //track position with throttle
+    this.state.animate.x.addListener(throttle(({value})=>{
+      this.state.aniValueX = value;
+    }, 100));
+
+    this.state.animate.y.addListener(throttle(({value})=>{
+      this.state.aniValueY = value;
+    }, 100));
+    
     // Initialize panResponder and configure handlers
     this._panResponder = PanResponder.create({
       //     
@@ -75,27 +96,28 @@ export class Movable extends Component {
           //start animation of reseting to middle 
           Animated.spring(this.state.animate, {
             toValue: 0,
-            useNativeDriver: false,
+            useNativeDriver: true,
           }).start(({finished})=>{
             //pass cordinates after reseting position
             if(finished){
               props.position(this.state.aniValueX, this.state.aniValueY)          
             }
           });    
-
+        }
+        else{
+          //update cordinates
+          if(this.state.isActivated){
+            this.state.animate.setValue({
+              x: gesture.dx,
+              y: gesture.dy
+            });
+            
+            //pass cordinates
+            throttle(props.position(this.state.aniValueX, this.state.aniValueY), 100)
+            //props.position(this.state.aniValueX, this.state.aniValueY)
         }
 
-        //update cordinates
-        if(this.state.isActivated){
-          this.state.animate.setValue({
-            x: gesture.dx,
-            y: gesture.dy
-          });
-          
-          //pass cordinates
-          props.position(this.state.aniValueX, this.state.aniValueY)
         }
-        
       },
       //
       // Fired at the end of the touch
@@ -116,12 +138,11 @@ export class Movable extends Component {
   } // End of constructor
 
   ifOnBorder(animate){
-    if(this.state.aniValueX < -(this.props.viewWidth.current/2 - 30) ||
-        this.state.aniValueX > this.props.viewWidth.current/2 - 30 ||
-        this.state.aniValueY < -(this.props.viewHeight.current/2 - 30) ||
-        this.state.aniValueY > this.props.viewHeight.current/2 - 30
+    if(this.state.aniValueX < -(this.props.viewWidth/2 - 30) ||
+        this.state.aniValueX > this.props.viewWidth/2 - 30 ||
+        this.state.aniValueY < -(this.props.viewHeight/2 - 30) ||
+        this.state.aniValueY > this.props.viewHeight/2 - 30
     ){
-      
       return true;
     }
   }
@@ -133,7 +154,8 @@ export class Movable extends Component {
       {...this._panResponder.panHandlers}
   
       style={[
-        this.state.animate.getLayout(),
+        //this.state.animate.getLayout(),
+        {transform: [{translateX: this.state.animate.x}, {translateY: this.state.animate.y}]},
         styles.heartContainer
       ]}
     >

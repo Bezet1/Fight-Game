@@ -29,8 +29,9 @@ const GetDamage = (props) => {
     const spinOpponent = spinValue.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg']
-    })
+    });
     
+    //random numbers
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
     }
@@ -39,7 +40,7 @@ const GetDamage = (props) => {
         return Math.random() * (max - min) + min;
     }
 
-    //when start of modal
+    //each time at the begining
     function startOfModal(){
 
         //setting difficulty
@@ -60,7 +61,7 @@ const GetDamage = (props) => {
         oppVal.current.path = props.imgpath;
         opponentPosition.setValue({x: view.current.width/2, y: view.current.height * 1.5});
         spinValue.setValue(0);
-
+        
         //check if first round
         if(firstRound.current){
             setIsElem((obj)=> ({...obj, text: true}));
@@ -79,7 +80,7 @@ const GetDamage = (props) => {
         //set end of round
         setTimeout(() => {
             endOfModal();
-        }, firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
+        }, 2000)//firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
         
     }
     

@@ -48,7 +48,7 @@ function Homescreen({navigation}) {
         }, [])
       );
 
-    //ANIMATIONS
+    //ANIMATION when change sreen
     useEffect(()=> { 
         aniScale.setValue(0.8);
         aniOpacity.setValue(0);
@@ -57,6 +57,7 @@ function Homescreen({navigation}) {
 
     }, [isScreen.homeScreen, isScreen.chooseCharacter, isScreen.chooseOpponent, isScreen.chooseDifficulty])
 
+    //start and stop animation when choose opponent screen
     useEffect(()=> {
         if(isScreen.chooseOpponent){
             Animated.loop(
@@ -81,7 +82,138 @@ function Homescreen({navigation}) {
         else {damianUP.stopAnimation()}
     }, [isScreen.chooseOpponent])
 
-      //homescreen element
+    //set difficulty and start
+    function goEasyLevel(){passValues.current.difficulty = "easy"; startGame();}
+
+    //set difficulty and start
+    function goHardLevel(){passValues.current.difficulty = "hard"; startGame();}
+  
+    //check if hp choosen, stop animations, and navigate to game
+    function startGame(){
+        if(!isHpPress._50 && !isHpPress._30){
+          setAlertText(()=>["CHOOSE HEALTH!"]);
+          return;
+        }
+        stopAnimation();
+
+        navigation.navigate("Game", {difficulty: passValues.current.difficulty, health: passValues.current.health, 
+          char: passValues.current.charID, opp: passValues.current.oppID, myname: name.mine, oppname: name.opp})
+      }
+      
+      //set hp
+      function pressed50(){
+        setIsHpPress((obj)=>({...obj, _30: false, _50: true}))
+        passValues.current.health = 50;
+      }
+
+      //set hp
+      function pressed30(){
+        setIsHpPress((obj)=>({...obj, _30: true, _50: false}))
+        passValues.current.health = 30;
+      }
+
+      //go back from choose difficulty
+      function backChooseDifficulty(){
+        setIsScreen((obj)=>({...obj, chooseOpponent: true, chooseDifficulty: false}));
+        setIsHpPress((obj)=>({...obj, _30: false, _50: false}))
+        setAlertText(()=> []);
+      }
+
+      //go back from choose character
+      function backChooseCharacter(){
+        setIsScreen((obj)=>({...obj, chooseCharacter: false, homeScreen: true}));
+        setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
+        setNoElem((obj)=> ({...obj, name: false, char: false}))
+        setName((obj)=> ({...obj, mine: ''}))
+      }
+
+      //go back from choose opponent
+      function backChooseOpponent(){
+        setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseCharacter: true}));
+        setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
+        setNoElem((obj)=> ({...obj, opp: false}))
+      }
+
+      //set 1 character 
+      function firstCharPressed(){
+        setCharPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
+        setNoElem((obj)=> ({...obj, char: false}))
+        passValues.current.charID = '1';
+      }
+
+      //set 2 character 
+      function secondCharPressed(){
+        setCharPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
+        setNoElem((obj)=> ({...obj, char: false}))
+        passValues.current.charID = '2';
+      }
+
+      //set 3 character 
+      function thirdCharPressed(){
+        setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
+        setNoElem((obj)=> ({...obj, char: false}))
+        passValues.current.charID = '3';
+      }
+      
+      //set 1 opponent
+      function firstOppPressed(){
+          setOppPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
+          setNoElem((obj)=> ({...obj, opp: false}))
+          passValues.current.oppID = '1';
+          setName((obj)=> ({...obj, opp: 'PROXIMITY'}))
+      }
+
+      //set 2 opponent
+      function secondOppPressed(){
+          setOppPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
+          setNoElem((obj)=> ({...obj, opp: false}))
+          passValues.current.oppID = '2';
+          setName((obj)=> ({...obj, opp: 'PRZEMO'}))
+      }
+
+      //set 3 opponent
+      function thirdOppPressed(){
+          setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
+          setNoElem((obj)=> ({...obj, opp: false}))
+          passValues.current.oppID = '3';
+          setName((obj)=> ({...obj, opp: 'DJRUDY'}))
+      }
+
+      //next screen after choose character
+      function confirmChooseCharacter(){
+        if(name.mine == '' && !charPress._1 && !charPress._2 && !charPress._3){    
+            setNoElem((obj)=> ({...obj, name: true, char: true}))
+            return;                
+          }
+        else if(name.mine == ''){
+            setNoElem((obj)=> ({...obj, name: true}))
+            return;
+          }
+        else if(!charPress._1 && !charPress._2 && !charPress._3){           
+            setNoElem((obj)=> ({...obj, char: true}))
+            return;
+          }
+          setIsScreen((obj)=>({...obj, chooseCharacter: false, chooseOpponent: true}));
+        }
+
+      //next screen after choose opponent
+      function confirmChooseOpponent(){
+        if(!oppPress._1 && !oppPress._2 && !oppPress._3){
+          setNoElem((obj)=> ({...obj, opp: true}))
+          return;
+        }
+        setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseDifficulty: true}));
+      }
+
+      //stop all animations
+      function stopAnimation(){
+        aniScale.stopAnimation(); 
+        aniOpacity.stopAnimation(); 
+        damianUP.stopAnimation(); 
+        rudyUP.stopAnimation(); 
+        spinValue.stopAnimation(); 
+      }
+
       function Home_Screen(){
         if(isScreen.homeScreen){
             return(
@@ -91,7 +223,7 @@ function Homescreen({navigation}) {
             )
         }
       }
-
+  
       function chooseCharacter_Screen(){
         if(isScreen.chooseCharacter){
             return(
@@ -102,7 +234,7 @@ function Homescreen({navigation}) {
             )
         }
       }
-
+  
       function chooseOpponent_Screen(){
         if(isScreen.chooseOpponent){
             return(
@@ -113,8 +245,7 @@ function Homescreen({navigation}) {
             )
         }
       }
-
-      //diffuculty element
+  
       function chooseDifficulty_Screen(){
         if(isScreen.chooseDifficulty){
             return(
@@ -124,124 +255,8 @@ function Homescreen({navigation}) {
             )
         }
       }
-
-      function goEasyLevel(){passValues.current.difficulty = "easy"; startGame();}
-
-      function goHardLevel(){passValues.current.difficulty = "hard"; startGame();}
-
-      function startGame(){
-        if(!isHpPress._50 && !isHpPress._30){
-            setAlertText(()=>["CHOOSE HEALTH!"]);
-            return;
-        }
-        stopAnimation();
-
-        navigation.navigate("Game", {difficulty: passValues.current.difficulty, health: passValues.current.health, 
-            char: passValues.current.charID, opp: passValues.current.oppID, myname: name.mine, oppname: name.opp})
-      }
-
-      //when 50 health pressed
-      function pressed50(){
-        setIsHpPress((obj)=>({...obj, _30: false, _50: true}))
-        passValues.current.health = 50;
-      }
-
-      //when 100 health pressed
-      function pressed30(){
-        setIsHpPress((obj)=>({...obj, _30: true, _50: false}))
-        passValues.current.health = 30;
-      }
-
-      //go back pressed
-      function backChooseDifficulty(){
-        setIsScreen((obj)=>({...obj, chooseOpponent: true, chooseDifficulty: false}));
-        setIsHpPress((obj)=>({...obj, _30: false, _50: false}))
-        setAlertText(()=> []);
-      }
-
-      function backChooseCharacter(){
-        setIsScreen((obj)=>({...obj, chooseCharacter: false, homeScreen: true}));
-        setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, name: false, char: false}))
-        setName((obj)=> ({...obj, mine: ''}))
-      }
-
-      function backChooseOpponent(){
-        setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseCharacter: true}));
-        setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, opp: false}))
-        }
-
-      function firstCharPressed(){
-        setCharPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, char: false}))
-        passValues.current.charID = '1';
-      }
-
-      function secondCharPressed(){
-        setCharPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
-        setNoElem((obj)=> ({...obj, char: false}))
-        passValues.current.charID = '2';
-      }
-
-      function thirdCharPressed(){
-        setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
-        setNoElem((obj)=> ({...obj, char: false}))
-        passValues.current.charID = '3';}
-        
-    function firstOppPressed(){
-            setOppPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
-            setNoElem((obj)=> ({...obj, opp: false}))
-            passValues.current.oppID = '1';
-            setName((obj)=> ({...obj, opp: 'PROXIMITY'}))
-        }
-    function secondOppPressed(){
-            setOppPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
-            setNoElem((obj)=> ({...obj, opp: false}))
-            passValues.current.oppID = '2';
-            setName((obj)=> ({...obj, opp: 'PRZEMO'}))
-        }
-    function thirdOppPressed(){
-            setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
-            setNoElem((obj)=> ({...obj, opp: false}))
-            passValues.current.oppID = '3';
-            setName((obj)=> ({...obj, opp: 'DJRUDY'}))
-        }
-
-      function confirmChooseCharacter(){
-        if(name.mine == '' && !charPress._1 && !charPress._2 && !charPress._3){    
-            setNoElem((obj)=> ({...obj, name: true, char: true}))
-            return;                
-        }
-        else if(name.mine == ''){
-            setNoElem((obj)=> ({...obj, name: true}))
-            return;
-        }
-        else if(!charPress._1 && !charPress._2 && !charPress._3){           
-            setNoElem((obj)=> ({...obj, char: true}))
-            return;
-        }
-        setIsScreen((obj)=>({...obj, chooseCharacter: false, chooseOpponent: true}));
-      }
-
-      function confirmChooseOpponent(){
-        if(!oppPress._1 && !oppPress._2 && !oppPress._3){
-            setNoElem((obj)=> ({...obj, opp: true}))
-            return;
-        }
-
-        setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseDifficulty: true}));
-      }
-
-      function stopAnimation(){
-        aniScale.stopAnimation(); 
-        aniOpacity.stopAnimation(); 
-        damianUP.stopAnimation(); 
-        rudyUP.stopAnimation(); 
-        spinValue.stopAnimation(); 
-      }
-
-    return (
+      
+      return (
         <>
         <StatusBar translucent backgroundColor='transparent' style='light'/>
         <ImageBackground resizeMode='cover' style={styles.background} source={require("../assets/planet.jpg")}>

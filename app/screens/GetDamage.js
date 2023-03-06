@@ -1,5 +1,6 @@
 import {React, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, SafeAreaView, Animated, StatusBar, Dimensions} from 'react-native';
+import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, 
+    SafeAreaView, Animated, StatusBar, Dimensions} from 'react-native';
 
 const GetDamage = (props) => {
 

@@ -1,9 +1,7 @@
-import {React, useState, useRef, Component, useEffect, useReducer, useCallback} from 'react';
-import { View, Image, Animated, ImageBackground, StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, Easing} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-
+import {React, useState, useRef, useEffect} from 'react';
+import { View, Image, Animated, ImageBackground, 
+    StyleSheet, SafeAreaView, StatusBar, Text, Easing} from 'react-native';
 import Movable from './MovableHeart';
-import { get } from 'react-native/Libraries/Utilities/PixelRatio';
 
 function EnemyRound({navigation, route}) {
 
@@ -97,6 +95,7 @@ function EnemyRound({navigation, route}) {
         }
     }, [health])
 
+    //how fast lines moves
     function setDifficulty(){
         if(route?.params?.difficulty == 'easy'){
             lineSpeed.current.vertical = 2000;
@@ -107,6 +106,7 @@ function EnemyRound({navigation, route}) {
         }
     }
 
+    //actions when is first round
     function whenFirstRound(){
         if(firstRound.current){
             setIsElem((obj)=> ({...obj, text: true}));
@@ -190,7 +190,8 @@ function EnemyRound({navigation, route}) {
             startListener(line2Ani, "_2", "y");
             startHorizontalMove(line2Ani, "_2");
 
-        }, firstRound.current? 5500 + lineSpeed.current.horizontal/2: 2000 + lineSpeed.current.horizontal/2);
+        }, firstRound.current? 5500 + lineSpeed.current.horizontal/2: 2000 
+        + lineSpeed.current.horizontal/2);
     }
 
     //listener of one cordinate
@@ -225,8 +226,10 @@ function EnemyRound({navigation, route}) {
             return;
         }
 
-        if(linePos.current[_lineNr].x + 30 > heartPos.current.x && linePos.current[_lineNr].x - 30 < heartPos.current.x && 
-            (linePos.current[_lineNr].y + 17 < heartPos.current.y || linePos.current[_lineNr].y - 17 > heartPos.current.y)){
+        if(linePos.current[_lineNr].x + 30 > heartPos.current.x && 
+            linePos.current[_lineNr].x - 30 < heartPos.current.x && 
+            (linePos.current[_lineNr].y + 17 < heartPos.current.y || 
+                linePos.current[_lineNr].y - 17 > heartPos.current.y)){
     
             setLineHit((obj)=>({...obj, _lineNR: true}));
 
@@ -258,7 +261,8 @@ function EnemyRound({navigation, route}) {
 
         startVertical(lineAni, _lineNr);
 
-        Animated.timing(lineAni.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, easing: Easing.linear ,useNativeDriver: true}).start(({finished})=>{
+        Animated.timing(lineAni.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, 
+        easing: Easing.linear ,useNativeDriver: true}).start(({finished})=>{
             if(finished){
                 //reset red
                 clearTimeout(changeColorLine.current[_lineNr]);
@@ -285,18 +289,22 @@ function EnemyRound({navigation, route}) {
         }
         else{
             if(UpDown.current[_lineNR] > 0.5){ //up
-                verticalDuration.current[_lineNR] = (randomHeight.current[_lineNR] + view.current.height) * lineSpeed.current.vertical/500;
+                verticalDuration.current[_lineNR] = (randomHeight.current[_lineNR]
+                    + view.current.height) * lineSpeed.current.vertical/500;
                 viewForLine.current[_lineNR] = view.current.height;
             }
             else{ //down
-                verticalDuration.current[_lineNR] = (-randomHeight.current[_lineNR] + view.current.height) * lineSpeed.current.vertical/500;
+                verticalDuration.current[_lineNR] = (-randomHeight.current[_lineNR] 
+                    + view.current.height) * lineSpeed.current.vertical/500;
                 viewForLine.current[_lineNR] = -view.current.height
             }
         }
 
         Animated.sequence([
-            Animated.timing(lineAni.y, {toValue: (-viewForLine.current[_lineNR] * 0.75)/2, duration: verticalDuration.current[_lineNR], easing: Easing.linear, useNativeDriver: true}),
-            Animated.timing(lineAni.y, {toValue: (viewForLine.current[_lineNR] * 0.75)/2, duration: lineSpeed.current.vertical, easing: Easing.linear, useNativeDriver: true})
+            Animated.timing(lineAni.y, {toValue: (-viewForLine.current[_lineNR] * 0.75)/2, 
+            duration: verticalDuration.current[_lineNR], easing: Easing.linear, useNativeDriver: true}),
+            Animated.timing(lineAni.y, {toValue: (viewForLine.current[_lineNR] * 0.75)/2, 
+            duration: lineSpeed.current.vertical, easing: Easing.linear, useNativeDriver: true})
             
         ]).start(({finished})=>{
             if(finished){
@@ -309,7 +317,8 @@ function EnemyRound({navigation, route}) {
     function heart(){
         if(isElem.heart){
             return(
-                <Movable position={takeHeartPosition} borderHit={borderHit} viewX={view.current.x} viewY={view.current.y} 
+                <Movable position={takeHeartPosition} borderHit={borderHit} 
+                viewX={view.current.x} viewY={view.current.y} 
                 viewWidth={view.current.width} viewHeight={view.current.height}/>
             )
         }
@@ -317,7 +326,8 @@ function EnemyRound({navigation, route}) {
 
     function opponent(){
         return(
-            <Animated.View style={[styles.opponent, {opacity: oppOpacity, transform: [{translateX: oppPosition.x}, {translateY: oppPosition.y}]}]}>
+            <Animated.View style={[styles.opponent, {opacity: oppOpacity, 
+            transform: [{translateX: oppPosition.x}, {translateY: oppPosition.y}]}]}>
                 <Image source={oppPath.current}  style={styles.image100} />
             </Animated.View>
         )
@@ -327,16 +337,21 @@ function EnemyRound({navigation, route}) {
 
     function line1(){
         return(
-            <Animated.View style={[styles.lineVertical, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: line1Ani.x}, {translateY: line1Ani.y}]}]}>
-                <Image resizeMode='contain' style={styles.image100} source={require('../assets/lineHorizontal.png')}></Image>
+            <Animated.View style={[styles.lineVertical, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
+            transform: [{translateX: line1Ani.x}, {translateY: line1Ani.y}]}]}>
+                <Image resizeMode='contain' style={styles.image100} 
+                source={require('../assets/lineHorizontal.png')}></Image>
             </Animated.View>
         )
     }
 
     function line2(){
         return(
-            <Animated.View style={[styles.lineVertical, lineHit._2 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: line2Ani.x}, {translateY: line2Ani.y}]}]}>
-                <Image resizeMode='contain' style={styles.image100} source={require('../assets/lineHorizontal.png')}></Image>
+            <Animated.View style={[styles.lineVertical, lineHit._2 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, 
+            {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
+            transform: [{translateX: line2Ani.x}, {translateY: line2Ani.y}]}]}>
+                <Image resizeMode='contain' style={styles.image100} 
+                source={require('../assets/lineHorizontal.png')}></Image>
             </Animated.View>
         )
     }
@@ -345,7 +360,8 @@ function EnemyRound({navigation, route}) {
         if(isElem.text){
             return(
                 <Animated.View
-                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', margin: 20, opacity: textProgress, transform: [{scale: textProgress}]}}>
+                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', 
+                margin: 20, opacity: textProgress, transform: [{scale: textProgress}]}}>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>MOVE HEART</Text>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO AVOID ATTACK!</Text>
                 </Animated.View>
@@ -359,14 +375,16 @@ function EnemyRound({navigation, route}) {
                 <View style={[styles.opponenContainer, {height: 120 + StatusBar.currentHeight}]}>
                     {opponent()}
                 </View>
-                <View onLayout={(event) => startOfScreen(event.nativeEvent.layout)} style={styles.fieldContainer}>
+                <View onLayout={(event) => startOfScreen(event.nativeEvent.layout)} 
+                style={styles.fieldContainer}>
                     {line1()}
                     {line2()}
                     {heart()}
                     {middleText()}
                 </View>
                 <View style={{marginBottom: 10}}>
-                    <Text style={styles.healhText} adjustsFontSizeToFit={true} numberOfLines={1}>HP {health}/{maxHealth}</Text>
+                    <Text style={styles.healhText} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>HP {health}/{maxHealth}</Text>
                 </View>
             </SafeAreaView>
         </ImageBackground>

@@ -56,11 +56,14 @@ function ChooseCharacter(props) {
                     </View>               
                     <View style={{flex: 1, paddingVertical: 50}}>
                         <View style={{flex: 1, justifyContent: "center", alignItems: 'center'}}>
-                            <Text style={{color: 'white', fontFamily:'Buttons', textAlign:"center", fontSize:30}} adjustsFontSizeToFit={true} numberOfLines={1}>SET YOUR NAME</Text>
-                            <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"red"}]} placeholder="YOUR NAME" placeholderTextColor={"#444444"} textAlign={"center"}
+                            <Text style={{color: 'white', fontFamily:'Buttons', textAlign:"center", fontSize:30}} adjustsFontSizeToFit={true} 
+                            numberOfLines={1}>SET YOUR NAME</Text>
+                            <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"red"}]} placeholder="YOUR NAME" 
+                            placeholderTextColor={"#444444"} textAlign={"center"}
                             onChangeText={newText => {inputChange(newText)}} value={props.myName} maxLength={15}
                             />
-                            <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
+                            <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, pressed && {transform: [{ scale: 0.9 }], 
+                            backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
                             onPress={() => 
                                 props.confirmChooseCharacter()
                             }>

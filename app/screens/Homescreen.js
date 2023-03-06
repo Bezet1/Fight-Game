@@ -13,7 +13,8 @@ import ChooseDifficulty from './ChooseDifficulty';
 
 function Homescreen({navigation}) {
 
-    const[isScreen, setIsScreen] = useState({homeScreen: true, chooseCharacter: false, chooseOpponent: false, chooseDifficulty: false}) 
+    const[isScreen, setIsScreen] = useState({homeScreen: true, chooseCharacter: false, 
+      chooseOpponent: false, chooseDifficulty: false}) 
     const[alertText, setAlertText] = useState([""]);
     const[isHpPress, setIsHpPress] = useState({_30: false, _50: false})
     const [name, setName] = useState({mine: '', opp: ''})
@@ -36,7 +37,8 @@ function Homescreen({navigation}) {
     //reset values when focus
     useFocusEffect(
         useCallback(() => { 
-            setIsScreen((obj)=>({...obj, homeScreen: true, chooseCharacter: false, chooseOpponent: false, chooseDifficulty: false}));
+            setIsScreen((obj)=>({...obj, homeScreen: true, chooseCharacter: false, 
+              chooseOpponent: false, chooseDifficulty: false}));
             setAlertText(()=>false);
             setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
             setName((obj)=> ({...obj, mine: '', opp: ''}));
@@ -62,8 +64,10 @@ function Homescreen({navigation}) {
         if(isScreen.chooseOpponent){
             Animated.loop(
                 Animated.sequence([
-                    Animated.spring(damianUP, {toValue: 2, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
-                    Animated.spring(damianUP, {toValue: -2, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
+                    Animated.spring(damianUP, {toValue: 2, useNativeDriver: true, 
+                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
+                    Animated.spring(damianUP, {toValue: -2, useNativeDriver: true, 
+                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
                 ])
             ).start();
             Animated.loop(
@@ -74,8 +78,10 @@ function Homescreen({navigation}) {
             ).start();
             Animated.loop(
                 Animated.sequence([
-                    Animated.spring(rudyUP, {toValue: 5, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
-                    Animated.spring(rudyUP, {toValue: -5, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
+                    Animated.spring(rudyUP, {toValue: 5, useNativeDriver: true, 
+                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
+                    Animated.spring(rudyUP, {toValue: -5, useNativeDriver: true, 
+                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
                 ])
             ).start();
         }
@@ -96,8 +102,9 @@ function Homescreen({navigation}) {
         }
         stopAnimation();
 
-        navigation.navigate("Game", {difficulty: passValues.current.difficulty, health: passValues.current.health, 
-          char: passValues.current.charID, opp: passValues.current.oppID, myname: name.mine, oppname: name.opp})
+        navigation.navigate("Game", {difficulty: passValues.current.difficulty, 
+          health: passValues.current.health, char: passValues.current.charID, opp: 
+          passValues.current.oppID, myname: name.mine, oppname: name.opp})
       }
       
       //set hp
@@ -227,10 +234,12 @@ function Homescreen({navigation}) {
       function chooseCharacter_Screen(){
         if(isScreen.chooseCharacter){
             return(
-                <ChooseCharacter noCharacter={noElem.char} Char1Pressed={charPress._1} firstCharPressed={firstCharPressed}
-                Char2Pressed={charPress._2} secondCharPressed={secondCharPressed} Char3Pressed={charPress._3} thirdCharPressed={thirdCharPressed}
-                noName={noElem.name} myName={name.mine} confirmChooseCharacter={confirmChooseCharacter} setNoName={(val) => setNoElem((obj)=> ({...obj, name: val}))}
-                setMyName={(name)=> setName((obj)=> ({...obj, mine: name}))} backChooseCharacter={backChooseCharacter} aniScale={aniScale} aniOpacity={aniOpacity}/>
+                <ChooseCharacter noCharacter={noElem.char} Char1Pressed={charPress._1} 
+                firstCharPressed={firstCharPressed} Char2Pressed={charPress._2} secondCharPressed={secondCharPressed} 
+                Char3Pressed={charPress._3} thirdCharPressed={thirdCharPressed} noName={noElem.name} myName={name.mine} 
+                confirmChooseCharacter={confirmChooseCharacter} setNoName={(val) => setNoElem((obj)=> ({...obj, name: val}))}
+                setMyName={(name)=> setName((obj)=> ({...obj, mine: name}))} backChooseCharacter={backChooseCharacter} 
+                aniScale={aniScale} aniOpacity={aniOpacity}/>
             )
         }
       }
@@ -238,9 +247,10 @@ function Homescreen({navigation}) {
       function chooseOpponent_Screen(){
         if(isScreen.chooseOpponent){
             return(
-                <ChooseOpponent noOpponent={noElem.opp} opp1Pressed={oppPress._1} firstOppPressed={firstOppPressed}
-                opp2Pressed={oppPress._2} secondOppPressed={secondOppPressed} opp3Pressed={oppPress._3} thirdOppPressed={thirdOppPressed}
-                confirmChooseOpponent={confirmChooseOpponent} backChooseOpponent={backChooseOpponent} aniScale={aniScale} aniOpacity={aniOpacity}
+                <ChooseOpponent noOpponent={noElem.opp} opp1Pressed={oppPress._1} 
+                firstOppPressed={firstOppPressed} opp2Pressed={oppPress._2} secondOppPressed={secondOppPressed} 
+                opp3Pressed={oppPress._3} thirdOppPressed={thirdOppPressed} confirmChooseOpponent={confirmChooseOpponent} 
+                backChooseOpponent={backChooseOpponent} aniScale={aniScale} aniOpacity={aniOpacity}
                 damianUP={damianUP} spinPrzemo={spinPrzemo} rudyUP={rudyUP}/>
             )
         }

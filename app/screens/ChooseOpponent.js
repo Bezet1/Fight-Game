@@ -5,21 +5,28 @@ function ChooseOpponent(props) {
     return (
         <>
         <View style={{flex: 0.2}}>
-                <Pressable onPress={props.backChooseOpponent} style={({pressed})=>[styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
+                <Pressable onPress={props.backChooseOpponent} style={({pressed})=>
+                [styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
                     <Text style={styles.backText}>BACK</Text>   
                 </Pressable>
             </View>
-            <Animated.View style={{flex: 1, justifyContent: "center", transform: [{scale: props.aniScale}], opacity: props.aniOpacity}}>
+            <Animated.View style={{flex: 1, justifyContent: "center", 
+            transform: [{scale: props.aniScale}], opacity: props.aniOpacity}}>
+                
                 <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHOOSE YOUR</Text>
-                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>OPPONENT</Text>
+                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>CHOOSE YOUR</Text>
+                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>OPPONENT</Text>
                 </View>
                 <View style={{flex: 1, justifyContent:'center'}}>
                     <View style={[styles.myOpponentsContainer, props.noOpponent && {borderColor: 'red'}]}>
-                        <Pressable style={[styles.individualOpponent, props.opp1Pressed && {borderWidth: 3, borderColor: "white"}]}
+                        <Pressable style={[styles.individualOpponent, props.opp1Pressed && 
+                        {borderWidth: 3, borderColor: "white"}]}
                         onPress={() => props.firstOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', transform: [{translateY: props.damianUP}]}} source={require("../assets/opp1.png")}></Animated.Image>
+                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
+                                transform: [{translateY: props.damianUP}]}} source={require("../assets/opp1.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PROXIMITY</Text>
@@ -29,7 +36,8 @@ function ChooseOpponent(props) {
                         <Pressable style={[styles.individualOpponent, props.opp2Pressed && {borderWidth: 3, borderColor: "white"}]}
                         onPress={() => props.secondOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', transform: [{rotate: props.spinPrzemo}]}} source={require("../assets/opp2.png")}></Animated.Image>
+                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
+                                transform: [{rotate: props.spinPrzemo}]}} source={require("../assets/opp2.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PRZEMO</Text>
@@ -39,7 +47,8 @@ function ChooseOpponent(props) {
                         <Pressable style={[styles.individualOpponent, props.opp3Pressed && {borderWidth: 3, borderColor: "white"}]}
                         onPress={() => props.thirdOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', transform: [{translateX: props.rudyUP}]}} source={require("../assets/opp3.png")}></Animated.Image>
+                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
+                                transform: [{translateX: props.rudyUP}]}} source={require("../assets/opp3.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>DJRUDY</Text>
@@ -49,7 +58,9 @@ function ChooseOpponent(props) {
                     </View>               
                 </View>
                 <View style={{flex: 1, alignItems:'center' ,justifyContent: 'center'}}>
-                        <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, {marginHorizontal: 0, marginVertical: 0}, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
+                        <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, 
+                        {marginHorizontal: 0, marginVertical: 0}, pressed && {transform: [{ scale: 0.9 }], 
+                        backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
                         onPress={() => 
                             props.confirmChooseOpponent()
                         }>

@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-
 
 function Win(props) {
 
-    const [toRefresh, setToRefresh] = useState(false)
+    const [forRefresh, setForRefresh] = useState(false)
     
     const imgPath = useRef(props.imgpath);
     const myName = useRef(props.name);
@@ -20,7 +20,7 @@ function Win(props) {
         Animated.timing(imageOpacity, {toValue: 1, useNativeDriver: true, duration: 500, delay: 300}).start();
         
         //update sreen
-        setToRefresh((c)=> !c)
+        setForRefresh((c)=> !c)
     }
 
     return (
@@ -33,10 +33,12 @@ function Win(props) {
                 </View>
                 <Text style={styles.scoreText}>SCORE: {score.current}</Text>
                 <View style={styles.buttonsContainer}>
-                    <Pressable onPress={props.restart} style={({pressed})=>[styles.buttonRestart, pressed && {backgroundColor: "#3e135c"}]}>
+                    <Pressable onPress={props.restart} style={({pressed})=>[styles.buttonRestart, 
+                        pressed && {backgroundColor: "#3e135c"}]}>
                         <Text style={styles.buttonText}>REPLAY</Text>
                     </Pressable>
-                    <Pressable onPress={props.goMenu} style={({pressed})=>[styles.buttonMenu, pressed && {backgroundColor: "#10135e"}]}>
+                    <Pressable onPress={props.goMenu} style={({pressed})=>[styles.buttonMenu, 
+                        pressed && {backgroundColor: "#10135e"}]}>
                         <Text style={styles.buttonText}>BACK TO MENU</Text>
                     </Pressable>
                 </View>

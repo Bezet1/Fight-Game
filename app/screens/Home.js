@@ -25,16 +25,20 @@ function Home(props) {
                 <Text style={styles.title} adjustsFontSizeToFit={true} numberOfLines={1}>game</Text>          
             </View>
             <View style={styles.options}>
-                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={start}>
+                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], 
+                backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={start}>
                     <Text style={styles.singleText}>START</Text>
                 </Pressable>
-                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={howToPlay}>
+                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], 
+                backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={howToPlay}>
                     <Text style={styles.singleText}>HOW TO PLAY</Text>
                 </Pressable>
-                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={ranking}>
+                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], 
+                backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={ranking}>
                     <Text style={styles.singleText}>RANKING</Text>
                 </Pressable>
-                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={exit}>
+                <Pressable style={({pressed}) => [styles.button, pressed && {transform: [{ scale: 0.9 }], 
+                backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={exit}>
                     <Text style={styles.singleText}>EXIT</Text>
                 </Pressable>
             </View>

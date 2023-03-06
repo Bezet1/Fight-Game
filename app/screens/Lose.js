@@ -1,9 +1,9 @@
 import {React, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-native';
+import { View, StyleSheet, Text, Modal, Pressable, Animated} from 'react-native';
 
 function Lose(props) {
 
-    const [toRefresh, setToRefresh] = useState(false)
+    const [forRefresh, setForRefresh] = useState(false)
     
     const oppName = useRef(props.name);
     const imgPath = useRef(props.imgpath);
@@ -20,13 +20,15 @@ function Lose(props) {
         Animated.timing(imageOpacity, {toValue: 1, useNativeDriver: true, duration: 500, delay: 300}).start();
         
         //update screen
-        setToRefresh((c)=> !c)
+        setForRefresh((c)=> !c)
 
         //loop opponent animation
         Animated.loop(
             Animated.sequence([
-                Animated.spring(imageUP, {toValue: 2, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
-                Animated.spring(imageUP, {toValue: -2, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
+                Animated.spring(imageUP, {toValue: 2, useNativeDriver: true, 
+                    restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
+                Animated.spring(imageUP, {toValue: -2, useNativeDriver: true, 
+                    restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
             ])
         ).start();
     }
@@ -49,13 +51,16 @@ function Lose(props) {
                 <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current}</Text>
                 <Text style={styles.winText}>WINS!</Text>
                 <View style={styles.imageContainer}>
-                    <Animated.Image source={imgPath.current} style={[styles.image, {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}/>
+                    <Animated.Image source={imgPath.current} style={[styles.image, 
+                        {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}/>
                 </View>
                 <View style={styles.buttonsContainer}>
-                    <Pressable onPress={replay} style={({pressed})=>[styles.buttonRestart, pressed && {backgroundColor: "#3e135c"}]}>
+                    <Pressable onPress={replay} style={({pressed})=>[styles.buttonRestart, 
+                        pressed && {backgroundColor: "#3e135c"}]}>
                         <Text style={styles.buttonText}>REPLAY</Text>
                     </Pressable>
-                    <Pressable onPress={gomenu} style={({pressed})=>[styles.buttonMenu, pressed && {backgroundColor: "#10135e"}]}>
+                    <Pressable onPress={gomenu} style={({pressed})=>[styles.buttonMenu, 
+                        pressed && {backgroundColor: "#10135e"}]}>
                         <Text style={styles.buttonText}>BACK TO MENU</Text>
                     </Pressable>
                 </View>

@@ -4,22 +4,27 @@ import {View, Text, Pressable, StyleSheet, Animated} from 'react-native';
 function ChooseDifficulty(props) {
     return (
         <>
-            <Pressable onPress={props.backChooseDifficulty} style={({pressed})=>[styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
+            <Pressable onPress={props.backChooseDifficulty} style={({pressed})=>
+            [styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
                 <Text style={styles.backText}>BACK</Text>   
             </Pressable>
             <Animated.View style={{flex: 1, top: 15, transform: [{scale: props.aniScale}], opacity: props.aniOpacity}}>
                 <View style={{justifyContent: 'center', alignItems: 'center', margin: 20}}>
-                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHOOSE</Text>
-                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>DIFFICULTY</Text>
+                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>CHOOSE</Text>
+                    <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>DIFFICULTY</Text>
                 </View>
                 <View style={styles.difficultyContainer}>
                     <View style={styles.difficultyButtonsContainer}>
                         <Text style={styles.healthText}>AMOUNT OF HEALTH:</Text>
                         <View style={styles.healthContainer}>
-                            <Pressable onPress={()=>props.pressed30()} style={[styles.buttonHealth, props.is30Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
+                            <Pressable onPress={()=>props.pressed30()} style={[styles.buttonHealth, 
+                                props.is30Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
                             <Text style={styles.singleHealthText}>30</Text>
                             </Pressable>
-                            <Pressable onPress={()=>props.pressed50()} style={[styles.buttonHealth, props.is50Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
+                            <Pressable onPress={()=>props.pressed50()} style={[styles.buttonHealth, 
+                                props.is50Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
                                 <Text style={styles.singleHealthText}>50</Text>
                             </Pressable>
                         </View>
@@ -27,10 +32,12 @@ function ChooseDifficulty(props) {
                             <Text style={styles.alertHealth}>{props.alertText}</Text>
                         </View>
                         <Text style={styles.gameDifficultyText}>GAME DIFFICULTY</Text>
-                        <Pressable style={({pressed}) => [styles.buttonDifficulty, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={()=>props.goEasyLevel()}>
+                        <Pressable style={({pressed}) => [styles.buttonDifficulty, pressed && {transform: [{ scale: 0.9 }], 
+                        backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={()=>props.goEasyLevel()}>
                             <Text style={styles.singleText}>EASY</Text>
                         </Pressable>
-                        <Pressable style={({pressed}) => [styles.buttonDifficulty, pressed && {transform: [{ scale: 0.9 }], backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={()=>props.goHardLevel()}>
+                        <Pressable style={({pressed}) => [styles.buttonDifficulty, pressed && {transform: [{ scale: 0.9 }], 
+                        backgroundColor: "rgba(37, 37, 64, 0.5)",}]} onPress={()=>props.goHardLevel()}>
                             <Text style={styles.singleText}>HARD</Text>
                         </Pressable>
                     </View>

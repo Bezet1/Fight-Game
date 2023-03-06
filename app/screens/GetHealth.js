@@ -230,7 +230,7 @@ function GetHealth(props) {
         if(isElem.text){
             return(
                 <Animated.View
-                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
+                style={{position: 'absolute', height: '70%', margin: 20, top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TAP MEDKIT</Text>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO HEAL!</Text>
                 </Animated.View>
@@ -240,7 +240,6 @@ function GetHealth(props) {
     
     
     return (
-        
         <Modal onShow={startOfModal} visible={props.isVisible} statusBarTranslucent animationType="slide">
             <ImageBackground style={styles.background} source={require("../assets/green.jpg")}>
                 <SafeAreaView style={styles.background}>

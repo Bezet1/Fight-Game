@@ -139,9 +139,6 @@ function Game({navigation, route}) {
         else if(oppID.current == "3"){
             oppPath.current = require("../assets/opp3.png")
         }
-
-
-        console.log(route.params)
     }, [])
     
     //find random number
@@ -459,18 +456,18 @@ function Game({navigation, route}) {
     return (  
         <ImageBackground style={styles.background} source={require("../assets/cosmos.png")}>
         <SafeAreaView style={styles.background}>
+            <Pressable onPress={MenuPressed}
+            style={({pressed}) => [styles.menuContainer, pressed && {opacity: 0.5}]}>
+                <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
+            </Pressable>
             <View style={styles.container}>                         
                 <Win goMenu={goMenu} isVisible={IsWin} restart={restart} imgpath={charPath.current} name={myName.current}/>                
                 <Lose goMenu={goMenu} isVisible={IsLoose} restart={restart} imgpath={oppPath.current} name={oppName.current}/>
                 <GetDamage isVisible={isGetDamage} close={closeGetDamage} difficulty={difficulty.current} imgpath={oppPath.current}
                 health={opponentHealth} firstRound={isFirstRound.GetDamage} maxHealth={maxHealth.current} oppName={oppName.current}/>
 
-                <GetHealth isVisible={isGetHealth} close={closeGetHealth} difficulty={difficulty.current} health={myHealth} firstRound={isFirstRound.GetHealth} maxHealth={maxHealth.current}/>
-                <Pressable 
-                onPress={MenuPressed}
-                style={({pressed}) => [styles.menuContainer, pressed && {opacity: 0.5}]}>
-                    <Image resizeMode='center' style={styles.image} source={require("../assets/menu.png")}/>
-                </Pressable>
+                <GetHealth isVisible={isGetHealth} close={closeGetHealth} difficulty={difficulty.current} 
+                health={myHealth} firstRound={isFirstRound.GetHealth} maxHealth={maxHealth.current}/>
                 
                 <View style={styles.secondContainer}>
                     <View style={styles.aboutHealth} >
@@ -552,7 +549,7 @@ function Game({navigation, route}) {
         );
     }
     const styles = StyleSheet.create({
-    background:{
+        background:{
         flex: 1,
     },
     container: {
@@ -572,7 +569,8 @@ function Game({navigation, route}) {
         marginTop: 20,
         marginLeft: 20,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        overflow: "hidden",
     },
     image: {
         width: 40,

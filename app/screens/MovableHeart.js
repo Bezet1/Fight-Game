@@ -15,6 +15,8 @@ export class Movable extends Component {
       x: 0
     };
 
+    const throttleDelay = 0;
+
     //set position and pass at the begining
     this.state.animate.setValue({ x: 0, y: 0 });
     props.position(this.state.aniValueX, this.state.aniValueY);
@@ -38,11 +40,11 @@ export class Movable extends Component {
     //track position with throttle
     this.state.animate.x.addListener(throttle(({value})=>{
       this.state.aniValueX = value;
-    }, 100));
+    }, throttleDelay));
 
     this.state.animate.y.addListener(throttle(({value})=>{
       this.state.aniValueY = value;
-    }, 100));
+    }, throttleDelay));
     
     // Initialize panResponder and configure handlers
     this._panResponder = PanResponder.create({
@@ -104,19 +106,17 @@ export class Movable extends Component {
             }
           });    
         }
-        else{
-          //update cordinates
-          if(this.state.isActivated){
-            this.state.animate.setValue({
-              x: gesture.dx,
-              y: gesture.dy
-            });
-            
-            //pass cordinates
-            throttle(props.position(this.state.aniValueX, this.state.aniValueY), 100)
-            //props.position(this.state.aniValueX, this.state.aniValueY)
-        }
-
+        
+        //update cordinates
+        if(this.state.isActivated){
+          this.state.animate.setValue({
+            x: gesture.dx,
+            y: gesture.dy
+          });
+          
+          //pass cordinates
+          throttle(props.position(this.state.aniValueX, this.state.aniValueY), throttleDelay)
+          //props.position(this.state.aniValueX, this.state.aniValueY)
         }
       },
       //

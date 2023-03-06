@@ -3,15 +3,16 @@ import { View, Image, Animated, ImageBackground, StyleSheet, SafeAreaView, Statu
 import { useFocusEffect } from '@react-navigation/native';
 
 import Movable from './MovableHeart';
+import { get } from 'react-native/Libraries/Utilities/PixelRatio';
 
 function EnemyRound({navigation, route}) {
+
+    const throttleDelay = 0;
 
     const [health, setHealth] = useState(route?.params?.health);
     const [maxHealth] = useState(route?.params?.maxHealth);
     const [isElem, setIsElem] = useState({heart: false, text: false});
     const [viewHeight_s, setViewHeight_s] = useState(0);
-    const [wasHit, setWasHit] = useState(false);
-    const [startVertical, setStartVertical] = useState({_1: false, _2: false});
     const [lineHit, setLineHit] = useState({
         _1: false,
         _2: false
@@ -25,13 +26,15 @@ function EnemyRound({navigation, route}) {
     const heartPos = useRef({x: 0, y: 0});
     const linePos = useRef({_1: {x: 0, y: 0}, _2: {x: 0, y: 0}});
     const changeColorLine = useRef({_1: null, _2: null});
-    const firstUpdate_line = useRef({_1: false, _2: false});
     const randomHeight = useRef({_1: 0, _2: 0});
     const UpDown = useRef({_1: 0.0, _2: 0.0});
+    const verticalDuration  = useRef({_1: 0, _2: 0});
+    const viewForLine = useRef({_1: 0, _2: 0});
+    const wasHit = useRef(true);
     
     const textProgress = useRef(new Animated.Value(0)).current;
-    const linePosition1 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
-    const linePosition2 = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
+    const line1Ani = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
+    const line2Ani = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const oppPosition = useRef(new Animated.ValueXY({x: -100, y: -5})).current;
     const oppOpacity = useRef(new Animated.Value(0)).current;
     
@@ -43,12 +46,13 @@ function EnemyRound({navigation, route}) {
     function takeHeartPosition(valueX, valueY){
         heartPos.current.x = valueX + view.current.width/2;
         heartPos.current.y = valueY + view.current.height/2;
+        
     }
     
     //information that heart hit border
     function borderHit(){
         setHealth((current)=> current - 4);
-        healthPass.current = healthPass.current - 4;
+        healthPass.current = healthPass.current + 4;
     }
 
     function throttle (func, limit){
@@ -84,26 +88,16 @@ function EnemyRound({navigation, route}) {
     useEffect(()=> {
         if(health <= 0){
             setHealth(()=>0);
-            linePosition1.y.removeAllListeners();
-            linePosition2.y.removeAllListeners();
+            line1Ani.removeAllListeners();
+            line2Ani.removeAllListeners(); //tutaj
 
             setTimeout(() => {
                 endOfScreen();
             }, 300);
         }
     }, [health])
-  
-    //on layout when start of the screen
-    function startOfScreen(layout){
 
-        //get dimentions
-        view.current.x = layout.x;
-        view.current.y = layout.y;
-        view.current.width = layout.width;
-        view.current.height = layout.height;
-        setViewHeight_s(()=>layout.height);
-    
-        //set difficulty
+    function setDifficulty(){
         if(route?.params?.difficulty == 'easy'){
             lineSpeed.current.vertical = 2000;
             lineSpeed.current.horizontal = 2500;
@@ -111,23 +105,9 @@ function EnemyRound({navigation, route}) {
             lineSpeed.current.vertical = 1200;
             lineSpeed.current.horizontal = 1700;
         }
-        
-        //initial position of heart
-        heartPos.current.x = layout.width/2;
-        heartPos.current.y = layout.height/2;
+    }
 
-        //random height of lines on start
-        randomHeight.current._1 = randomNumber((-view.current.height * 0.75)/2, (view.current.height * 0.75)/2);
-        randomHeight.current._2 = randomNumber((-view.current.height * 0.75)/2, (view.current.height * 0.75)/2);
-
-        linePosition1.setValue({x: -layout.width/2, y: randomHeight.current._1})      
-        linePosition2.setValue({x: -layout.width/2, y: randomHeight.current._2})      
-
-        //set if line goes down or up
-        UpDown.current._1 = Math.random();
-        UpDown.current._2 = Math.random();
-
-        //check if first round
+    function whenFirstRound(){
         if(firstRound.current){
             setIsElem((obj)=> ({...obj, text: true}));
             textProgress.setValue(0);
@@ -143,19 +123,10 @@ function EnemyRound({navigation, route}) {
                 setIsElem((obj)=> ({...obj, heart: true}));
             }, 500);
         }
-        
-        //start of lines aniamtions
-        setTimeout(() => {
-            Animated.timing(linePosition1.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, easing: Easing.linear ,useNativeDriver: true}).start();
-            setStartVertical((obj)=> ({...obj, _1: !obj._1}));
-        }, firstRound.current ? 5500: 2000);
+    }
 
-        setTimeout(() => {
-            Animated.timing(linePosition2.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, easing: Easing.linear ,useNativeDriver: true}).start();
-            setStartVertical((obj)=> ({...obj, _2: !obj._2}));
-        }, firstRound.current? 5500 + lineSpeed.current.horizontal/2: 2000 + lineSpeed.current.horizontal/2);
-
-        //opponent animations
+    //opponent animations
+    function startOpponentAnimations(){
         Animated.timing(oppOpacity, {toValue: 1, useNativeDriver: true, delay: 1000, duration: 500}).start();
 
         Animated.loop(
@@ -171,197 +142,169 @@ function EnemyRound({navigation, route}) {
                 Animated.timing(oppPosition.y, {toValue: -5, useNativeDriver: true}),
             ])
         ).start();
+    }
+  
+    //get dimentions of view which move lines in 
+    function getDimentions(layout){
+        view.current.x = layout.x;
+        view.current.y = layout.y;
+        view.current.width = layout.width;
+        view.current.height = layout.height;
+        setViewHeight_s(()=>layout.height);
+    }
 
-}
-    //all listeners
-    useEffect(()=> {
+    //on layout when start of the screen
+    function startOfScreen(layout){
 
-        //LINE1
-        linePosition1.x.removeAllListeners();
+        getDimentions(layout);
+
+        setDifficulty();
         
-        linePosition1.x.addListener(({value}) => {
-            
-            //get position
-            linePos.current._1.x = value + view.current.width/2;
+        //initial position
+        heartPos.current.x = layout.width/2;
+        heartPos.current.y = layout.height/2;
+        line1Ani.setValue({x: -layout.width/2, y: 0})      
+        line2Ani.setValue({x: -layout.width/2, y: 0})      
 
-            //line on the end of view
-            if(linePos.current._1.x > view.current.width + 10){
-                linePosition1.stopAnimation();
+        //check if first round
+        whenFirstRound();
+        
+        //start of lines aniamtions
+        
+        startAllLines();
 
+        startOpponentAnimations();
+
+    }
+
+    //starts animations of vertival and horizontal move for all lines
+    function startAllLines(){
+        setTimeout(() => {
+            startListener(line1Ani, "_1", "x");
+            startListener(line1Ani, "_1", "y");            
+            startHorizontalMove(line1Ani, "_1");
+        }, firstRound.current ? 5500: 2000);
+        
+        setTimeout(() => {
+            startListener(line2Ani, "_2", "x");
+            startListener(line2Ani, "_2", "y");
+            startHorizontalMove(line2Ani, "_2");
+
+        }, firstRound.current? 5500 + lineSpeed.current.horizontal/2: 2000 + lineSpeed.current.horizontal/2);
+    }
+
+    //listener of one cordinate
+    function startListener(lineAni, _lineNR, cordinate){
+        
+        lineAni[cordinate].removeAllListeners();
+        
+        lineAni[cordinate].addListener(throttle(({value})=>{
+            lineGetCordinate(_lineNR, cordinate, value);
+            if(cordinate =="x"){
+                checkIfHit(_lineNR);
+            }
+        }, throttleDelay));
+
+    }
+    
+    //set actual ani value to ref
+    function lineGetCordinate(_lineNr, cordinate, value) {
+        if(cordinate == "x"){
+            linePos.current[_lineNr][cordinate] = value + view.current.width/2;
+        }
+        else{
+            linePos.current[_lineNr][cordinate] = value + view.current.height/2;
+        }
+
+        
+    }
+
+    //chec if heart hit one of lines
+    function checkIfHit(_lineNr){
+        if(!wasHit.current){
+            return;
+        }
+
+        if(linePos.current[_lineNr].x + 30 > heartPos.current.x && linePos.current[_lineNr].x - 30 < heartPos.current.x && 
+            (linePos.current[_lineNr].y + 17 < heartPos.current.y || linePos.current[_lineNr].y - 17 > heartPos.current.y)){
+    
+            setLineHit((obj)=>({...obj, _lineNR: true}));
+
+            setHealth((c)=> c - 2)
+            healthPass.current = healthPass.current + 2;
+
+            // changeColorLine.current._2 = setTimeout(() => {
+            //     setLineHit((obj)=>({...obj, _2: false}));
+            // }, 500);
+
+            wasHit.current = false;
+            setTimeout(() => {
+                wasHit.current = true;
+            }, 500);
+        }
+    }
+
+    //horizontal move of line
+    function startHorizontalMove(lineAni, _lineNr){
+        lineAni.stopAnimation();
+
+        //random height of lines on start
+        randomHeight.current[_lineNr] = randomNumber((-view.current.height * 0.75)/2, (view.current.height * 0.75)/2);
+        
+        //set if line goes down or up
+        UpDown.current[_lineNr] = Math.random();
+        
+        lineAni.setValue({x: -view.current.width/2 - 10, y: randomHeight.current[_lineNr]});
+
+        startVertical(lineAni, _lineNr);
+
+        Animated.timing(lineAni.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, easing: Easing.linear ,useNativeDriver: true}).start(({finished})=>{
+            if(finished){
                 //reset red
-                clearTimeout(changeColorLine.current._1);
-                setLineHit((obj)=>({...obj, _1: false}));
-
-                //set new random height and the way
-                randomHeight.current._1 = randomNumber((-view.current.height * 0.75)/2, (view.current.height * 0.75)/2);
-                linePosition1.setValue({x: -view.current.width/2 - 10, y: randomHeight.current._1});
-                UpDown.current._1 = Math.random();
-
-                //renew animations
-                setStartVertical((obj)=> ({...obj, _1: !obj._1}));
-                Animated.timing(linePosition1.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal ,easing: Easing.linear ,useNativeDriver: true}).start();
+                clearTimeout(changeColorLine.current[_lineNr]);
+                setLineHit((obj)=>({...obj, [_lineNr]: false}));
+    
+                // setWasHit((current)=> !current);
+                startHorizontalMove(lineAni,_lineNr);
             }
-        })
-        
-        linePosition1.y.removeAllListeners();
-        linePosition1.y.addListener(({value}) => {
-            linePos.current._1.y = value + view.current.height/2;
+        }); 
+    }
 
-            //when hit heart
-            if(linePos.current._1.x + 30 > heartPos.current.x && linePos.current._1.x - 30 < heartPos.current.x && (linePos.current._1.y + 17 < heartPos.current.y || linePos.current._1.y - 17 > heartPos.current.y)){
-                linePosition1.y.removeAllListeners();
-                linePosition2.y.removeAllListeners();
+    //vertival move of line
+    function startVertical(lineAni, _lineNR){
 
-                setLineHit((obj)=>({...obj, _1: true}));
-
-                setHealth((c)=> c - 2);
-                healthPass.current = healthPass.current + 2;
-
-                setTimeout(() => {
-                    setWasHit((c) => !c)
-                }, 500);
-
-                changeColorLine.current._1 = setTimeout(() => {
-                    setLineHit((obj)=>({...obj, _1: false}));
-                }, 500);
-            }
-        })
-        
-        //LINE2
-        linePosition2.x.removeAllListeners();
-        linePosition2.x.addListener(({value}) => {
-        linePos.current._2.x = value + view.current.width/2;
-
-            //line on the end of view
-            if(linePos.current._2.x > view.current.width + 10){
-                linePosition2.stopAnimation();
-
-                clearTimeout(changeColorLine.current._2);
-                setLineHit((obj)=>({...obj, _2: false}));
-
-                randomHeight.current._2 = randomNumber((-view.current.height * 0.75)/2, (view.current.height * 0.75)/2);
-
-                linePosition2.setValue({x: -view.current.width/2 - 10, y: randomHeight.current._2});
-                UpDown.current._2 = Math.random();
-
-                setStartVertical((obj)=> ({...obj, _2: !obj._2}));
-                Animated.timing(linePosition2.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, easing: Easing.linear ,useNativeDriver: true}).start();
-            }
-        })
-
-        linePosition2.y.removeAllListeners();
-        linePosition2.y.addListener(({value}) => {
-            linePos.current._2.y = value + view.current.height/2;
-
-            //when hit heart
-            if(linePos.current._2.x + 30 > heartPos.current.x && linePos.current._2.x - 30 < heartPos.current.x && (linePos.current._2.y + 17 < heartPos.current.y || linePos.current._2.y - 17 > heartPos.current.y)){
-                linePosition1.y.removeAllListeners();
-                linePosition2.y.removeAllListeners();
-
-                setLineHit((obj)=>({...obj, _2: true}));
-
-                setHealth((c)=> c - 2)
-                healthPass.current = healthPass.current + 2;
-
-                setTimeout(() => {
-                    setWasHit((c) => !c)
-                }, 500);
-
-                changeColorLine.current._2 = setTimeout(() => {
-                    setLineHit((obj)=>({...obj, _2: false}));
-                }, 500);
-            }
-        })
-
-    }, [wasHit])
-
-    const duration1  = useRef();
-    const viewForLine1 = useRef();
-    const duration2  = useRef();
-    const viewForLine2 = useRef();
-
-    //horizontal line1 animation
-    useEffect(()=> {
-        if(!firstUpdate_line.current._1){
-            firstUpdate_line.current._1 = true;
-            return;
-        }
-
-        //LINE1 logic
-        if(!randomHeight.current._1){
-            if(UpDown.current._1 > 0.5){
-                duration1.current = lineSpeed.current.vertical;
-                viewForLine1.current = view.current.height;
+        if(!randomHeight.current[_lineNR]){
+            if(UpDown.current[_lineNR] > 0.5){
+                verticalDuration.current[_lineNR] = lineSpeed.current.vertical;
+                viewForLine.current[_lineNR] = view.current.height;
             }
             else{
-                duration1.current = lineSpeed.current.vertical;
-                viewForLine1.current = -view.current.height;
+                verticalDuration.current[_lineNR] = lineSpeed.current.vertical;
+                viewForLine.current[_lineNR] = -view.current.height;
             }
         }
         else{
-            if(UpDown.current._1 > 0.5){ //up
-                duration1.current = (randomHeight.current._1 + view.current.height) * lineSpeed.current.vertical/500;
-                viewForLine1.current = view.current.height;
+            if(UpDown.current[_lineNR] > 0.5){ //up
+                verticalDuration.current[_lineNR] = (randomHeight.current[_lineNR] + view.current.height) * lineSpeed.current.vertical/500;
+                viewForLine.current[_lineNR] = view.current.height;
             }
             else{ //down
-                duration1.current = (-randomHeight.current._1 + view.current.height) * lineSpeed.current.vertical/500;
-                viewForLine1.current = -view.current.height
+                verticalDuration.current[_lineNR] = (-randomHeight.current[_lineNR] + view.current.height) * lineSpeed.current.vertical/500;
+                viewForLine.current[_lineNR] = -view.current.height
             }
         }
-        
+
         Animated.sequence([
-            Animated.timing(linePosition1.y, {toValue: (-viewForLine1.current * 0.75)/2, duration: duration1.current, easing: Easing.linear, useNativeDriver: true}),
-            Animated.timing(linePosition1.y, {toValue: (viewForLine1.current * 0.75)/2, duration: lineSpeed.current.vertical, easing: Easing.linear, useNativeDriver: true})
+            Animated.timing(lineAni.y, {toValue: (-viewForLine.current[_lineNR] * 0.75)/2, duration: verticalDuration.current[_lineNR], easing: Easing.linear, useNativeDriver: true}),
+            Animated.timing(lineAni.y, {toValue: (viewForLine.current[_lineNR] * 0.75)/2, duration: lineSpeed.current.vertical, easing: Easing.linear, useNativeDriver: true})
             
         ]).start(({finished})=>{
             if(finished){
-                randomHeight.current._1 = 0;
-                setStartVertical((obj)=> ({...obj, _1: !obj._1}));
+                randomHeight.current[_lineNR] = 0;
+                startVertical(lineAni, _lineNR);
             }
         });
-    }, [startVertical._1])
-
-    //horizontal line2 animation
-    useEffect(()=> {
-        if(!firstUpdate_line.current._2){
-            firstUpdate_line.current._2 = true;
-            return;
-        }
-
-        //LINE2 logic
-        if(!randomHeight.current._2){
-            if(UpDown.current._2 > 0.5){
-                duration2.current = lineSpeed.current.vertical;
-                viewForLine2.current = view.current.height;
-            }
-            else{
-                duration2.current = lineSpeed.current.vertical;
-                viewForLine2.current = -view.current.height;
-            }
-        }
-        else{
-            if(UpDown.current._2> 0.5){ //up
-                duration2.current = (randomHeight.current._2 + view.current.height/2) * lineSpeed.current.vertical/500;
-                viewForLine2.current = view.current.height;
-            }
-            else{ //down
-                duration2.current = (-randomHeight.current._2 + view.current.height/2) * lineSpeed.current.vertical/500;
-                viewForLine2.current = -view.current.height;
-            }
-        }
-        
-        Animated.sequence([
-            Animated.timing(linePosition2.y, {toValue: (-viewForLine2.current * 0.75)/2, duration: duration2.current, easing: Easing.linear, useNativeDriver: true}),
-            Animated.timing(linePosition2.y, {toValue: (viewForLine2.current * 0.75)/2, duration: lineSpeed.current.vertical, easing: Easing.linear, useNativeDriver: true})
-            
-        ]).start(({finished})=>{
-            if(finished){
-                randomHeight.current._2 = 0;
-                setStartVertical((obj)=> ({...obj, _2: !obj._2}));
-            }
-        });
-    }, [startVertical._2])
-
+    }
 
     function heart(){
         if(isElem.heart){
@@ -384,7 +327,7 @@ function EnemyRound({navigation, route}) {
 
     function line1(){
         return(
-            <Animated.View style={[styles.lineVertical, lineHit._1 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: linePosition1.x}, {translateY: linePosition1.y}]}]}>
+            <Animated.View style={[styles.lineVertical, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: line1Ani.x}, {translateY: line1Ani.y}]}]}>
                 <Image resizeMode='contain' style={styles.image100} source={require('../assets/lineHorizontal.png')}></Image>
             </Animated.View>
         )
@@ -392,7 +335,7 @@ function EnemyRound({navigation, route}) {
 
     function line2(){
         return(
-            <Animated.View style={[styles.lineVertical, lineHit._2 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: linePosition2.x}, {translateY: linePosition2.y}]}]}>
+            <Animated.View style={[styles.lineVertical, lineHit._2 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,transform: [{translateX: line2Ani.x}, {translateY: line2Ani.y}]}]}>
                 <Image resizeMode='contain' style={styles.image100} source={require('../assets/lineHorizontal.png')}></Image>
             </Animated.View>
         )
@@ -402,7 +345,7 @@ function EnemyRound({navigation, route}) {
         if(isElem.text){
             return(
                 <Animated.View
-                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
+                style={{position: 'absolute', height: '70%', top: '35%', alignSelf: 'center', margin: 20, opacity: textProgress, transform: [{scale: textProgress}]}}>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>MOVE HEART</Text>
                     <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO AVOID ATTACK!</Text>
                 </Animated.View>

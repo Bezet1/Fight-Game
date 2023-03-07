@@ -41,10 +41,8 @@ const GetDamage = (props) => {
         return Math.random() * (max - min) + min;
     }
 
-    //each time at the begining
-    function startOfModal(){
-
-        //setting difficulty
+    //setting difficulty
+    function setDifficulty(){
         if(props.difficulty === "easy"){
             restSpeedThreshold_value.current = 0.5;
             restDisplacementThreshold_value.current = 0.9;
@@ -53,8 +51,10 @@ const GetDamage = (props) => {
             restSpeedThreshold_value.current = 10;
             restDisplacementThreshold_value.current = 2;
         }
-        
-        //setting values
+    }
+
+    //setting values
+    function initialValues(){
         setHealth(() => props.health);
         healthPass.current = props.health;
         maxHealth.current = props.maxHealth;
@@ -62,8 +62,10 @@ const GetDamage = (props) => {
         oppVal.current.path = props.imgpath;
         opponentPosition.setValue({x: view.current.width/2, y: view.current.height * 1.5});
         spinValue.setValue(0);
-        
-        //check if first round
+    }
+
+    //check if first round
+    function checkFirstRound(){
         if(firstRound.current){
             setIsElem((obj)=> ({...obj, text: true}));
             textProgress.setValue(0);
@@ -72,25 +74,41 @@ const GetDamage = (props) => {
                 Animated.spring(textProgress, {toValue: 0, useNativeDriver: true}).start(() => setIsElem((obj)=> ({...obj, text: false})));
             }, 2500);
         }
+    }
+
+    //each time at the begining
+    function startOfModal(){
+
+        setDifficulty();
+
+        initialValues();
+        
+        checkFirstRound();
         
         //start moving opponent
         setTimeout(()=> {
             intervalForOpponent();
+            startListener(opponentPosition, "x");
+            startListener(opponentPosition, 'y');
         }, firstRound.current ? 3000: 1000)
         
         //set end of round
         setTimeout(() => {
             endOfModal();
-        }, 2000)//firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
+        }, firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
         
+    }
+
+    function startListener(oppPosition, corinate){
+        oppPosition[corinate].removeAllListeners();
+
+        oppPosition[corinate].addListener(({value}) => {
+            oppPos.current[corinate] = value
+        });
     }
     
     //opponents moving logic
-    const intervalForOpponent =() => {
-          
-        //get opponent position
-        opponentPosition.x.addListener(({value}) => oppPos.current.x = value);
-        opponentPosition.y.addListener(({value}) => oppPos.current.y = value);
+    function intervalForOpponent() {
         
         //start move animation
         Animated.spring(opponentPosition, {toValue: {x: getRandomInt(view.current.width - 30), y: getRandomInt(view.current.height - 60)}, 
@@ -116,12 +134,15 @@ const GetDamage = (props) => {
     //when opponent clicked
     function enemyHit(evt){
 
+        //stop moving animations
+        opponentPosition.stopAnimation();   
+
         //return if out of health
        if(healthPass.current <= 0){
             return;
        }
         
-       //decrement health
+        //decrement health
         healthPass.current = healthPass.current - 1;
         setHealth((val) => val - 1); 
 
@@ -131,9 +152,18 @@ const GetDamage = (props) => {
                 endOfModal();
             }, 300);
         }
+
+        pointAnimation(evt);
+        
+        //spin opponent after hit
+        spinValue.setValue(0);
+        Animated.spring(spinValue, {toValue: 1, useNativeDriver: true, speed: 0.01}).start();
+        
+        //renew opponent animation
+        intervalForOpponent();
+    }
     
-        //stop moving animations
-        opponentPosition.stopAnimation();   
+    function pointAnimation(evt){
 
         //set point position
         pointPosition.setValue({x: evt.nativeEvent.pageX, y: evt.nativeEvent.pageY - 180});
@@ -148,17 +178,11 @@ const GetDamage = (props) => {
             ]),
             Animated.spring(pointPosition.y, {toValue: evt.nativeEvent.pageY - 300, useNativeDriver: true, mass: 10}),
         ]).start(()=> setIsElem((obj)=> ({...obj, point: false})))
-        
-        //spin opponent after hit
-        spinValue.setValue(0);
-        Animated.spring(spinValue, {toValue: 1, useNativeDriver: true, speed: 0.01}).start();
-        
-        //renew opponent animation
-        intervalForOpponent();
     }
 
     //when end of modal, stop animations
     function endOfModal(){
+        spinValue.setValue(0);
         textProgress.stopAnimation();
         pointPosition.stopAnimation();
         pointOpacity.stopAnimation();
@@ -184,12 +208,13 @@ const GetDamage = (props) => {
             return(
                 <Animated.View
                 style={{position: 'absolute', height: '70%', margin: 20, top: '35%', alignSelf: 'center', opacity: textProgress, transform: [{scale: textProgress}]}}>
-                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TAP ENEMY</Text>
-                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO GET DAMAGE!</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>HIT OPPONENT</Text>
+                    <Text style={styles.middleText} adjustsFontSizeToFit={true} numberOfLines={1}>TO LOWER HP!</Text>
                 </Animated.View>
             )
         }
     }
+
     function point(){
         if(isElem.point){
             return(

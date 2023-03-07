@@ -17,50 +17,45 @@ function Game({navigation, route}) {
     let usesOfGetHealth = 2;
     let windowWidth = Dimensions.get("window").width;
     
-    const [isAlertHealthMax, setIsAlertHealthMax] = useState(false);
-    const [isAlertHealthLimit, setIsAlertHealthLimit] = useState(false);
-    const [isGetHealth, setIsGetHealth] = useState(false);
-    const [isGetDamage, setIsGetDamage] = useState(false);
-    const [IsWin, setIsWin] = useState(false);
-    const [IsLoose, setIsLoose] = useState(false);
-    const [IsMenu, setIsMenu] = useState(false);
-    const [startEnemyRound, setStartEnemyRound] = useState(false);
-    const [healthMinusValue, setHealthMinusValue] = useState([])
-    const [damageMinusValue, setDamageMinusValue] = useState([])
-    const [My_DamageMinusValue, setMy_DamageMinusValue] = useState([])
-    const [buttonsActive, setButtonsActive] = useState(true);
+    const [health, setHealth] = useState({mine: myAmountHealth-2, opp: opponentAmountHealth});
+    const [isElem, setIsElem] = useState({alertHealthMax: false, alertHealthLimit: false,
+     getDamage: false, getHealth: false, win: false, loose: false, menu: false,
+    timer: true})
     const [myTurn, setMyTurn] = useState(true);
-    const [startTimer, setStartTimer] = useState(false);
-    const [isTimer, setIsTimer] = useState(true);
-    const [myHealth, setMyHealth] = useState(myAmountHealth-2);
-    const [opponentHealth, setopponentHealth] = useState(opponentAmountHealth);
+    const [buttonsActive, setButtonsActive] = useState(true);
     const [timer, setTimer] = useState(timerValue);
-    const [menuIsShown, setMenuIsShown] = useState(true);opponentUPDOWN
-    const [startAnimations, setStartAnimations] = useState(false);
-    const [stopAnimations, setStopAnimations] = useState(false);
+    const [menuIsShown, setMenuIsShown] = useState(true);
+    const [healthUsedCounter, setHealthUsedCounter] = useState(usesOfGetHealth);
+    const [healthChange, setHealthChange] = useState({my_plus: [''], my_minus: [''], opp_minus: ['']})
     const [isFirstRound, setIsFirstRound] = useState({
         EnemyRound: true,
         GetHealth: true,
         GetDamage: true,
     });
-    const [healthUsedCounter, setHealthUsedCounter] = useState(usesOfGetHealth);
     
-    const difficulty = useRef(route?.params?.difficulty);
-    const charID = useRef(route?.params?.char);
-    const oppID = useRef(route?.params?.opp);
-    const myName = useRef(route?.params?.myname?.toUpperCase());
-    const oppName = useRef(route?.params?.oppname);
-    const oppPath = useRef(0);
-    const charPath = useRef(0);
-    const wasFirstFocus = useRef(false);
+    //wykasowac
+    const [startEnemyRound, setStartEnemyRound] = useState(false);
+    const [startTimer, setStartTimer] = useState(false);
+    const [startAnimations, setStartAnimations] = useState(false);
+    const [stopAnimations, setStopAnimations] = useState(false);
     const firstUpdateForstopAnim = useRef(false);
+    
+    //??
     const intervalForTimer = useRef(null);
     const intervalForOpponentHealth = useRef(null);
     const intervalForMyHealth = useRef(null);
     const FirstUpdate_enemyRound = useRef(false);
+    
+    const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
+        oppID: route?.params?.opp, myName: route?.params?.myname?.toUpperCase(),
+        oppName: route?.params?.oppname, maxHealth: route?.params?.health})
+    
+    const imgPath = useRef({char: 0, opp: 0})
+    const wasFirstFocus = useRef(false);
     const myHealthRef = useRef(myAmountHealth);
     const ER_healthPassed = useRef(0);
-    const maxHealth = useRef(route?.params?.health)
+
+    
 
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -120,24 +115,24 @@ function Game({navigation, route}) {
     //setting images
     useEffect(() => {
         
-        if(charID.current == "1"){
-            charPath.current = require("../assets/char1.gif")
+        if(passedArg.current.charID == "1"){
+            imgPath.current.char = require("../assets/char1.gif");
         }
-        else if(charID.current == "2"){
-            charPath.current = require("../assets/char2.gif")
+        else if(passedArg.current.charID == "2"){
+            imgPath.current.char = require("../assets/char2.gif");
         }
-        else if(charID.current == "3"){
-            charPath.current = require("../assets/char3.gif")
+        else if(passedArg.current.charID == "3"){
+            imgPath.current.char = require("../assets/char3.gif");
         }
 
-        if(oppID.current == "1"){
-            oppPath.current = require("../assets/opp1.png")
+        if(passedArg.current.oppID == "1"){
+            imgPath.current.opp= require("../assets/opp1.png");
         }
-        else if(oppID.current == "2"){
-            oppPath.current = require("../assets/opp2.png")
+        else if(passedArg.current.oppID == "2"){
+            imgPath.current.opp = require("../assets/opp2.png");
         }
-        else if(oppID.current == "3"){
-            oppPath.current = require("../assets/opp3.png")
+        else if(passedArg.current.oppID == "3"){
+            imgPath.current.opp = require("../assets/opp3.png");
         }
     }, [])
     
@@ -163,13 +158,13 @@ function Game({navigation, route}) {
             }).start(({finished}) => {
 
                 if (finished) {
-                    setIsTimer(()=> false);
+                    setIsElem((obj)=> ({...obj, timer: false})); 
                 }
             })}
     }, [timer])
 
     function showTimer(){
-        if(isTimer){
+        if(isElem.timer){
             return(
                 <Animated.View style={{width: "100%", height: "100%", position: "absolute", 
                 justifyContent: "center", opacity: TimmerOpacity}}> 
@@ -181,37 +176,37 @@ function Game({navigation, route}) {
     
     //check if win
     useEffect(() => {
-        if(opponentHealth <= 0 ){
+        if(health.opp <= 0 ){
             setopponentHealth(() => 0); 
-            setIsWin(() => true);
+            setIsElem((obj)=> ({...obj, win: true})); 
             setButtonsActive(()=>false);   
 
             //stop animations
             setStopAnimations(()=>true);
         }
-    }, [opponentHealth])
+    }, [health.opp])
     
     //check if loose
     useEffect(()=> {
-        if(myHealth <= 0){
-            setMyHealth(() => 0);
-            setIsLoose(() => true);
+        if(health.mine <= 0){
+            setHealth((obj)=> ({...obj, mine: 0}));
+            setIsElem((obj)=> ({...obj, loose: true})); 
             setButtonsActive(()=>false); 
 
             //stop animations
             setStopAnimations((current) => !current)
         }
-    },[myHealth])
+    },[health.mine])
 
     //check if end of increase health after restart
     useEffect(()=> {
-        if(opponentHealth == opponentAmountHealth){
+        if(health.opp == opponentAmountHealth){
             clearInterval(intervalForOpponentHealth.current)
         }
-        if(myHealth == myAmountHealth){
+        if(health.mine == myAmountHealth){
             clearInterval(intervalForMyHealth.current)
         }
-    }, [opponentHealth, myHealth])
+    }, [health.opp, health.mine])
     
     //go menu pressed
     function goMenu(){
@@ -229,36 +224,31 @@ function Game({navigation, route}) {
     //restart pressed
     function restart(){
         //increase health
-        if(opponentHealth < opponentAmountHealth){
+        if(health.opp < opponentAmountHealth){
             intervalForOpponentHealth.current = setInterval(() => {
-                setopponentHealth((prevtime) => prevtime + 1);
+                setHealth((obj)=> ({...obj, opp: obj.opp + 1}));
                 return () => clearInterval(intervalForOpponentHealth.current)
             }, 5);
         }
-        if(myHealth < myAmountHealth){
+        if(health.mine < myAmountHealth){
             intervalForMyHealth.current = setInterval(() => {
-                setMyHealth((prevtime) => prevtime + 1);
+                setHealth((obj)=> ({...obj, mine: obj.mine + 1}));
                 return () => clearInterval(intervalForMyHealth.current)
             }, 5);
         }
-
         
-        setIsMenu(() => false);
-        setIsWin(() => false);
-        setIsLoose(() => false);
+        setIsElem((obj)=> ({...obj, menu: false, win: false, loose: false, timer: true,})); 
         setTimer(() => timerValue);
         setStartTimer((prevvalue)=> !prevvalue);
         TimmerOpacity.setValue(0)
-        setIsTimer(() => true);
+        
         Animated.spring(TimmerOpacity, {toValue: 1, useNativeDriver: true}).start();
         setButtonsActive(() => true);
         if(!menuIsShown){
             setMenuIsShown((current) => !current);            
         }
         setStartAnimations((current)=>!current);
-        setHealthMinusValue(()=>[])
-        setDamageMinusValue(()=>[])
-        setMy_DamageMinusValue(()=>[])
+        setHealthChange((obj)=> ({...obj, opp_minus: [''], my_minus: [''], my_plus: ['']}));
         setMyTurn(()=>true);
         setIsFirstRound((obj)=>({...obj, GetDamage: true, GetHealth: true, EnemyRound: true}));
         setHealthUsedCounter(()=>usesOfGetHealth)
@@ -276,7 +266,7 @@ function Game({navigation, route}) {
         setButtonsActive(() => false);
         
         setTimeout(() => {
-            setIsGetDamage(()=>true)       
+            setIsElem((obj)=> ({...obj, getDamage: true}));   
         }, 100);
         
     }
@@ -284,14 +274,14 @@ function Game({navigation, route}) {
     //when heal pressed, opens getHealth
     function heal(){
 
-        if(myHealth >= myAmountHealth){
-            setIsAlertHealthMax(()=>true)
+        if(health.mine >= myAmountHealth){
+            setIsElem((obj)=> ({...obj, alertHealthMax: true}));
             setButtonsActive(()=>false)
             return
         }
-
+        
         if(healthUsedCounter <= 0){
-            setIsAlertHealthLimit(()=>true);
+            setIsElem((obj)=> ({...obj, alertHealthLimit: true}));
             setButtonsActive(()=>false);
             return;
         }
@@ -300,21 +290,21 @@ function Game({navigation, route}) {
         setButtonsActive(()=>false);
 
         setTimeout(() => {
-            setIsGetHealth(()=>true)   
+            setIsElem((obj)=> ({...obj, getHealth: true}));
         }, 100);
     }
 
     //close getDamage, changes health, sets enemy round
     function closeGetDamage(healthPassed){
-        setIsGetDamage(()=>false);
+        setIsElem((obj)=> ({...obj, getDamage: false}));
 
         setTimeout(() => {
             setIsFirstRound((obj)=>({...obj, GetDamage: false}));
 
-            setDamageMinusValue(() => ["-" + (opponentHealth - healthPassed)])
-            setopponentHealth(() => healthPassed)
+            setHealthChange((obj)=> ({...obj, opp_minus: ["-",(health.opp - healthPassed)]}));
+            setHealth((obj)=> ({...obj, opp: healthPassed}))
             setTimeout(() => {
-                setDamageMinusValue(() => []);
+                setHealthChange((obj)=> ({...obj, opp_minus: ['']}));
                 setStartEnemyRound((current)=> !current);
             }, 1000);
         }, randomNumber(100,700));   
@@ -322,17 +312,17 @@ function Game({navigation, route}) {
 
     //close getHealht, changes health, sets enemy round
     function closeGetHealth(healthPlusPassed){
-        setIsGetHealth(()=>false)
+        setIsElem((obj)=> ({...obj, getHealth: false}));
 
         setTimeout(() => {
             setIsFirstRound((obj)=>({...obj, GetHealth: false}));
 
-            setHealthMinusValue(() => ["+" + (healthPlusPassed - myHealth)])
-            setMyHealth(() => healthPlusPassed)
+            setHealthChange((obj)=> ({...obj, my_plus: ["+",healthPlusPassed - health.mine]}));
+            setHealth((obj)=> ({...obj, mine: healthPlusPassed}));
             myHealthRef.current = healthPlusPassed;
 
             setTimeout(() => {
-                setHealthMinusValue(() => [])
+                setHealthChange((obj)=> ({...obj, my_plus: ['']}));
                 setStartEnemyRound((current)=> !current);
             }, 1000);
         }, randomNumber(100,700));   
@@ -345,13 +335,13 @@ function Game({navigation, route}) {
             return;
         }
         
-        if(IsLoose || IsWin){
+        if(isElem.loose || isElem.win){
             return;
         }
 
         setMyTurn(() => false)
         setTimeout(() => {
-            navigation.navigate("EnemyRound", {difficulty: difficulty.current, path: oppPath.current, health: myHealth, isFirstRound: isFirstRound.EnemyRound, maxHealth: maxHealth.current})
+            navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, health: health.mine, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
         }, randomNumber(700,1000));
 
     },[startEnemyRound])
@@ -373,14 +363,14 @@ function Game({navigation, route}) {
             setIsFirstRound((obj)=>({...obj, EnemyRound: false}));
 
             setTimeout(() => {
-                setMy_DamageMinusValue(() => '-' + ER_healthPassed.current);
+                setHealthChange((obj)=> ({...obj, my_minus: ['-',ER_healthPassed.current]}));
                 myHealthRef.current = myHealthRef.current - ER_healthPassed.current;
 
-                setMyHealth(()=> myHealthRef.current)
+                setHealth((obj)=> ({...obj, mine: myHealthRef.current}));
                 setTimeout(() => {
                     setButtonsActive(() => true)
                     setMyTurn(() => true)
-                    setMy_DamageMinusValue([])
+                    setHealthChange((obj)=> ({...obj, my_minus: ['']}));
                     ER_healthPassed.current = 0;
                 }, 1000);
             }, 1000);
@@ -391,17 +381,17 @@ function Game({navigation, route}) {
     //when menu botton pressed
     function MenuPressed() {
 
-        setIsAlertHealthMax(() => false)
+        setIsElem((obj)=> ({...obj, alertHealthMax: false}));
         if(menuIsShown){ 
             setButtonsActive(()=> false)
             progress.setValue(0);
-            setIsMenu(() => true);    
+            setIsElem((obj)=> ({...obj, menu: true}));
             Animated.spring(progress, {toValue: 1, useNativeDriver: true}).start();
         }
         else{
             setButtonsActive(()=> true)
             progress.setValue(1);
-            Animated.spring(progress, {toValue: 0, useNativeDriver: true}).start(() => setIsMenu(() => false));
+            Animated.spring(progress, {toValue: 0, useNativeDriver: true}).start(() => setIsElem((obj)=> ({...obj, menu: false})));
         }
         setMenuIsShown((current) => !current)
     }
@@ -410,16 +400,18 @@ function Game({navigation, route}) {
     function closeMenu() {
         setMenuIsShown((current) => !current);
         progress.setValue(1);
-        Animated.spring(progress, {toValue: 0, useNativeDriver: true}).start(() => setIsMenu(() => false));
+        Animated.spring(progress, {toValue: 0, useNativeDriver: true}).start(() => setIsElem((obj)=> ({...obj, menu: false})));
         setButtonsActive(() => true);
     }
 
     //shows alert when max health
     function showAlertHealthMax(){
-        if(isAlertHealthMax){
+        if(isElem.alertHealthMax){
             return(
                 <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}> 
-                    <AlertHealth close={()=> setIsAlertHealthMax(()=>false, setButtonsActive(()=> true))} 
+                    <AlertHealth close={()=> {
+                        setIsElem((obj)=> ({...obj, alertHealthMax: false})); 
+                        setButtonsActive(()=> true)}} 
                     text1={"YOU HAVE A FULL HEALTH"}
                     text2={"CAN'T ADD MORE"}
                     />    
@@ -430,10 +422,12 @@ function Game({navigation, route}) {
 
     //shows alert when max health
     function showAlertHealthLimit(){
-        if(isAlertHealthLimit){
+        if(isElem.alertHealthLimit){
             return(
                 <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}> 
-                    <AlertHealth close={()=> setIsAlertHealthLimit(()=>false, setButtonsActive(()=> true))}
+                    <AlertHealth close={()=> {
+                        setIsElem((obj)=> ({...obj, alertHealthLimit: false})); 
+                        setButtonsActive(()=> true)}}
                     text1={"YOU'RE OUT OF USES"}
                     text2={"CAN'T USE MORE"}
                     />    
@@ -444,10 +438,10 @@ function Game({navigation, route}) {
 
     //shows menu when true
     function showMenu(){
-        if(IsMenu){
+        if(isElem.menu){
             return(
                 <Animated.View style={{position: 'absolute', height: '50%', top: '25%', alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
-                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={IsMenu} close={closeMenu}/>  
+                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu}/>  
                 </Animated.View>
             )
         }
@@ -461,34 +455,34 @@ function Game({navigation, route}) {
                 <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
             </Pressable>
             <View style={styles.container}>                         
-                <Win goMenu={goMenu} isVisible={IsWin} restart={restart} imgpath={charPath.current} name={myName.current}/>                
-                <Lose goMenu={goMenu} isVisible={IsLoose} restart={restart} imgpath={oppPath.current} name={oppName.current}/>
-                <GetDamage isVisible={isGetDamage} close={closeGetDamage} difficulty={difficulty.current} imgpath={oppPath.current}
-                health={opponentHealth} firstRound={isFirstRound.GetDamage} maxHealth={maxHealth.current} oppName={oppName.current}/>
+                <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}/>                
+                <Lose goMenu={goMenu} isVisible={isElem.loose} restart={restart} imgpath={imgPath.current.opp} name={passedArg.current.oppName}/>
+                <GetDamage isVisible={isElem.getDamage} close={closeGetDamage} difficulty={passedArg.current.difficulty} imgpath={imgPath.current.opp}
+                health={health.opp} firstRound={isFirstRound.GetDamage} maxHealth={passedArg.current.maxHealth} oppName={passedArg.current.oppName}/>
 
-                <GetHealth isVisible={isGetHealth} close={closeGetHealth} difficulty={difficulty.current} 
-                health={myHealth} firstRound={isFirstRound.GetHealth} maxHealth={maxHealth.current}/>
+                <GetHealth isVisible={isElem.getHealth} close={closeGetHealth} difficulty={passedArg.current.difficulty} 
+                health={health.mine} firstRound={isFirstRound.GetHealth} maxHealth={passedArg.current.maxHealth}/>
                 
                 <View style={styles.secondContainer}>
                     <View style={styles.aboutHealth} >
                         <Text style={styles.bigHealth}>HEALTH</Text>
                         <View style={styles.healthContainer}>
                             <View style={styles.singleHealth}>
-                                <Text style={styles.HealthText}>{myHealth}</Text>
+                                <Text style={styles.HealthText}>{health.mine}</Text>
                             </View>
                             <View style={styles.singleHealth}>
-                                <Text style={styles.HealthText}>{opponentHealth}</Text>
+                                <Text style={styles.HealthText}>{health.opp}</Text>
                             </View>
                         </View>
                     </View>
 
                     <View style={styles.containerValues}>
                         <View style={styles.singleValue}>
-                            <Text style={styles.textHeal}>{healthMinusValue}</Text>
-                            <Text style={styles.textMyDamage}>{My_DamageMinusValue}</Text>
+                            <Text style={styles.textHeal}>{healthChange.my_plus}</Text>
+                            <Text style={styles.textMyDamage}>{healthChange.my_minus}</Text>
                         </View>
                         <View style={styles.singleValue}>
-                            <Text style={styles.textAttack}>{damageMinusValue}</Text>
+                            <Text style={styles.textAttack}>{healthChange.opp_minus}</Text>
                         </View>
                     </View>
 
@@ -496,19 +490,19 @@ function Game({navigation, route}) {
                         <View style={styles.namesContainer}>
                             <Animated.View style={[styles.playersText, myTurn ? {
                                 borderWidth: 2, borderColor: "red", borderRadius: healthRound}: {borderRadius: 5}]}>
-                                <Text style={styles.names} adjustsFontSizeToFit={true} numberOfLines={1} >{myName.current}</Text>
+                                <Text style={styles.names} adjustsFontSizeToFit={true} numberOfLines={1} >{passedArg.current.myName}</Text>
                             </Animated.View>
                         </View>
                         <View style={styles.namesContainer}>
                             <Animated.View style={[styles.playersText, !myTurn ? {
                                 borderWidth: 2, borderColor: "red", borderRadius: healthRound}: {borderRadius: 5}]}>
-                                <Text style={styles.names} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current}</Text>
+                                <Text style={styles.names} adjustsFontSizeToFit={true} numberOfLines={1}>{passedArg.current.oppName}</Text>
                             </Animated.View>
                         </View>
                     </View>
                     <View style={styles.players}>
-                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerLeft}]}]} source={charPath.current}/>
-                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerRight}, {translateY: opponentUPDOWN}]}]} source={oppPath.current}/>
+                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerLeft}]}]} source={imgPath.current.char}/>
+                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerRight}, {translateY: opponentUPDOWN}]}]} source={imgPath.current.opp}/>
                     </View>
                     <View style={styles.buttonsContainer}>
                         <Pressable onPress={attack} disabled={!buttonsActive} style={({pressed}) => [

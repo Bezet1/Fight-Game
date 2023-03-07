@@ -5,8 +5,6 @@ function GetHealth(props) {
     
     const [health, setHealth] = useState(props.health);
     const [isElem, setIsElem]= useState({medKit: false, point: false, text: false});
-    const [kitHit, setKitHit] = useState(false);
-    const [firstUpdateInterval, setFirstUpdateInterval] = useState(false);
     const [counterOfKit, setCounterOfKit] = useState(0);
     const [bonus, setBonus] = useState(1);
     
@@ -36,16 +34,18 @@ function GetHealth(props) {
         view.current.width = layout.width;
     }
 
-    //start of modal
-    function startOfModal(){
+    //set game diffuculty
+    function setDifficulty(){
+        if(props.difficulty === "easy"){
+            howFastIsChange.current = 600;
+        }
+        else{
+            howFastIsChange.current = 500;
+        }
+    }
 
-        //set game diffuculty
-        if(props.difficulty === "easy"){howFastIsChange.current = 600;}
-        else{howFastIsChange.current = 500;}
-        
-        firstRound.current = props.firstRound;
-
-        //check if first round
+    //check if first round
+    function checkFirstRound(){
         if(firstRound.current){
             setIsElem((obj)=>({...obj, text: true}))
             textProgress.setValue(0);
@@ -54,13 +54,17 @@ function GetHealth(props) {
                 Animated.spring(textProgress, {toValue: 0, useNativeDriver: true}).start(() => setIsElem((obj)=>({...obj, text: false})));
             }, 2500);
         }
+    }
 
-        //set actual values
+    //set actual values
+    function setInitialValues(){
         healthPass.current = props.health;
         setHealth(()=> props.health);
         maxHealth.current = props.maxHealth;
+    }
 
-        //start animations
+    //start animations of bonus
+    function bonusAnimation(){
         Animated.loop(
             Animated.sequence([
                 Animated.timing(bonusPosition, {toValue: 20, useNativeDriver: true, duration: 750}),
@@ -68,45 +72,27 @@ function GetHealth(props) {
             ])
         ).start();
 
+    }
+
+    //start of modal
+    function startOfModal(){
+
+        setDifficulty();
+        
+        firstRound.current = props.firstRound;
+        
+        checkFirstRound();
+        
+        setInitialValues();
+        
+        bonusAnimation();
+
         //start showing medkit
         setTimeout(()=> {
-            setKitHit((c)=> !c);
+            kitHit();
         }, firstRound ? 3000: 0)
         
     }
-    
-    //changes of position 
-    useEffect(()=>{
-  
-        //check if first update
-        if(!firstUpdateInterval){
-            setFirstUpdateInterval(()=>true);
-            return;
-        }
-
-        //track position of medkit
-        medKitPosition.x.setValue(randomNumber(0, view.current.width - 80))
-        medKitPosition.y.setValue(randomNumber(0, view.current.height - 80))
-
-        //show medkit
-        changeTimeout.current._1 = setTimeout(() => {
-            kitOpacity.setValue(0);
-            setIsElem((obj)=>({...obj, medKit: true}))
-            setCounterOfKit((current)=> current + 1);
-            Animated.spring(kitOpacity, {toValue: 1, useNativeDriver: true, duration: 100}).start();
-
-            //hide medkit
-            changeTimeout.current._2 = setTimeout(() => {
-                setIsElem((obj)=>({...obj, medKit: false}))
-                if(counterOfKit != 6){
-                    setKitHit((c)=>!c);
-                    bonusCounter.current = 0;
-                    Animated.timing(bonusOpacity, {toValue: 0, useNativeDriver: true, duration: 300}).start();
-                }
-            }, howFastIsChange.current);
-            
-        }, randomNumber(1000, 2000)); 
-    }, [kitHit])
 
     //end of modal
     useEffect(()=>{
@@ -117,14 +103,58 @@ function GetHealth(props) {
         }
     }, [counterOfKit])
     
+    //changes of position 
+    function kitHit(){
+
+        //set new position
+        medKitPosition.x.setValue(randomNumber(0, view.current.width - 80))
+        medKitPosition.y.setValue(randomNumber(0, view.current.height - 80))
+        
+        //show medkit
+        changeTimeout.current._1 = setTimeout(() => {
+            kitOpacity.setValue(0);
+            setIsElem((obj)=>({...obj, medKit: true}))
+            setCounterOfKit((current)=> current + 1);
+            Animated.spring(kitOpacity, {toValue: 1, useNativeDriver: true, duration: 100}).start();
+            
+            //hide medkit
+            changeTimeout.current._2 = setTimeout(() => {
+                setIsElem((obj)=>({...obj, medKit: false}))
+                if(counterOfKit != 6){
+                    kitHit();
+                    bonusCounter.current = 0;
+                    Animated.timing(bonusOpacity, {toValue: 0, useNativeDriver: true, duration: 300}).start();
+                }
+            }, howFastIsChange.current);
+            
+        }, randomNumber(1000, 2000)); 
+    }
+    
+    function pointAnimation(){
+
+        //set point position
+        pointPosition.setValue({x: evt.nativeEvent.pageX, y: evt.nativeEvent.pageY - 180});
+        pointOpacity.setValue(0);
+        setIsElem((obj)=>({...obj, point: true}));
+        
+        //start point animation
+        Animated.parallel([
+            Animated.sequence([
+                Animated.timing(pointOpacity, {toValue: 1, useNativeDriver: true, duration: 100}),
+                Animated.timing(pointOpacity, {toValue: 0, useNativeDriver: true, duration: 200, delay: 200}),
+            ]),
+            Animated.spring(pointPosition.y, {toValue: evt.nativeEvent.pageY - 300, useNativeDriver: true, mass: 10}),
+        ]).start(()=> setIsElem((obj)=>({...obj, point: false})))    
+    }
+    
     //when medkit pressed
     function kitPressed(evt){
-
+        
         //return if player has max health
         if(healthPass.current == maxHealth.current){
             return;
         }
-
+        
         //track bonus
         bonusCounter.current = bonusCounter.current + 1;
         
@@ -148,6 +178,7 @@ function GetHealth(props) {
         
         //check if player has max health
         if(healthPass.current >= maxHealth.current){
+            
             healthPass.current = maxHealth.current;
             setHealth(()=>maxHealth.current);
             
@@ -161,27 +192,15 @@ function GetHealth(props) {
         clearTimeout(changeTimeout.current._1);
         clearTimeout(changeTimeout.current._2);
 
+        pointAnimation();
+        
         //start new show of medkit
-        setKitHit((current)=>!current);
-        
-        //set point position
-        pointPosition.setValue({x: evt.nativeEvent.pageX, y: evt.nativeEvent.pageY - 180});
-        pointOpacity.setValue(0);
-        setIsElem((obj)=>({...obj, point: true}));
-        
-        //start point animation
-        Animated.parallel([
-            Animated.sequence([
-                Animated.timing(pointOpacity, {toValue: 1, useNativeDriver: true, duration: 100}),
-                Animated.timing(pointOpacity, {toValue: 0, useNativeDriver: true, duration: 200, delay: 200}),
-            ]),
-            Animated.spring(pointPosition.y, {toValue: evt.nativeEvent.pageY - 300, useNativeDriver: true, mass: 10}),
-        ]).start(()=> setIsElem((obj)=>({...obj, point: false})))
+        kitHit();
         
     }
     
     //stop animations and timeouts
-    function stopAnimation(){
+    function stopAllAnimation(){
         medKitPosition.stopAnimation(); 
         pointPosition.stopAnimation();
         pointOpacity.stopAnimation();
@@ -201,7 +220,7 @@ function GetHealth(props) {
         bonusCounter.current = 0;
         setBonus(()=>1);
         bonusOpacity.setValue(0);
-        stopAnimation();  
+        stopAllAnimation();  
     }
     
     function medkit(){

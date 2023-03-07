@@ -153,6 +153,14 @@ function EnemyRound({navigation, route}) {
         setViewHeight_s(()=>layout.height);
     }
 
+    //initial position
+    function setInitialValues(layout){
+        heartPos.current.x = layout.width/2;
+        heartPos.current.y = layout.height/2;
+        line1Ani.setValue({x: -layout.width/2, y: 0})      
+        line2Ani.setValue({x: -layout.width/2, y: 0})      
+    }
+
     //on layout when start of the screen
     function startOfScreen(layout){
 
@@ -160,16 +168,9 @@ function EnemyRound({navigation, route}) {
 
         setDifficulty();
         
-        //initial position
-        heartPos.current.x = layout.width/2;
-        heartPos.current.y = layout.height/2;
-        line1Ani.setValue({x: -layout.width/2, y: 0})      
-        line2Ani.setValue({x: -layout.width/2, y: 0})      
+        setInitialValues(layout);
 
-        //check if first round
         whenFirstRound();
-        
-        //start of lines aniamtions
         
         startAllLines();
 

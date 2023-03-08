@@ -34,8 +34,7 @@ export class Movable extends Component {
       }
     }
 
-    //this.state.animate.x.addListener(({value})=> this.state.aniValueX = value);
-    //this.state.animate.y.addListener(({value})=> this.state.aniValueY = value);
+    this.state.animate.removeAllListeners();
 
     //track position with throttle
     this.state.animate.x.addListener(throttle(({value})=>{

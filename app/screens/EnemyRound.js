@@ -79,7 +79,7 @@ function EnemyRound({navigation, route}) {
     useEffect(()=> {
         setTimeout(() => {
             endOfScreen();
-        },500000)//firstRound.current ? 18500: 15000);
+        }, firstRound.current ? 18500: 15000);
     }, [])
 
     //track amount of health and end when 0 

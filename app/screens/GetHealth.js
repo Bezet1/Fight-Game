@@ -130,7 +130,7 @@ function GetHealth(props) {
         }, randomNumber(1000, 2000)); 
     }
     
-    function pointAnimation(){
+    function pointAnimation(evt){
 
         //set point position
         pointPosition.setValue({x: evt.nativeEvent.pageX, y: evt.nativeEvent.pageY - 180});
@@ -192,7 +192,7 @@ function GetHealth(props) {
         clearTimeout(changeTimeout.current._1);
         clearTimeout(changeTimeout.current._2);
 
-        pointAnimation();
+        pointAnimation(evt);
         
         //start new show of medkit
         kitHit();

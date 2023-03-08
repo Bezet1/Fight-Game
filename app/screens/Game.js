@@ -10,6 +10,10 @@ import GetDamage from './GetDamage';
 import GetHealth from './GetHealth';
 import AlertHealth from './AlertHealth';
 
+//dodac redround przy kazdej zmianie myTurn
+//setPlayersImg na poczatek
+//timer
+
 function Game({navigation, route}) {
     let timerValue = 1;
     let opponentAmountHealth = route?.params?.health;
@@ -17,7 +21,7 @@ function Game({navigation, route}) {
     let usesOfGetHealth = 2;
     let windowWidth = Dimensions.get("window").width;
     
-    const [health, setHealth] = useState({mine: myAmountHealth-2, opp: opponentAmountHealth});
+    const [health, setHealth] = useState({mine: myAmountHealth, opp: opponentAmountHealth});
     const [isElem, setIsElem] = useState({alertHealthMax: false, alertHealthLimit: false,
      getDamage: false, getHealth: false, win: false, loose: false, menu: false,
     timer: true})
@@ -32,20 +36,8 @@ function Game({navigation, route}) {
         GetHealth: true,
         GetDamage: true,
     });
-    
-    //wykasowac
-    const [startEnemyRound, setStartEnemyRound] = useState(false);
-    const [startTimer, setStartTimer] = useState(false);
-    const [startAnimations, setStartAnimations] = useState(false);
-    const [stopAnimations, setStopAnimations] = useState(false);
-    const firstUpdateForstopAnim = useRef(false);
-    
-    //??
-    const intervalForTimer = useRef(null);
-    const intervalForOpponentHealth = useRef(null);
-    const intervalForMyHealth = useRef(null);
-    const FirstUpdate_enemyRound = useRef(false);
-    
+        
+    const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
         oppID: route?.params?.opp, myName: route?.params?.myname?.toUpperCase(),
         oppName: route?.params?.oppname, maxHealth: route?.params?.health})
@@ -55,8 +47,6 @@ function Game({navigation, route}) {
     const myHealthRef = useRef(myAmountHealth);
     const ER_healthPassed = useRef(0);
 
-    
-
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
     const playerLeft = useRef(new Animated.Value(-windowWidth)).current;
@@ -65,56 +55,52 @@ function Game({navigation, route}) {
     const opponentUPDOWN = useRef(new Animated.Value(0)).current;
     
     //AIMATIONS
-    useEffect(()=>{
-    
+    function startAnimations(){
+
+        animateRedRound();
+
         Animated.spring(playerLeft, {toValue: 0, useNativeDriver: true, delay: 1800}).start();
         Animated.spring(playerRight, {toValue: 0, useNativeDriver: true, delay: 2000}).start();
-        Animated.spring(TimmerOpacity, {toValue: 1, useNativeDriver: true}).start();
-
+    
         Animated.loop(
             Animated.sequence([
                 Animated.spring(opponentUPDOWN, {toValue: 10, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
                 Animated.spring(opponentUPDOWN, {toValue: 0, useNativeDriver: true, restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
             ])
         ).start();
-
+    
         Animated.loop(
             Animated.sequence([
                 Animated.timing(healthRound, {toValue: 20, useNativeDriver: true}),
                 Animated.timing(healthRound, {toValue: 5, useNativeDriver: true})
             ])
         ).start();
-
-    }, [startAnimations])
-
-    useEffect(()=>{
+    }
+    
+    function animateRedRound(){
         Animated.loop(
             Animated.sequence([
                 Animated.timing(healthRound, {toValue: 20, useNativeDriver: true}),
                 Animated.timing(healthRound, {toValue: 5, useNativeDriver: true})
             ])
-        ).start();
-
-    }, [myTurn, startAnimations])
-
-    //stops animations
-    useEffect(()=>{
-        if(!firstUpdateForstopAnim.current){
-            firstUpdateForstopAnim.current = false;
-            return;
+            ).start();
         }
 
+    
+    //stops animations
+    function stopAllAnimations(){
+        
         progress.stopAnimation();
         playerRight.stopAnimation();
         playerLeft.stopAnimation();
         healthRound.stopAnimation();
         TimmerOpacity.stopAnimation();
         opponentUPDOWN.stopAnimation();
-    }, [stopAnimations])
+    }
+
 
     //setting images
-    useEffect(() => {
-        
+    function setPlayersIMG(){
         if(passedArg.current.charID == "1"){
             imgPath.current.char = require("../assets/char1.gif");
         }
@@ -124,7 +110,7 @@ function Game({navigation, route}) {
         else if(passedArg.current.charID == "3"){
             imgPath.current.char = require("../assets/char3.gif");
         }
-
+    
         if(passedArg.current.oppID == "1"){
             imgPath.current.opp= require("../assets/opp1.png");
         }
@@ -134,124 +120,114 @@ function Game({navigation, route}) {
         else if(passedArg.current.oppID == "3"){
             imgPath.current.opp = require("../assets/opp3.png");
         }
-    }, [])
-    
+    }
+
     //find random number
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     } 
 
-    //count down timer
-    useEffect(() => { 
-            intervalForTimer.current = setInterval(() => {
-                setTimer((prevtime) => prevtime - 1);
-                return () => clearInterval(intervalForTimer.current)
-            }, 800);
-    }, [startTimer]);
-
-    useEffect(()=> {
-        if(timer == 0){
-            clearInterval(intervalForTimer.current);
-            Animated.spring(TimmerOpacity, {toValue: 0, useNativeDriver: true, 
-                restSpeedThreshold: 3, 
-                restDisplacementThreshold: 0.9
-            }).start(({finished}) => {
-
-                if (finished) {
-                    setIsElem((obj)=> ({...obj, timer: false})); 
-                }
-            })}
-    }, [timer])
-
-    function showTimer(){
-        if(isElem.timer){
-            return(
-                <Animated.View style={{width: "100%", height: "100%", position: "absolute", 
-                justifyContent: "center", opacity: TimmerOpacity}}> 
-                    <Countdown timer={timer}/>  
-                </Animated.View>
-            )
+    function throttle (func, limit){
+        let inThrottle;
+        return function() {
+          const args = arguments;
+          const context = this;
+          if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+          }
         }
     }
+
+    //count down timer    
+    function startTimer(){
+
+        setTimer(()=> timerValue);
+        setIsElem((obj)=> ({...obj, timer: true}));
+        TimmerOpacity.setValue(0);
+        Animated.timing(TimmerOpacity, {toValue: 1, useNativeDriver: true, duration: 200 
+        }).start(({finished}) => {  
+            if(finished){
+                interval.current.timer = setInterval(() => {
+                    setTimer((prevtime) => prevtime - 1);
+                }, 800)
+            }  
+        })
+    }
     
-    //check if win
-    useEffect(() => {
-        if(health.opp <= 0 ){
-            setopponentHealth(() => 0); 
-            setIsElem((obj)=> ({...obj, win: true})); 
-            setButtonsActive(()=>false);   
-
-            //stop animations
-            setStopAnimations(()=>true);
-        }
-    }, [health.opp])
-    
-    //check if loose
+    //timer listener
     useEffect(()=> {
-        if(health.mine <= 0){
-            setHealth((obj)=> ({...obj, mine: 0}));
-            setIsElem((obj)=> ({...obj, loose: true})); 
-            setButtonsActive(()=>false); 
-
-            //stop animations
-            setStopAnimations((current) => !current)
+        if(timer <= 0){
+            clearInterval(interval.current.timer);
+            Animated.timing(TimmerOpacity, {toValue: 0, useNativeDriver: true, 
+                duration: 500
+            }).start(({finished})=> {
+                if(finished){
+                    setIsElem((obj)=> ({...obj, timer: false}));
+                }   
+            });
         }
-    },[health.mine])
-
-    //check if end of increase health after restart
-    useEffect(()=> {
-        if(health.opp == opponentAmountHealth){
-            clearInterval(intervalForOpponentHealth.current)
-        }
-        if(health.mine == myAmountHealth){
-            clearInterval(intervalForMyHealth.current)
-        }
-    }, [health.opp, health.mine])
+    }, [timer])
     
     //go menu pressed
     function goMenu(){
-        //stop animations
+        stopAllAnimations();
+        navigation.navigate("Homescreen")
+    }
+    
+    //stop animations
+    function stopAllAnimations(){
         progress.stopAnimation();
         playerRight.stopAnimation();
         playerLeft.stopAnimation();
         healthRound.stopAnimation();
         TimmerOpacity.stopAnimation();
         opponentUPDOWN.stopAnimation();
-
-        navigation.navigate("Homescreen")
     }
-
+    
+    //increase health
+    function increaseHealth(health, amountHealth, who, interval, whosehp){
+        if(health < amountHealth){
+            interval.current[whosehp] = setInterval(() => {
+                setHealth((obj)=> ({...obj, [who]: obj[who] + 1}))
+            }, 20);
+        }
+    }
+    
+    //track and check if end of increase health after restart
+    useEffect(()=> {
+        if(health.opp >= opponentAmountHealth){
+            clearInterval(interval.current.oppHp)
+        }
+        if(health.mine >= myAmountHealth){
+            clearInterval(interval.current.mineHp);
+        }
+    }, [health.opp, health.mine])
+    
+    function beginingOfScreen(){
+        startTimer();
+        setPlayersIMG();
+        startAnimations();
+    }
+    
     //restart pressed
     function restart(){
-        //increase health
-        if(health.opp < opponentAmountHealth){
-            intervalForOpponentHealth.current = setInterval(() => {
-                setHealth((obj)=> ({...obj, opp: obj.opp + 1}));
-                return () => clearInterval(intervalForOpponentHealth.current)
-            }, 5);
-        }
-        if(health.mine < myAmountHealth){
-            intervalForMyHealth.current = setInterval(() => {
-                setHealth((obj)=> ({...obj, mine: obj.mine + 1}));
-                return () => clearInterval(intervalForMyHealth.current)
-            }, 5);
-        }
         
-        setIsElem((obj)=> ({...obj, menu: false, win: false, loose: false, timer: true,})); 
-        setTimer(() => timerValue);
-        setStartTimer((prevvalue)=> !prevvalue);
-        TimmerOpacity.setValue(0)
+        startTimer();
         
-        Animated.spring(TimmerOpacity, {toValue: 1, useNativeDriver: true}).start();
-        setButtonsActive(() => true);
+        increaseHealth(health.mine, myAmountHealth, "mine", interval, "mineHp");
+        increaseHealth(health.opp, opponentAmountHealth, "opp", interval, "oppHp");
+        
         if(!menuIsShown){
             setMenuIsShown((current) => !current);            
         }
-        setStartAnimations((current)=>!current);
-        setHealthChange((obj)=> ({...obj, opp_minus: [''], my_minus: [''], my_plus: ['']}));
+        setButtonsActive(() => true);
         setMyTurn(()=>true);
+        setIsElem((obj)=> ({...obj, menu: false, win: false, loose: false})); 
+        setHealthChange((obj)=> ({...obj, opp_minus: [''], my_minus: [''], my_plus: ['']}));
         setIsFirstRound((obj)=>({...obj, GetDamage: true, GetHealth: true, EnemyRound: true}));
-        setHealthUsedCounter(()=>usesOfGetHealth)
+        setHealthUsedCounter(()=>usesOfGetHealth);
         
         myHealthRef.current = myAmountHealth;
         
@@ -260,7 +236,8 @@ function Game({navigation, route}) {
         });
         
     }
-
+    
+    
     //when attack, opens getDamage
     function attack(){
         setButtonsActive(() => false);
@@ -270,110 +247,139 @@ function Game({navigation, route}) {
         }, 100);
         
     }
-
+    
     //when heal pressed, opens getHealth
     function heal(){
-
+        
+        //check if max health
         if(health.mine >= myAmountHealth){
             setIsElem((obj)=> ({...obj, alertHealthMax: true}));
             setButtonsActive(()=>false)
             return
         }
         
+        //check if out of limit of getHealth
         if(healthUsedCounter <= 0){
             setIsElem((obj)=> ({...obj, alertHealthLimit: true}));
             setButtonsActive(()=>false);
             return;
         }
-
+        
         setHealthUsedCounter((current)=>current - 1);
         setButtonsActive(()=>false);
-
+        
         setTimeout(() => {
             setIsElem((obj)=> ({...obj, getHealth: true}));
         }, 100);
     }
-
+    
     //close getDamage, changes health, sets enemy round
     function closeGetDamage(healthPassed){
         setIsElem((obj)=> ({...obj, getDamage: false}));
-
+        
         setTimeout(() => {
-            setIsFirstRound((obj)=>({...obj, GetDamage: false}));
-
+            if(isFirstRound.GetDamage){
+                setIsFirstRound((obj)=>({...obj, GetDamage: false}));
+            }
+        
             setHealthChange((obj)=> ({...obj, opp_minus: ["-",(health.opp - healthPassed)]}));
-            setHealth((obj)=> ({...obj, opp: healthPassed}))
+            setHealth((obj)=> ({...obj, opp: healthPassed}));
+              
             setTimeout(() => {
                 setHealthChange((obj)=> ({...obj, opp_minus: ['']}));
-                setStartEnemyRound((current)=> !current);
+                if(!isElem.loose && !isElem.loose){
+                    startEnemyRound();
+                }
             }, 1000);
         }, randomNumber(100,700));   
     }
-
+    
     //close getHealht, changes health, sets enemy round
     function closeGetHealth(healthPlusPassed){
         setIsElem((obj)=> ({...obj, getHealth: false}));
-
+        
         setTimeout(() => {
-            setIsFirstRound((obj)=>({...obj, GetHealth: false}));
-
+            if(isFirstRound.getHealth){
+                setIsFirstRound((obj)=>({...obj, GetHealth: false}));
+            } 
+           
             setHealthChange((obj)=> ({...obj, my_plus: ["+",healthPlusPassed - health.mine]}));
             setHealth((obj)=> ({...obj, mine: healthPlusPassed}));
             myHealthRef.current = healthPlusPassed;
-
+            
             setTimeout(() => {
                 setHealthChange((obj)=> ({...obj, my_plus: ['']}));
-                setStartEnemyRound((current)=> !current);
+                if(!isElem.loose && !isElem.loose){
+                    startEnemyRound();
+                }
             }, 1000);
         }, randomNumber(100,700));   
     }
-
-    //ENEMY ROUND
+    
+    //track health and check if win or loose
     useEffect(()=> {
-        if(!FirstUpdate_enemyRound.current){
-            FirstUpdate_enemyRound.current = true;
-            return;
+        if(health.mine <= 0){
+            setHealth((obj)=> ({...obj, mine: 0}));
+            setIsElem((obj)=> ({...obj, loose: true})); 
+            setButtonsActive(()=>false); 
+            
+            stopAllAnimations();
+        }
+        if(health.opp <= 0 ){
+            setopponentHealth(() => 0); 
+            setIsElem((obj)=> ({...obj, win: true})); 
+            setButtonsActive(()=>false);
+    
+            stopAllAnimations();
+        }
+    }, [health.mine, health.opp])
+
+    
+    function startEnemyRound(){
+        
+        setMyTurn(() => false);
+        setTimeout(() => {
+            navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
+                health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
+            }, randomNumber(700,1000));
+            
         }
         
-        if(isElem.loose || isElem.win){
-            return;
-        }
-
-        setMyTurn(() => false)
-        setTimeout(() => {
-            navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, health: health.mine, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
-        }, randomNumber(700,1000));
-
-    },[startEnemyRound])
-
     //when screen is back after enemys round
     useEffect(() => {
-      if (route.params?.EN_health) {
-          ER_healthPassed.current = route.params.EN_health;
-      }
+        if (route.params?.EN_health) {
+            ER_healthPassed.current = route.params.EN_health;
+        }
     }, [route.params?.EN_health]);
-   
+    
     useFocusEffect(
-        useCallback(() => {    
+        useCallback(() => {
+
+            //start of screen
             if(!wasFirstFocus.current){
                 wasFirstFocus.current = true;
-                return;
+                beginingOfScreen();
             }
+            else{
     
-            setIsFirstRound((obj)=>({...obj, EnemyRound: false}));
-
-            setTimeout(() => {
-                setHealthChange((obj)=> ({...obj, my_minus: ['-',ER_healthPassed.current]}));
-                myHealthRef.current = myHealthRef.current - ER_healthPassed.current;
-
-                setHealth((obj)=> ({...obj, mine: myHealthRef.current}));
+                if(isFirstRound.EnemyRound){
+                    setIsFirstRound((obj)=>({...obj, EnemyRound: false}));
+                }
+    
                 setTimeout(() => {
-                    setButtonsActive(() => true)
-                    setMyTurn(() => true)
-                    setHealthChange((obj)=> ({...obj, my_minus: ['']}));
-                    ER_healthPassed.current = 0;
+                    setHealthChange((obj)=> ({...obj, my_minus: ['-',ER_healthPassed.current]}));
+                    myHealthRef.current = myHealthRef.current - ER_healthPassed.current;
+                    setHealth((obj)=> ({...obj, mine: myHealthRef.current}));
+
+                    setTimeout(() => {
+                        setButtonsActive(() => true)
+                        setMyTurn(() => true)
+                        setHealthChange((obj)=> ({...obj, my_minus: ['']}));
+                        ER_healthPassed.current = 0;
+                    }, 1000);
                 }, 1000);
-            }, 1000);
+            }
+
         }, [])
       );
 
@@ -404,7 +410,6 @@ function Game({navigation, route}) {
         setButtonsActive(() => true);
     }
 
-    //shows alert when max health
     function showAlertHealthMax(){
         if(isElem.alertHealthMax){
             return(
@@ -420,7 +425,6 @@ function Game({navigation, route}) {
         }
     }
 
-    //shows alert when max health
     function showAlertHealthLimit(){
         if(isElem.alertHealthLimit){
             return(
@@ -435,13 +439,23 @@ function Game({navigation, route}) {
             )
         }
     }
-
-    //shows menu when true
+ 
     function showMenu(){
         if(isElem.menu){
             return(
                 <Animated.View style={{position: 'absolute', height: '50%', top: '25%', alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
                     <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu}/>  
+                </Animated.View>
+            )
+        }
+    }
+
+    function showTimer(){
+        if(isElem.timer){
+            return(
+                <Animated.View style={{width: "100%", height: "100%", position: "absolute", 
+                justifyContent: "center", opacity: TimmerOpacity}}> 
+                    <Countdown timer={timer}/>  
                 </Animated.View>
             )
         }

@@ -72,7 +72,7 @@ function Lose(props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "rgba(255, 3, 36, 0.85)",
+        backgroundColor: "rgba(255, 3, 36, 0.9)",
         justifyContent: "center",
         alignItems: "center"
     },

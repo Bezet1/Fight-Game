@@ -10,7 +10,9 @@ function Home(props) {
     }
 
     //how to play button clicked
-    function howToPlay(){console.log('how to play')}
+    function howToPlay(){
+        props.navigation.navigate("howtoplay")
+    }
 
     //ranking button clicked
     function ranking(){props.navigation.navigate("Ranking")}

@@ -16,8 +16,8 @@ import AlertHealth from './AlertHealth';
 
 function Game({navigation, route}) {
     let timerValue = 1;
-    let opponentAmountHealth = route?.params?.health;
-    let myAmountHealth = route?.params?.health;
+    let opponentAmountHealth =4//route?.params?.health;
+    let myAmountHealth = 12//route?.params?.health;
     let usesOfGetHealth = 2;
     let windowWidth = Dimensions.get("window").width;
     
@@ -40,12 +40,14 @@ function Game({navigation, route}) {
     const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
         oppID: route?.params?.opp, myName: route?.params?.myname?.toUpperCase(),
-        oppName: route?.params?.oppname, maxHealth: route?.params?.health})
-    
+        oppName: route?.params?.oppname, maxHealth: route?.params?.health});
     const imgPath = useRef({char: 0, opp: 0})
     const wasFirstFocus = useRef(false);
     const myHealthRef = useRef(myAmountHealth);
     const ER_healthPassed = useRef(0);
+    const time = useRef({start: 0.8, end: 0.8, total: 0.8});
+    const isFinish = useRef(false);
+    const timeout = useRef({getDamage: null, getHealth: null});
 
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -56,8 +58,6 @@ function Game({navigation, route}) {
     
     //AIMATIONS
     function startAnimations(){
-
-        animateRedRound();
 
         Animated.spring(playerLeft, {toValue: 0, useNativeDriver: true, delay: 1800}).start();
         Animated.spring(playerRight, {toValue: 0, useNativeDriver: true, delay: 2000}).start();
@@ -83,9 +83,12 @@ function Game({navigation, route}) {
                 Animated.timing(healthRound, {toValue: 20, useNativeDriver: true}),
                 Animated.timing(healthRound, {toValue: 5, useNativeDriver: true})
             ])
-            ).start();
-        }
+        ).start();
+    }
 
+    useEffect(()=> {
+        animateRedRound();
+    }, [myTurn])
     
     //stops animations
     function stopAllAnimations(){
@@ -178,11 +181,9 @@ function Game({navigation, route}) {
     
     //stop animations
     function stopAllAnimations(){
-        progress.stopAnimation();
         playerRight.stopAnimation();
         playerLeft.stopAnimation();
         healthRound.stopAnimation();
-        TimmerOpacity.stopAnimation();
         opponentUPDOWN.stopAnimation();
     }
     
@@ -198,10 +199,12 @@ function Game({navigation, route}) {
     //track and check if end of increase health after restart
     useEffect(()=> {
         if(health.opp >= opponentAmountHealth){
-            clearInterval(interval.current.oppHp)
+            clearInterval(interval.current.oppHp);
+            isFinish.current = false;
         }
         if(health.mine >= myAmountHealth){
             clearInterval(interval.current.mineHp);
+            isFinish.current = false;
         }
     }, [health.opp, health.mine])
     
@@ -215,6 +218,11 @@ function Game({navigation, route}) {
     function restart(){
         
         startTimer();
+
+        time.current.start = new Date();
+
+        stopAllAnimations();
+        startAnimations();
         
         increaseHealth(health.mine, myAmountHealth, "mine", interval, "mineHp");
         increaseHealth(health.opp, opponentAmountHealth, "opp", interval, "oppHp");
@@ -275,6 +283,7 @@ function Game({navigation, route}) {
     
     //close getDamage, changes health, sets enemy round
     function closeGetDamage(healthPassed){
+        console.log("teraz")
         setIsElem((obj)=> ({...obj, getDamage: false}));
         
         setTimeout(() => {
@@ -285,11 +294,10 @@ function Game({navigation, route}) {
             setHealthChange((obj)=> ({...obj, opp_minus: ["-",(health.opp - healthPassed)]}));
             setHealth((obj)=> ({...obj, opp: healthPassed}));
               
-            setTimeout(() => {
-                setHealthChange((obj)=> ({...obj, opp_minus: ['']}));
-                if(!isElem.loose && !isElem.loose){
-                    startEnemyRound();
-                }
+            timeout.current.getDamage = setTimeout(() => {
+                setHealthChange((obj)=> ({...obj, opp_minus: ['']}));   
+                startEnemyRound();
+                
             }, 1000);
         }, randomNumber(100,700));   
     }
@@ -307,43 +315,58 @@ function Game({navigation, route}) {
             setHealth((obj)=> ({...obj, mine: healthPlusPassed}));
             myHealthRef.current = healthPlusPassed;
             
-            setTimeout(() => {
+            timeout.current.getHealth = setTimeout(() => {
                 setHealthChange((obj)=> ({...obj, my_plus: ['']}));
-                if(!isElem.loose && !isElem.loose){
-                    startEnemyRound();
-                }
+                startEnemyRound();
+                
             }, 1000);
         }, randomNumber(100,700));   
     }
     
     //track health and check if win or loose
     useEffect(()=> {
-        if(health.mine <= 0){
-            setHealth((obj)=> ({...obj, mine: 0}));
-            setIsElem((obj)=> ({...obj, loose: true})); 
-            setButtonsActive(()=>false); 
-            
-            stopAllAnimations();
-        }
-        if(health.opp <= 0 ){
-            setopponentHealth(() => 0); 
-            setIsElem((obj)=> ({...obj, win: true})); 
-            setButtonsActive(()=>false);
-    
-            stopAllAnimations();
+        if(!isFinish.current){
+            if(health.mine <= 0){
+                isFinish.current = true;
+                setTimeout(() => {
+                    winOrLoose("mine", "loose");
+                }, 1000);
+            }
+            if(health.opp <= 0 ){
+                isFinish.current = true;
+                setTimeout(() => {
+                    winOrLoose("opp", "win");
+                }, 1000);
+                
+                time.current.end = new Date();
+                time.current.total = time.current.end - time.current.start;
+                console.log(time.current.total);
+            }
         }
     }, [health.mine, health.opp])
+    
+    function winOrLoose(who, modal){
+        setHealth((obj)=> ({...obj, [who]: 0}));
+        setIsElem((obj)=> ({...obj, [modal]: true})); 
+        setButtonsActive(()=>false); 
+        clearTimeout(timeout.current.getDamage);
+        clearTimeout(timeout.current.getHealth);
+        stopAllAnimations();
+    }
 
     
     function startEnemyRound(){
-        
-        setMyTurn(() => false);
-        setTimeout(() => {
-            navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
-                health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
+        if(!isFinish.current){
+            setMyTurn(() => false);
+            setTimeout(() => {
+                navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
+                    health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
             }, randomNumber(700,1000));
-            
+                
         }
+        else{return}
+        }
+
         
     //when screen is back after enemys round
     useEffect(() => {
@@ -359,6 +382,7 @@ function Game({navigation, route}) {
             if(!wasFirstFocus.current){
                 wasFirstFocus.current = true;
                 beginingOfScreen();
+                time.current.start = new Date();
             }
             else{
     
@@ -469,7 +493,8 @@ function Game({navigation, route}) {
                 <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
             </Pressable>
             <View style={styles.container}>                         
-                <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}/>                
+                <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}
+                score={health.mine} time={time.current.total} />                
                 <Lose goMenu={goMenu} isVisible={isElem.loose} restart={restart} imgpath={imgPath.current.opp} name={passedArg.current.oppName}/>
                 <GetDamage isVisible={isElem.getDamage} close={closeGetDamage} difficulty={passedArg.current.difficulty} imgpath={imgPath.current.opp}
                 health={health.opp} firstRound={isFirstRound.GetDamage} maxHealth={passedArg.current.maxHealth} oppName={passedArg.current.oppName}/>

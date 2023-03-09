@@ -2,7 +2,7 @@ import {React, useEffect, useState, useRef, useCallback} from 'react';
 import { ImageBackground, StyleSheet, View, Animated, Text, Pressable, BackHandler, SafeAreaView, Image, TextInput} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite'
 import {Audio} from 'expo-av'
 import click from '../assets/sounds/click.mp3'
 
@@ -29,6 +29,41 @@ function Homescreen({navigation}) {
     const rudyUP = useRef(new Animated.Value(-5)).current;
     const spinValue =  useRef(new Animated.Value(-1)).current
     
+    const db = SQLite.openDatabase('database0.db');
+
+    useEffect(()=> {
+      db.transaction(tx => {
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS rankingEasy (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, duration TEXT)',
+          [],
+          (txObj, resultSet) => {
+            // success callback
+            console.log('Table created');
+          },
+          (txObj, error) => {
+            // error callback
+            console.log('Error:', error);
+          }
+        );
+      });
+
+      db.transaction(tx => {
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS rankingHard (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, duration TEXT)',
+          [],
+          (txObj, resultSet) => {
+            // success callback
+            console.log('Table created');
+          },
+          (txObj, error) => {
+            // error callback
+            console.log('Error:', error);
+          }
+        );
+      });
+    
+    }, [])
+
     const spinPrzemo = spinValue.interpolate({
         inputRange: [-1, 0, 1],
         outputRange: ['-10deg','0deg', '10deg']

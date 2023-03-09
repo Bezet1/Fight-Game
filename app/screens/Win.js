@@ -4,34 +4,38 @@ import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-
 function Win(props) {
 
     const [forRefresh, setForRefresh] = useState(false)
-    
-    const imgPath = useRef(props.imgpath);
-    const myName = useRef(props.name);
-    const score = useRef(0);
+
+    const passedArg = useRef({
+        imgPath: props.imgPath, myName: props.name, score: props.score, time: props.time})
 
     const imageOpacity =  useRef(new Animated.Value(0)).current
 
     //when star of modal
     function startOfModal(){
-
+        
+        
         //set values and start animation
-        imgPath.current = props.imgpath;
+        passedArg.current.score = props.score;
+        passedArg.current.imgPath = props.imgpath;
+        passedArg.current.time = props.time;
+
         imageOpacity.setValue(0);
         Animated.timing(imageOpacity, {toValue: 1, useNativeDriver: true, duration: 500, delay: 300}).start();
         
         //update sreen
         setForRefresh((c)=> !c)
-    }
+    } 
 
     return (
         <Modal onShow={startOfModal} visible={props.isVisible} transparent statusBarTranslucent animationType="fade">
             <View style={styles.container}>
-                <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{myName.current}</Text>
+                <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{passedArg.current.myName}</Text>
                 <Text style={styles.winText}>WINS!</Text>
                 <View style={styles.imageContainer}>
-                    <Animated.Image source={imgPath.current} style={[styles.image, {opacity: imageOpacity}]}/>
+                    <Animated.Image source={passedArg.current.imgPath} style={[styles.image, {opacity: imageOpacity}]}/>
                 </View>
-                <Text style={styles.scoreText}>SCORE: {score.current}</Text>
+                <Text style={styles.scoreText}>SCORE: {passedArg.current.score}</Text>
+                <Text style={styles.scoreText}>TIME: {passedArg.current.time}</Text>
                 <View style={styles.buttonsContainer}>
                     <Pressable onPress={props.restart} style={({pressed})=>[styles.buttonRestart, 
                         pressed && {backgroundColor: "#3e135c"}]}>
@@ -50,7 +54,7 @@ function Win(props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "rgba(15, 153, 38, 0.9)",
+        backgroundColor: "rgba(15, 153, 38, 0.95)",
         justifyContent: "center",
         alignItems: "center"
     },

@@ -13,7 +13,7 @@ function Home(props) {
     function howToPlay(){console.log('how to play')}
 
     //ranking button clicked
-    function ranking(){console.log("ranking")}
+    function ranking(){props.navigation.navigate("Ranking")}
 
     //exit button clicked
     function exit() {props.exit()}

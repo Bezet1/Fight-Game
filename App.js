@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import Homescreen from './app/screens/Homescreen';
 import Game from './app/screens/Game'
 import EnemyRound from './app/screens/EnemyRound';
+import Ranking from './app/screens/Ranking';
 
 import {useFonts} from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -41,6 +42,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Homescreen" component={Homescreen} options={{headerShown: false}}/>
+        <Stack.Screen name="Ranking" component={Ranking} options={{headerShown: false}}/>
         <Stack.Screen name="Game" component={Game} options={{headerShown: false}}/>
         <Stack.Screen name="EnemyRound" component={EnemyRound} options={{headerShown: false, animation: 'slide_from_bottom'} } />
       </Stack.Navigator>

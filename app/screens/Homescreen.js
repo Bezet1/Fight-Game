@@ -226,7 +226,7 @@ function Homescreen({navigation}) {
             return(
                 <Home aniOpacity={aniOpacity} setIsHomeScreen={(val)=> setIsScreen((obj)=> ({...obj, homeScreen: false}))} 
                 setIsChooseCharacter={(val)=> setIsScreen((obj)=> ({...obj, chooseCharacter: true}))}
-                exit={()=> setTimeout(() => BackHandler.exitApp(), 100)} />
+                navigation={navigation} exit={()=> setTimeout(() => BackHandler.exitApp(), 100)} />
             )
         }
       }

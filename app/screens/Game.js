@@ -15,6 +15,9 @@ import AlertHealth from './AlertHealth';
 //timer
 
 function Game({navigation, route}) {
+
+    const db = SQLite.openDatabase('database10.db');
+
     let timerValue = 1;
     let opponentAmountHealth =4//route?.params?.health;
     let myAmountHealth = 12//route?.params?.health;
@@ -48,6 +51,7 @@ function Game({navigation, route}) {
     const time = useRef({start: 0.8, end: 0.8, total: 0.8});
     const isFinish = useRef(false);
     const timeout = useRef({getDamage: null, getHealth: null});
+    const score = useRef(0);
 
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -129,19 +133,6 @@ function Game({navigation, route}) {
     function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     } 
-
-    function throttle (func, limit){
-        let inThrottle;
-        return function() {
-          const args = arguments;
-          const context = this;
-          if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-          }
-        }
-    }
 
     //count down timer    
     function startTimer(){
@@ -338,12 +329,67 @@ function Game({navigation, route}) {
                     winOrLoose("opp", "win");
                 }, 1000);
                 
-                time.current.end = new Date();
-                time.current.total = time.current.end - time.current.start;
-                console.log(time.current.total);
+                measureTime();
+
+                calculateScore();
+
+                addNewScore();
             }
         }
-    }, [health.mine, health.opp])
+    }, [health.mine, health.opp]);
+    
+    //adding new score to database
+    function addNewScore(){
+        if(passedArg.current.difficulty == "easy"){
+            db.transaction(tx => {
+                tx.executeSql(
+                    'INSERT INTO rankingEasy (name, score, time) VALUES (?, ?, ?)',
+                    [passedArg.current.myName, score.current, time.current.total],
+                    (txObj, resultSet) => {
+                        console.log('Correct added', resultSet.rowsAffected);
+                    },
+                    (txObj, error) => {
+                        console.log('Error:', error);
+                    }
+                );
+            });
+        }
+        else{
+            db.transaction(tx => {
+                tx.executeSql(
+                    'INSERT INTO rankingHard (name, score, time) VALUES (?, ?, ?)',
+                    [passedArg.current.myName, score.current, time.current.total],
+                    (txObj, resultSet) => {
+                        console.log('Correct added', resultSet.rowsAffected);
+                    },
+                    (txObj, error) => {
+                        console.log('Error:', error);
+                    }
+                );
+            });
+        }
+    }
+
+    function calculateScore(){
+        let newScore = Math.round((health.mine / passedArg.current.maxHealth) * 100);
+        score.current = newScore;
+    }
+    
+    //get duration of round
+    function measureTime(){
+
+        time.current.end = new Date();
+            
+        let duration = time.current.end - time.current.start;
+
+        let hours = Math.floor(duration / (1000 * 60 * 60));
+        let minutes = Math.floor((duration / (1000 * 60)) % 60);
+        let seconds = Math.floor((duration / 1000) % 60);
+
+        let formattedDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        time.current.total = formattedDuration;
+        console.log(formattedDuration); // output: "01:30:15"
+    }
     
     function winOrLoose(who, modal){
         setHealth((obj)=> ({...obj, [who]: 0}));
@@ -494,7 +540,7 @@ function Game({navigation, route}) {
             </Pressable>
             <View style={styles.container}>                         
                 <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}
-                score={health.mine} time={time.current.total} />                
+                score={score.current} time={time.current.total} />                
                 <Lose goMenu={goMenu} isVisible={isElem.loose} restart={restart} imgpath={imgPath.current.opp} name={passedArg.current.oppName}/>
                 <GetDamage isVisible={isElem.getDamage} close={closeGetDamage} difficulty={passedArg.current.difficulty} imgpath={imgPath.current.opp}
                 health={health.opp} firstRound={isFirstRound.GetDamage} maxHealth={passedArg.current.maxHealth} oppName={passedArg.current.oppName}/>

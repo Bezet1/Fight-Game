@@ -29,12 +29,12 @@ function Homescreen({navigation}) {
     const rudyUP = useRef(new Animated.Value(-5)).current;
     const spinValue =  useRef(new Animated.Value(-1)).current
     
-    const db = SQLite.openDatabase('database0.db');
+    const db = SQLite.openDatabase('database10.db');
 
     useEffect(()=> {
       db.transaction(tx => {
         tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS rankingEasy (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, duration TEXT)',
+          'CREATE TABLE IF NOT EXISTS rankingEasy (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
           [],
           (txObj, resultSet) => {
             // success callback
@@ -49,7 +49,7 @@ function Homescreen({navigation}) {
 
       db.transaction(tx => {
         tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS rankingHard (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, duration TEXT)',
+          'CREATE TABLE IF NOT EXISTS rankingHard (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
           [],
           (txObj, resultSet) => {
             // success callback

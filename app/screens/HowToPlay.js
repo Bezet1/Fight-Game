@@ -4,7 +4,7 @@ import * as SQLite from 'expo-sqlite';
 import { useState, useEffect} from 'react';
 
 function HowToPlay(props) {
-    const db = SQLite.openDatabase('database0.db');
+    const db = SQLite.openDatabase('database10.db');
     const [isLoading, setIsLoading] = useState(false);
     const [names, setNames] = useState([]);
     const [currentName, setCurrentName] = useState(undefined)

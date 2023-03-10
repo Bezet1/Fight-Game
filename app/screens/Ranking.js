@@ -8,13 +8,15 @@ function Ranking({navigation}) {
     const [isRankingLoading, setIsRankingLoading] = useState(true);
     const [rankingEasy, setRankingEasy] = useState([]);
     const [rankingHard, setRankingHard] = useState([]);
+    const [isEmpty, setIsEmpty] = useState({easy: true, hard: true});
 
-    const db = SQLite.openDatabase('database0.db');
+    const db = SQLite.openDatabase('database10.db');
 
     useEffect(() => {
         fetchData();
       }, []);
 
+    //get database tables to states
     function fetchData() {
        
         db.transaction(tx => {
@@ -45,74 +47,58 @@ function Ranking({navigation}) {
           );
         });
 
+        
         setIsRankingLoading(false);
-    }
+      }
+      
+      function checkIfEmpty(ranking, diffculty){
+        if(ranking.length === 0){
+          setIsEmpty((obj)=> ({...obj, [diffculty]: true}));
+        }
+        else{
+          setIsEmpty((obj)=> ({...obj, [diffculty]: false}));
+        }
+      }
+      useEffect(()=> {
+      checkIfEmpty(rankingEasy, 'easy');
+      checkIfEmpty(rankingHard, 'hard');
 
+    }, [rankingEasy, rankingHard])
     
     function showRanking() {
         if(isRankingLoading){
             return (
-                <View>
-                    <Text>Loading...</Text>
-                </View>
+              <View style={{position: 'absolute', alignSelf: 'center', top: '50%', width: '40%'}}>
+                <Text style={styles.noRecords} adjustsFontSizeToFit={true} numberOfLines={1}  >Loading...</Text>
+              </View>
             )
         }
         else if (difficulty.easy) {
+          if(isEmpty.easy){
+            return(
+              noRecords()
+            )
+          }
+          else{
             return (
-              <FlatList
-                data={rankingEasy}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                  <View key={item.id} style={styles.elementsRow}>
-                    <View style={styles.elementLeft}>
-                      <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                        {item.name}
-                      </Text>
-                    </View>
-                    <View style={styles.elementMid}>
-                      <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                        {item.name}
-                      </Text>
-                    </View>
-                    <View style={styles.elementRight}>
-                      <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                        {item.id}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-              />
-            );
+              rankingList(rankingEasy)
+                );
+              }
         }
         else if(difficulty.hard){
+          if(isEmpty.hard){
+            return(
+              noRecords()
+            )
+          }
+          else{
             return (
-                <FlatList
-                  data={rankingHard}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <View key={item.id} style={styles.elementsRow}>
-                      <View style={styles.elementLeft}>
-                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                          {item.name}
-                        </Text>
-                      </View>
-                      <View style={styles.elementMid}>
-                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                          {item.name}
-                        </Text>
-                      </View>
-                      <View style={styles.elementRight}>
-                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
-                          {item.id}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                />
+                rankingList(rankingHard)
               );
           }
+        }
     }   
-    
+
     function goBack(){
         navigation.navigate("Homescreen");
     }
@@ -123,6 +109,42 @@ function Ranking({navigation}) {
     
     function hardChoose(){
         setDificulty((obj)=> ({...obj, easy: false, hard: true}));
+    }
+
+    function noRecords() {
+      return(
+        <View style={{position: 'absolute', alignSelf: 'center', top: '50%', width: '40%'}}>
+            <Text style={styles.noRecords} adjustsFontSizeToFit={true} numberOfLines={1}  >No records</Text>
+        </View>
+      )
+    }
+
+    function rankingList(ranking){
+      return(
+        <FlatList
+        data={ranking}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View key={item.id} style={styles.elementsRow}>
+            <View style={styles.elementLeft}>
+              <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
+                {item.name}
+              </Text>
+            </View>
+            <View style={styles.elementMid}>
+              <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
+                {item.score}
+              </Text>
+            </View>
+            <View style={styles.elementRight}>
+              <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.elementText}>
+                {item.time}
+              </Text>
+            </View>
+          </View>
+        )}
+        />
+      )
     }
     
     return (
@@ -148,13 +170,11 @@ function Ranking({navigation}) {
                         </Pressable>
                     </View>
                     <View style={styles.titlesContainels}>
-                        <Text style={styles.titleText}>Name</Text>
-                        <Text style={styles.titleText}>Time</Text>
-                        <Text style={styles.titleText}>Score</Text>
+                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.titleText}>Name</Text>
+                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.titleText}>Score</Text>
+                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.titleText}>Time</Text>
                     </View>
-                    <View style={styles.elementsContainer}>
                         {showRanking()}
-                    </View>
                 </View>
             </View>
         </ImageBackground>
@@ -238,6 +258,12 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
         textAlign:"center",
     },
+    noRecords:{
+      color: "rgba(255,255,255, 0.7)",
+      fontSize: 20,
+      fontFamily: "Buttons",
+      textAlign:"center",
+    },
     backContainer: {
         marginLeft: 10,
         marginTop: 60,
@@ -259,25 +285,6 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
         textAlign:"center",
     },
-    loadingText: {
-        color: "white",
-        fontSize: 30,
-        fontFamily: "Buttons",
-        textAlign:"center",
-    },
-    container:{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-      id: {
-        fontWeight: 'bold',
-        color: 'white'
-    },
-    name: {
-        color: 'white',
-        flex: 1,
-      },
 })
 
 export default Ranking;

@@ -41,7 +41,7 @@ function HowToPlay(props) {
           [currentName],
           (txObj, resultSet) => {
             // success callback
-            console.log('Correct added', resultSet.rowsAffected);
+            //console.log('Correct added', resultSet.rowsAffected);
           },
           (txObj, error) => {
             // error callback

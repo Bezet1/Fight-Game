@@ -169,7 +169,6 @@ export class Movable extends Component {
     heartContainer: {
         height: 50,
         width: 50,
-        borderWidth: 2,
     },
     IMG: {
       width: '100%',

@@ -1,5 +1,5 @@
 import {React, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, Image, Animated} from 'react-native';
+import { View, StyleSheet, Text, Modal, Pressable, Animated, Dimensions} from 'react-native';
 
 function Win(props) {
 
@@ -28,24 +28,28 @@ function Win(props) {
 
     return (
         <Modal onShow={startOfModal} visible={props.isVisible} transparent statusBarTranslucent animationType="fade">
-            <View style={styles.container}>
-                <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{passedArg.current.myName}</Text>
-                <Text style={styles.winText}>WINS!</Text>
-                <View style={styles.imageContainer}>
-                    <Animated.Image source={passedArg.current.imgPath} style={[styles.image, {opacity: imageOpacity}]}/>
+            <View style={styles.container2}>
+            <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
+                <View style={styles.container}>
+                    <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{passedArg.current.myName}</Text>
+                    <Text style={styles.winText}>WINS!</Text>
+                    <View style={styles.imageContainer}>
+                        <Animated.Image source={passedArg.current.imgPath} style={[styles.image, {opacity: imageOpacity}]}/>
+                    </View>
+                    <Text style={styles.scoreText}>SCORE: {passedArg.current.score}</Text>
+                    <Text style={styles.scoreText}>TIME: {passedArg.current.time}</Text>
+                    <View style={styles.buttonsContainer}>
+                        <Pressable onPress={props.restart} style={({pressed})=>[styles.buttonRestart, 
+                            pressed && {backgroundColor: "#3e135c"}]}>
+                            <Text style={styles.buttonText}>REPLAY</Text>
+                        </Pressable>
+                        <Pressable onPress={props.goMenu} style={({pressed})=>[styles.buttonMenu, 
+                            pressed && {backgroundColor: "#10135e"}]}>
+                            <Text style={styles.buttonText}>BACK TO MENU</Text>
+                        </Pressable>
+                    </View>
                 </View>
-                <Text style={styles.scoreText}>SCORE: {passedArg.current.score}</Text>
-                <Text style={styles.scoreText}>TIME: {passedArg.current.time}</Text>
-                <View style={styles.buttonsContainer}>
-                    <Pressable onPress={props.restart} style={({pressed})=>[styles.buttonRestart, 
-                        pressed && {backgroundColor: "#3e135c"}]}>
-                        <Text style={styles.buttonText}>REPLAY</Text>
-                    </Pressable>
-                    <Pressable onPress={props.goMenu} style={({pressed})=>[styles.buttonMenu, 
-                        pressed && {backgroundColor: "#10135e"}]}>
-                        <Text style={styles.buttonText}>BACK TO MENU</Text>
-                    </Pressable>
-                </View>
+            </View>
             </View>
         </Modal>
     );
@@ -53,6 +57,11 @@ function Win(props) {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    container2:{
         flex: 1,
         backgroundColor: "rgba(15, 153, 38, 0.95)",
         justifyContent: "center",

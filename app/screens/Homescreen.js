@@ -1,5 +1,6 @@
 import {React, useEffect, useState, useRef, useCallback} from 'react';
-import { ImageBackground, StyleSheet, View, Animated, Text, Pressable, BackHandler, SafeAreaView, Image, TextInput} from 'react-native';
+import { ImageBackground, StyleSheet, Animated, BackHandler, 
+  SafeAreaView, Vibration, View, Dimensions} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 import * as SQLite from 'expo-sqlite'
@@ -37,11 +38,9 @@ function Homescreen({navigation}) {
           'CREATE TABLE IF NOT EXISTS rankingEasy (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
           [],
           (txObj, resultSet) => {
-            // success callback
-            console.log('Table created');
+            //console.log('Table created');
           },
           (txObj, error) => {
-            // error callback
             console.log('Error:', error);
           }
         );
@@ -52,11 +51,9 @@ function Homescreen({navigation}) {
           'CREATE TABLE IF NOT EXISTS rankingHard (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
           [],
           (txObj, resultSet) => {
-            // success callback
-            console.log('Table created');
+            //console.log('Table created');
           },
           (txObj, error) => {
-            // error callback
             console.log('Error:', error);
           }
         );
@@ -144,12 +141,18 @@ function Homescreen({navigation}) {
       
       //set hp
       function pressed50(){
+        if(!isHpPress._50){
+          Vibration.vibrate(3);
+        }
         setIsHpPress((obj)=>({...obj, _30: false, _50: true}))
         passValues.current.health = 50;
       }
-
+      
       //set hp
       function pressed30(){
+        if(!isHpPress._30){
+          Vibration.vibrate(3);
+        }
         setIsHpPress((obj)=>({...obj, _30: true, _50: false}))
         passValues.current.health = 30;
       }
@@ -157,82 +160,104 @@ function Homescreen({navigation}) {
       //go back from choose difficulty
       function backChooseDifficulty(){
         setIsScreen((obj)=>({...obj, chooseOpponent: true, chooseDifficulty: false}));
-        setIsHpPress((obj)=>({...obj, _30: false, _50: false}))
+        setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
         setAlertText(()=> []);
+        Vibration.vibrate(6);
       }
 
       //go back from choose character
       function backChooseCharacter(){
         setIsScreen((obj)=>({...obj, chooseCharacter: false, homeScreen: true}));
         setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, name: false, char: false}))
-        setName((obj)=> ({...obj, mine: ''}))
+        setNoElem((obj)=> ({...obj, name: false, char: false}));
+        setName((obj)=> ({...obj, mine: ''}));
+        Vibration.vibrate(6);
+
       }
 
       //go back from choose opponent
       function backChooseOpponent(){
         setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseCharacter: true}));
         setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, opp: false}))
+        setNoElem((obj)=> ({...obj, opp: false}));
+        Vibration.vibrate(6);
       }
 
       //set 1 character 
       function firstCharPressed(){
+        if(!charPress._1){
+          Vibration.vibrate(3);
+        }
         setCharPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
         setNoElem((obj)=> ({...obj, char: false}))
         passValues.current.charID = '1';
       }
-
+      
       //set 2 character 
       function secondCharPressed(){
+        if(!charPress._2){
+          Vibration.vibrate(3);
+        }
         setCharPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
         setNoElem((obj)=> ({...obj, char: false}))
         passValues.current.charID = '2';
       }
-
+      
       //set 3 character 
       function thirdCharPressed(){
+        if(!charPress._3){
+          Vibration.vibrate(3);
+        }
         setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
-        setNoElem((obj)=> ({...obj, char: false}))
+        setNoElem((obj)=> ({...obj, char: false}));
         passValues.current.charID = '3';
       }
       
       //set 1 opponent
       function firstOppPressed(){
+        if(!oppPress._1){
+          Vibration.vibrate(3);
+        }
           setOppPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
           setNoElem((obj)=> ({...obj, opp: false}))
           passValues.current.oppID = '1';
-          setName((obj)=> ({...obj, opp: 'PROXIMITY'}))
+          setName((obj)=> ({...obj, opp: 'PROXIMITY'}));
       }
 
       //set 2 opponent
       function secondOppPressed(){
+        if(!oppPress._2){
+          Vibration.vibrate(3);
+        }
           setOppPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
-          setNoElem((obj)=> ({...obj, opp: false}))
+          setNoElem((obj)=> ({...obj, opp: false}));
           passValues.current.oppID = '2';
-          setName((obj)=> ({...obj, opp: 'PRZEMO'}))
+          setName((obj)=> ({...obj, opp: 'PRZEMO'}));
       }
 
       //set 3 opponent
       function thirdOppPressed(){
+        if(!oppPress._3){
+          Vibration.vibrate(3);
+        }
           setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
-          setNoElem((obj)=> ({...obj, opp: false}))
+          setNoElem((obj)=> ({...obj, opp: false}));
           passValues.current.oppID = '3';
-          setName((obj)=> ({...obj, opp: 'DJRUDY'}))
+          setName((obj)=> ({...obj, opp: 'DJRUDY'}));
       }
 
       //next screen after choose character
       function confirmChooseCharacter(){
         if(name.mine == '' && !charPress._1 && !charPress._2 && !charPress._3){    
-            setNoElem((obj)=> ({...obj, name: true, char: true}))
+            setNoElem((obj)=> ({...obj, name: true, char: true}));
             return;                
           }
         else if(name.mine == ''){
-            setNoElem((obj)=> ({...obj, name: true}))
+            setNoElem((obj)=> ({...obj, name: true}));
             return;
           }
         else if(!charPress._1 && !charPress._2 && !charPress._3){           
-            setNoElem((obj)=> ({...obj, char: true}))
+            setNoElem((obj)=> ({...obj, char: true}));
             return;
           }
           setIsScreen((obj)=>({...obj, chooseCharacter: false, chooseOpponent: true}));
@@ -305,11 +330,13 @@ function Homescreen({navigation}) {
         <>
         <StatusBar translucent backgroundColor='transparent' style='light'/>
         <ImageBackground resizeMode='cover' style={styles.background} source={require("../assets/planet.jpg")}>
-            <SafeAreaView style={{flex: 1}}>
+            <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
+              <View style={{height: '100%', width: Math.min(400, Dimensions.get("screen").width), alignSelf: 'center'}}>
                 {Home_Screen()}
                 {chooseCharacter_Screen()}
                 {chooseOpponent_Screen()}
                 {chooseDifficulty_Screen()}
+              </View>
             </SafeAreaView>
         </ImageBackground>
         </>

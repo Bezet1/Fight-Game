@@ -22,11 +22,14 @@ function Menu(props) {
 
 const styles = StyleSheet.create({
     menuContainer: {
-        backgroundColor: "rgba(255,255,255, 0.7)",
+        backgroundColor: "rgba(255,255,255, 0.9)",
         borderRadius: 20,
         alignItems: "center",
         justifyContent: "space-evenly",
         paddingVertical: 20,
+        height: 350,
+        width: 260
+        
     },
     buttons: {
         backgroundColor: "rgba(70, 70, 120, 1)",
@@ -49,12 +52,6 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
         color: "white"
     },
-    menuButton:{  
-        marginLeft: 20,
-        top: 40,
-        height: 50,
-        width: 50,    
-    }
 })
 
 export default Menu;

@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Pressable, StyleSheet, Animated} from 'react-native';
+import {View, Text, Pressable, StyleSheet, Animated, Vibration} from 'react-native';
 
 function Home(props) {
 
@@ -11,7 +11,7 @@ function Home(props) {
 
     //how to play button clicked
     function howToPlay(){
-        props.navigation.navigate("howtoplay")
+        props.navigation.navigate("howtoplay");
     }
 
     //ranking button clicked

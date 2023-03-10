@@ -1,5 +1,5 @@
 import {React, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, Animated} from 'react-native';
+import { View, StyleSheet, Text, Modal, Pressable, Animated, Dimensions} from 'react-native';
 
 function Lose(props) {
 
@@ -47,22 +47,26 @@ function Lose(props) {
 
     return (
         <Modal onShow={startOfModal} visible={props.isVisible} transparent statusBarTranslucent animationType="fade">
-            <View style={styles.container}>
-                <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current}</Text>
-                <Text style={styles.winText}>WINS!</Text>
-                <View style={styles.imageContainer}>
-                    <Animated.Image source={imgPath.current} style={[styles.image, 
-                        {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}/>
+            <View style={styles.container2}>
+                <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
+                <View style={styles.container}>
+                    <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current}</Text>
+                    <Text style={styles.winText}>WINS!</Text>
+                    <View style={styles.imageContainer}>
+                        <Animated.Image source={imgPath.current} style={[styles.image, 
+                            {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}/>
+                    </View>
+                    <View style={styles.buttonsContainer}>
+                        <Pressable onPress={replay} style={({pressed})=>[styles.buttonRestart, 
+                            pressed && {backgroundColor: "#3e135c"}]}>
+                            <Text style={styles.buttonText}>REPLAY</Text>
+                        </Pressable>
+                        <Pressable onPress={gomenu} style={({pressed})=>[styles.buttonMenu, 
+                            pressed && {backgroundColor: "#10135e"}]}>
+                            <Text style={styles.buttonText}>BACK TO MENU</Text>
+                        </Pressable>
+                    </View>
                 </View>
-                <View style={styles.buttonsContainer}>
-                    <Pressable onPress={replay} style={({pressed})=>[styles.buttonRestart, 
-                        pressed && {backgroundColor: "#3e135c"}]}>
-                        <Text style={styles.buttonText}>REPLAY</Text>
-                    </Pressable>
-                    <Pressable onPress={gomenu} style={({pressed})=>[styles.buttonMenu, 
-                        pressed && {backgroundColor: "#10135e"}]}>
-                        <Text style={styles.buttonText}>BACK TO MENU</Text>
-                    </Pressable>
                 </View>
             </View>
         </Modal>
@@ -71,6 +75,11 @@ function Lose(props) {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    container2:{
         flex: 1,
         backgroundColor: "rgba(255, 3, 36, 0.9)",
         justifyContent: "center",

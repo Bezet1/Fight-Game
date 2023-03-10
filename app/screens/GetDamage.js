@@ -1,6 +1,6 @@
 import {React, useRef, useState} from 'react';
 import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, 
-    SafeAreaView, Animated, StatusBar, Dimensions} from 'react-native';
+    SafeAreaView, Animated, StatusBar, Dimensions, Vibration} from 'react-native';
 
 const GetDamage = (props) => {
 
@@ -134,6 +134,8 @@ const GetDamage = (props) => {
     //when opponent clicked
     function enemyHit(evt){
 
+        Vibration.vibrate(10);
+
         //stop moving animations
         opponentPosition.stopAnimation();   
 
@@ -226,10 +228,10 @@ const GetDamage = (props) => {
     }
 
     return (
-
         <Modal onShow={startOfModal} visible={props.isVisible} statusBarTranslucent animationType="slide">
-            <ImageBackground style={styles.background} source={require("../assets/tlo2.jpg")}>
+            <ImageBackground style={styles.background} source={require("../assets/tloRed.jpg")}>
             <SafeAreaView style={styles.background}>
+            <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
                 <View style={styles.container}>
                     <View style={[styles.damageContainer, {height: 50 + StatusBar.currentHeight}]}>
                         <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppVal.current.name} {health}/{maxHealth.current}</Text>
@@ -240,6 +242,7 @@ const GetDamage = (props) => {
                         {point()}
                     </View>
                 </View>
+            </View>
             </SafeAreaView>
             </ImageBackground>
         </Modal>
@@ -253,7 +256,6 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.3)"
     },
     damageContainer:{
         height: 80,

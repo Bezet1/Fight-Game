@@ -1,6 +1,6 @@
 import {React, useState, useRef, useEffect} from 'react';
 import { View, Image, Animated, ImageBackground, 
-    StyleSheet, SafeAreaView, StatusBar, Text, Easing} from 'react-native';
+    StyleSheet, SafeAreaView, StatusBar, Text, Easing, Vibration, Dimensions} from 'react-native';
 import Movable from './MovableHeart';
 
 function EnemyRound({navigation, route}) {
@@ -51,6 +51,7 @@ function EnemyRound({navigation, route}) {
     function borderHit(){
         setHealth((current)=> current - 4);
         healthPass.current = healthPass.current + 4;
+        Vibration.vibrate(500);
     }
 
     function throttle (func, limit){
@@ -237,9 +238,7 @@ function EnemyRound({navigation, route}) {
             setHealth((c)=> c - 2)
             healthPass.current = healthPass.current + 2;
 
-            // changeColorLine.current._2 = setTimeout(() => {
-            //     setLineHit((obj)=>({...obj, _2: false}));
-            // }, 500);
+            Vibration.vibrate(500);
 
             wasHit.current = false;
             setTimeout(() => {
@@ -371,21 +370,23 @@ function EnemyRound({navigation, route}) {
     }
 
     return (
-        <ImageBackground style={styles.background} source={require("../assets/flame34k.jpg")}>
+        <ImageBackground style={styles.background} source={require("../assets/flames.jpg")}>
             <SafeAreaView style={styles.background}>
-                <View style={[styles.opponenContainer, {height: 120 + StatusBar.currentHeight}]}>
-                    {opponent()}
-                </View>
-                <View onLayout={(event) => startOfScreen(event.nativeEvent.layout)} 
-                style={styles.fieldContainer}>
-                    {line1()}
-                    {line2()}
-                    {heart()}
-                    {middleText()}
-                </View>
-                <View style={{marginBottom: 10}}>
-                    <Text style={styles.healhText} adjustsFontSizeToFit={true} 
-                    numberOfLines={1}>HP {health}/{maxHealth}</Text>
+                <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
+                    <View style={[styles.opponenContainer, {height: 120 + StatusBar.currentHeight}]}>
+                        {opponent()}
+                    </View>
+                    <View onLayout={(event) => startOfScreen(event.nativeEvent.layout)} 
+                    style={styles.fieldContainer}>
+                        {line1()}
+                        {line2()}
+                        {heart()}
+                        {middleText()}
+                    </View>
+                    <View style={{marginBottom: 10}}>
+                        <Text style={styles.healhText} adjustsFontSizeToFit={true} 
+                        numberOfLines={1}>HP {health}/{maxHealth}</Text>
+                    </View>
                 </View>
             </SafeAreaView>
         </ImageBackground>
@@ -397,7 +398,6 @@ const styles = StyleSheet.create({
     background: {
         flex: 1,
         width:"100%",
-        backgroundColor: "rgba(255,255,255, 0.1)"//do przerobienia w gimpie
     },
     opponenContainer:{
         justifyContent: 'flex-end',

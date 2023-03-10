@@ -1,5 +1,6 @@
 import {React, useEffect, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, SafeAreaView, Animated, StatusBar} from 'react-native';
+import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, 
+    Image, SafeAreaView, Animated, StatusBar, Vibration, Dimensions} from 'react-native';
 
 function GetHealth(props) {
     
@@ -105,6 +106,8 @@ function GetHealth(props) {
     
     //changes of position 
     function kitHit(){
+
+        Vibration.vibrate(10);
 
         //set new position
         medKitPosition.x.setValue(randomNumber(0, view.current.width - 80))
@@ -262,17 +265,19 @@ function GetHealth(props) {
         <Modal onShow={startOfModal} visible={props.isVisible} statusBarTranslucent animationType="slide">
             <ImageBackground style={styles.background} source={require("../assets/green.jpg")}>
                 <SafeAreaView style={styles.background}>
-                <View style={styles.container}>
-                    <View style={[styles.textContainer, {height: 50 + StatusBar.currentHeight}]}>
-                        <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>HP {health}/{maxHealth.current}</Text>
-                    </View>
-                    <Animated.View style={[styles.textContainer, {opacity: bonusOpacity, transform: [{translateX: bonusPosition}]}]}>
-                        <Text style={styles.bonusText} adjustsFontSizeToFit={true} numberOfLines={1}>BONUS: +{bonus}</Text>
-                    </Animated.View>
-                    <View onLayout={(event) => getDimentions(event.nativeEvent.layout)} style={styles.fieldContainer} collapsable={false}>
-                        {medkit()} 
-                        {point()}
-                        {middleText()}
+                <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
+                    <View style={styles.container}>
+                        <View style={[styles.textContainer, {height: 50 + StatusBar.currentHeight}]}>
+                            <Text style={styles.valueText} adjustsFontSizeToFit={true} numberOfLines={1}>HP {health}/{maxHealth.current}</Text>
+                        </View>
+                        <Animated.View style={[styles.textContainer, {opacity: bonusOpacity, transform: [{translateX: bonusPosition}]}]}>
+                            <Text style={styles.bonusText} adjustsFontSizeToFit={true} numberOfLines={1}>BONUS: +{bonus}</Text>
+                        </Animated.View>
+                        <View onLayout={(event) => getDimentions(event.nativeEvent.layout)} style={styles.fieldContainer} collapsable={false}>
+                            {medkit()} 
+                            {point()}
+                            {middleText()}
+                        </View>
                     </View>
                 </View>
                 </SafeAreaView>

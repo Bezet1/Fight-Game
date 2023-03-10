@@ -1,5 +1,6 @@
 import {React, useEffect, useRef, useState} from 'react';
-import {View, Text, Pressable, StyleSheet, ImageBackground, Dimensions, FlatList} from 'react-native';
+import {View, Text, Pressable, StyleSheet, ImageBackground, 
+  Dimensions, FlatList, Vibration} from 'react-native';
 import * as SQLite from 'expo-sqlite'
 
 function Ranking({navigation}) {
@@ -21,13 +22,12 @@ function Ranking({navigation}) {
        
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM rankingEasy ORDER BY id DESC',
+            'SELECT * FROM rankingEasy ORDER BY score DESC',
             [],
             (_, { rows }) => {
               setRankingEasy(rows._array);
             },
             (txObj, error) => {
-              // error callback
               console.log('Error:', error);
             }
           );
@@ -35,13 +35,12 @@ function Ranking({navigation}) {
     
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM rankingEasy ORDER BY id DESC',
+            'SELECT * FROM rankingHard ORDER BY score DESC',
             [],
             (_, { rows }) => {
               setRankingHard(rows._array);
             },
             (txObj, error) => {
-              // error callback
               console.log('Error:', error);
             }
           );
@@ -101,13 +100,20 @@ function Ranking({navigation}) {
 
     function goBack(){
         navigation.navigate("Homescreen");
+        Vibration.vibrate(5);
     }
 
     function easyChoose(){
-        setDificulty((obj)=> ({...obj, easy: true, hard: false}));
+      if(!difficulty.easy){
+        Vibration.vibrate(3);
+      }
+      setDificulty((obj)=> ({...obj, easy: true, hard: false}));
     }
     
     function hardChoose(){
+      if(!difficulty.hard){
+        Vibration.vibrate(3);
+      }
         setDificulty((obj)=> ({...obj, easy: false, hard: true}));
     }
 

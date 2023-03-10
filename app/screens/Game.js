@@ -1,5 +1,6 @@
 import {React, useState, useEffect, useRef, useCallback} from 'react';
-import { Image, Text, View, StyleSheet, ImageBackground, Pressable, SafeAreaView, Animated, Dimensions} from 'react-native';
+import { Image, Text, View, StyleSheet, ImageBackground, 
+    Pressable, SafeAreaView, Animated, Dimensions, Vibration} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import * as SQLite from 'expo-sqlite';
 import Menu from "./Menu";
@@ -10,21 +11,17 @@ import GetDamage from './GetDamage';
 import GetHealth from './GetHealth';
 import AlertHealth from './AlertHealth';
 
-//dodac redround przy kazdej zmianie myTurn
-//setPlayersImg na poczatek
-//timer
-
 function Game({navigation, route}) {
 
     const db = SQLite.openDatabase('database10.db');
 
-    let timerValue = 1;
+    let timerValue = 3;
     let opponentAmountHealth =4//route?.params?.health;
     let myAmountHealth = 12//route?.params?.health;
     let usesOfGetHealth = 2;
     let windowWidth = Dimensions.get("window").width;
     
-    const [health, setHealth] = useState({mine: myAmountHealth, opp: opponentAmountHealth});
+    const [health, setHealth] = useState({mine: myAmountHealth -2, opp: opponentAmountHealth});
     const [isElem, setIsElem] = useState({alertHealthMax: false, alertHealthLimit: false,
      getDamage: false, getHealth: false, win: false, loose: false, menu: false,
     timer: true})
@@ -145,7 +142,8 @@ function Game({navigation, route}) {
             if(finished){
                 interval.current.timer = setInterval(() => {
                     setTimer((prevtime) => prevtime - 1);
-                }, 800)
+                    Vibration.vibrate(3);
+                }, 700)
             }  
         })
     }
@@ -167,7 +165,7 @@ function Game({navigation, route}) {
     //go menu pressed
     function goMenu(){
         stopAllAnimations();
-        navigation.navigate("Homescreen")
+        navigation.navigate("Homescreen");
     }
     
     //stop animations
@@ -239,6 +237,9 @@ function Game({navigation, route}) {
     
     //when attack, opens getDamage
     function attack(){
+
+        Vibration.vibrate(3);
+
         setButtonsActive(() => false);
         
         setTimeout(() => {
@@ -250,6 +251,8 @@ function Game({navigation, route}) {
     //when heal pressed, opens getHealth
     function heal(){
         
+        Vibration.vibrate(3);
+
         //check if max health
         if(health.mine >= myAmountHealth){
             setIsElem((obj)=> ({...obj, alertHealthMax: true}));
@@ -274,7 +277,6 @@ function Game({navigation, route}) {
     
     //close getDamage, changes health, sets enemy round
     function closeGetDamage(healthPassed){
-        console.log("teraz")
         setIsElem((obj)=> ({...obj, getDamage: false}));
         
         setTimeout(() => {
@@ -318,15 +320,19 @@ function Game({navigation, route}) {
     useEffect(()=> {
         if(!isFinish.current){
             if(health.mine <= 0){
+                setHealth((obj)=>({...obj, mine: 0}));
                 isFinish.current = true;
                 setTimeout(() => {
                     winOrLoose("mine", "loose");
+                    Vibration.vibrate(500);
                 }, 1000);
             }
             if(health.opp <= 0 ){
+                setHealth((obj)=>({...obj, opp: 0}));
                 isFinish.current = true;
                 setTimeout(() => {
                     winOrLoose("opp", "win");
+                    Vibration.vibrate(500);
                 }, 1000);
                 
                 measureTime();
@@ -334,6 +340,7 @@ function Game({navigation, route}) {
                 calculateScore();
 
                 addNewScore();
+
             }
         }
     }, [health.mine, health.opp]);
@@ -346,7 +353,7 @@ function Game({navigation, route}) {
                     'INSERT INTO rankingEasy (name, score, time) VALUES (?, ?, ?)',
                     [passedArg.current.myName, score.current, time.current.total],
                     (txObj, resultSet) => {
-                        console.log('Correct added', resultSet.rowsAffected);
+                        //console.log('Correct added', resultSet.rowsAffected);
                     },
                     (txObj, error) => {
                         console.log('Error:', error);
@@ -360,7 +367,7 @@ function Game({navigation, route}) {
                     'INSERT INTO rankingHard (name, score, time) VALUES (?, ?, ?)',
                     [passedArg.current.myName, score.current, time.current.total],
                     (txObj, resultSet) => {
-                        console.log('Correct added', resultSet.rowsAffected);
+                        //console.log('Correct added', resultSet.rowsAffected);
                     },
                     (txObj, error) => {
                         console.log('Error:', error);
@@ -388,7 +395,6 @@ function Game({navigation, route}) {
 
         let formattedDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         time.current.total = formattedDuration;
-        console.log(formattedDuration); // output: "01:30:15"
     }
     
     function winOrLoose(who, modal){
@@ -407,8 +413,7 @@ function Game({navigation, route}) {
             setTimeout(() => {
                 navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
                     health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
-            }, randomNumber(700,1000));
-                
+            }, 500);
         }
         else{return}
         }
@@ -456,6 +461,8 @@ function Game({navigation, route}) {
 
     //when menu botton pressed
     function MenuPressed() {
+
+        Vibration.vibrate(3);
 
         setIsElem((obj)=> ({...obj, alertHealthMax: false}));
         if(menuIsShown){ 
@@ -513,7 +520,7 @@ function Game({navigation, route}) {
     function showMenu(){
         if(isElem.menu){
             return(
-                <Animated.View style={{position: 'absolute', height: '50%', top: '25%', alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
+                <Animated.View style={{position: 'absolute', top: Dimensions.get('screen').height/2 - 175, alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
                     <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu}/>  
                 </Animated.View>
             )
@@ -532,8 +539,9 @@ function Game({navigation, route}) {
     }
     
     return (  
-        <ImageBackground style={styles.background} source={require("../assets/cosmos.png")}>
-        <SafeAreaView style={styles.background}>
+        <ImageBackground style={styles.container} source={require("../assets/cosmos.png")}>
+        <SafeAreaView style={styles.container}>
+        <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
             <Pressable onPress={MenuPressed}
             style={({pressed}) => [styles.menuContainer, pressed && {opacity: 0.5}]}>
                 <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
@@ -548,7 +556,7 @@ function Game({navigation, route}) {
                 <GetHealth isVisible={isElem.getHealth} close={closeGetHealth} difficulty={passedArg.current.difficulty} 
                 health={health.mine} firstRound={isFirstRound.GetHealth} maxHealth={passedArg.current.maxHealth}/>
                 
-                <View style={styles.secondContainer}>
+                <View style={styles.container}>
                     <View style={styles.aboutHealth} >
                         <Text style={styles.bigHealth}>HEALTH</Text>
                         <View style={styles.healthContainer}>
@@ -623,23 +631,14 @@ function Game({navigation, route}) {
             {showAlertHealthLimit()}
             {showMenu()}
             {showTimer()}
+        </View>
         </SafeAreaView>
         </ImageBackground>    
         );
     }
     const styles = StyleSheet.create({
-        background:{
-        flex: 1,
-    },
     container: {
         flex: 1,  
-    },
-    secondContainer: {
-        flex: 1,        
-    },
-    background: {
-        flex: 1,
-        width:"100%"
     },
     menuContainer: {
         top: 20,
@@ -657,8 +656,7 @@ function Game({navigation, route}) {
     namesContainer: {
         flex: 1,
         alignItems: "center"   
-    },
-    
+    }, 
     names: {
         color: "white",
         fontSize: 25,
@@ -676,7 +674,6 @@ function Game({navigation, route}) {
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-evenly",
-        
     },
     hitButton: {
         width:150,
@@ -772,7 +769,6 @@ function Game({navigation, route}) {
     },
     singleValue: {
         width: 100,
-        
         marginHorizontal: 20,
         alignItems: "center"
     },

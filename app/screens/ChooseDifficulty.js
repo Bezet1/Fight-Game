@@ -20,11 +20,11 @@ function ChooseDifficulty(props) {
                         <Text style={styles.healthText}>AMOUNT OF HEALTH:</Text>
                         <View style={styles.healthContainer}>
                             <Pressable onPress={()=>props.pressed30()} style={[styles.buttonHealth, 
-                                props.is30Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
+                                props.is30Pressed && {backgroundColor: "rgba(110, 110, 160, 0.85)" ,borderColor: 'white'}]}>
                             <Text style={styles.singleHealthText}>30</Text>
                             </Pressable>
                             <Pressable onPress={()=>props.pressed50()} style={[styles.buttonHealth, 
-                                props.is50Pressed && {backgroundColor: "#175728", borderColor: '#22803b'}]}>
+                                props.is50Pressed && {backgroundColor: "rgba(110, 110, 160, 0.85)" ,borderColor: 'white'}]}>
                                 <Text style={styles.singleHealthText}>50</Text>
                             </Pressable>
                         </View>

@@ -21,7 +21,7 @@ function Ranking({navigation}) {
        
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM rankingEasy',
+            'SELECT * FROM rankingEasy ORDER BY id DESC',
             [],
             (_, { rows }) => {
               setRankingEasy(rows._array);
@@ -35,7 +35,7 @@ function Ranking({navigation}) {
     
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM rankingHard',
+            'SELECT * FROM rankingEasy ORDER BY id DESC',
             [],
             (_, { rows }) => {
               setRankingHard(rows._array);

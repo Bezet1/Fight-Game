@@ -27,7 +27,7 @@ function ChooseCharacter(props) {
                         onPress={() => props.firstCharPressed()}
                         >
                             <View style={{flex:3}}>
-                                <Image style={{width:'100%', height:'100%'}} source={require("../assets/char1.gif")}></Image>
+                                <Image style={{width:'100%', height:'100%'}} source={require("../assets/images/char1.gif")}></Image>
                             </View>
                             <View style={{flex:1, backgroundColor: "purple", justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white"}}>SOLDIER</Text>
@@ -37,7 +37,7 @@ function ChooseCharacter(props) {
                         onPress={() => props.secondCharPressed()}
                         >
                             <View style={{flex:3}}>
-                                <Image style={{width:'100%', height:'100%'}} source={require("../assets/char2.gif")}></Image>
+                                <Image style={{width:'100%', height:'100%'}} source={require("../assets/images/char2.gif")}></Image>
                             </View>
                             <View style={{flex:1, backgroundColor: "purple", justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white"}}>GUMBALL</Text>
@@ -47,7 +47,7 @@ function ChooseCharacter(props) {
                         onPress={() => props.thirdCharPressed()}
                         >
                             <View style={{flex:3}}>
-                            <Image style={{width:'100%', height:'100%'}} source={require("../assets/char3.gif")}></Image>
+                            <Image style={{width:'100%', height:'100%'}} source={require("../assets/images/char3.gif")}></Image>
                             </View>
                             <View style={{flex:1, backgroundColor: "purple", justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white"}}>FLAME</Text>

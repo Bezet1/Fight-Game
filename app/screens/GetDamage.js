@@ -229,7 +229,7 @@ const GetDamage = (props) => {
 
     return (
         <Modal onShow={startOfModal} visible={props.isVisible} statusBarTranslucent animationType="slide">
-            <ImageBackground style={styles.background} source={require("../assets/tloRed.jpg")}>
+            <ImageBackground style={styles.background} source={require("../assets/images/tloRed.jpg")}>
             <SafeAreaView style={styles.background}>
             <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
                 <View style={styles.container}>

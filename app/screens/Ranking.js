@@ -154,7 +154,7 @@ function Ranking({navigation}) {
     }
     
     return (
-        <ImageBackground style={styles.background} source={require('../assets/dark2.jpg')}>
+        <ImageBackground style={styles.background} source={require('../assets/images/dark2.jpg')}>
             <View style={{flex: 0.15 }}>
                 <Pressable onPress={goBack} style={({pressed})=>[styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
                     <Text style={styles.backText}>BACK</Text>   

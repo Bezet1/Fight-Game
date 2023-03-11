@@ -201,7 +201,7 @@ function Homescreen({navigation}) {
         navigation.navigate("Game", {difficulty: passValues.current.difficulty, 
           health: passValues.current.health, char: passValues.current.charID, opp: 
           passValues.current.oppID, myname: name.mine, oppname: name.opp,
-          music: music.current});
+          });
       }
       
       //set hp
@@ -397,7 +397,7 @@ function Homescreen({navigation}) {
       return (
         <>
         <StatusBar translucent backgroundColor='transparent' style='light'/>
-        <ImageBackground resizeMode='cover' style={styles.background} source={require("../assets/planet.jpg")}>
+        <ImageBackground resizeMode='cover' style={styles.background} source={require("../assets/images/planet.jpg")}>
             <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
               <View style={{height: '100%', width: Math.min(400, Dimensions.get("screen").width), alignSelf: 'center'}}>
                 {Home_Screen()}

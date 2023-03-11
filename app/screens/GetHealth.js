@@ -231,7 +231,7 @@ function GetHealth(props) {
             return (
                 <Animated.View style={{transform: [{translateX: medKitPosition.x}, {translateY: medKitPosition.y}], opacity: kitOpacity}}>
                 <Pressable onPress={(evt)=> kitPressed(evt)} style={styles.medKitContainer}>
-                    <Image source={require("../assets/aidkit.png")} style={styles.medkit}/>
+                    <Image source={require("../assets/images/aidkit.png")} style={styles.medkit}/>
                 </Pressable>
             </Animated.View>
             )
@@ -263,7 +263,7 @@ function GetHealth(props) {
     
     return (
         <Modal onShow={startOfModal} visible={props.isVisible} statusBarTranslucent animationType="slide">
-            <ImageBackground style={styles.background} source={require("../assets/green.jpg")}>
+            <ImageBackground style={styles.background} source={require("../assets/images/green.jpg")}>
                 <SafeAreaView style={styles.background}>
                 <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
                     <View style={styles.container}>

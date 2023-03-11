@@ -2,7 +2,6 @@ import {React, useState, useRef, useEffect} from 'react';
 import { View, Image, Animated, ImageBackground, 
     StyleSheet, SafeAreaView, StatusBar, Text, Easing, Vibration, Dimensions} from 'react-native';
 import Movable from './MovableHeart';
-import { Audio } from 'expo-av';
 
 function EnemyRound({navigation, route}) {
 
@@ -38,25 +37,7 @@ function EnemyRound({navigation, route}) {
     const oppPosition = useRef(new Animated.ValueXY({x: -100, y: -5})).current;
     const oppOpacity = useRef(new Animated.Value(0)).current;
     
-    async function playHitSound() {
-        const { sound } = await Audio.Sound.createAsync( assets[0]
-        );
-        setSoundHit(sound);
-        console.log('grane')
-        await sound.playAsync();
-      }
-
-      //unload
-      useEffect(() => {
-        return soundHit
-          ? () => {
-              console.log('Unloading Sound');
-              soundHit.unloadAsync();
-            }
-          : undefined;
-      }, [soundHit]);
-    
-      function randomNumber(min, max) { 
+    function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     }
     
@@ -271,15 +252,13 @@ function EnemyRound({navigation, route}) {
             linePos.current[_lineNr].x - 30 < heartPos.current.x && 
             (linePos.current[_lineNr].y + 17 < heartPos.current.y || 
                 linePos.current[_lineNr].y - 17 > heartPos.current.y)){
-            
-                playHitSound();
-        
+                    
                 setLineHit((obj)=>({...obj, _lineNR: true}));
 
                 setHealth((c)=> c - 2)
                 healthPass.current = healthPass.current + 2;
 
-                //Vibration.vibrate(500);
+                Vibration.vibrate(500);
 
                 wasHit.current = false;
                 setTimeout(() => {
@@ -381,7 +360,7 @@ function EnemyRound({navigation, route}) {
             <Animated.View style={[styles.lineVertical, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
             transform: [{translateX: line1Ani.x}, {translateY: line1Ani.y}]}]}>
                 <Image resizeMode='contain' style={styles.image100} 
-                source={require('../assets/lineHorizontal.png')}></Image>
+                source={require('../assets/images/lineHorizontal.png')}></Image>
             </Animated.View>
         )
     }
@@ -392,7 +371,7 @@ function EnemyRound({navigation, route}) {
             {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
             transform: [{translateX: line2Ani.x}, {translateY: line2Ani.y}]}]}>
                 <Image resizeMode='contain' style={styles.image100} 
-                source={require('../assets/lineHorizontal.png')}></Image>
+                source={require('../assets/images/lineHorizontal.png')}></Image>
             </Animated.View>
         )
     }
@@ -411,7 +390,7 @@ function EnemyRound({navigation, route}) {
     }
 
     return (
-        <ImageBackground style={styles.background} source={require("../assets/flames.jpg")}>
+        <ImageBackground style={styles.background} source={require("../assets/images/flames.jpg")}>
             <SafeAreaView style={styles.background}>
                 <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
                     <View style={[styles.opponenContainer, {height: 120 + StatusBar.currentHeight}]}>

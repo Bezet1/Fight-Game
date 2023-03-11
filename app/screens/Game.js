@@ -180,23 +180,23 @@ function Game({navigation, route}) {
     //setting images
     function setPlayersIMG(){
         if(passedArg.current.charID == "1"){
-            imgPath.current.char = require("../assets/char1.gif");
+            imgPath.current.char = require("../assets/images/char1.gif");
         }
         else if(passedArg.current.charID == "2"){
-            imgPath.current.char = require("../assets/char2.gif");
+            imgPath.current.char = require("../assets/images/char2.gif");
         }
         else if(passedArg.current.charID == "3"){
-            imgPath.current.char = require("../assets/char3.gif");
+            imgPath.current.char = require("../assets/images/char3.gif");
         }
     
         if(passedArg.current.oppID == "1"){
-            imgPath.current.opp= require("../assets/opp1.png");
+            imgPath.current.opp= require("../assets/images/opp1.png");
         }
         else if(passedArg.current.oppID == "2"){
-            imgPath.current.opp = require("../assets/opp2.png");
+            imgPath.current.opp = require("../assets/images/opp2.png");
         }
         else if(passedArg.current.oppID == "3"){
-            imgPath.current.opp = require("../assets/opp3.png");
+            imgPath.current.opp = require("../assets/images/opp3.png");
         }
     }
 
@@ -630,25 +630,25 @@ function Game({navigation, route}) {
     function showSound(){
         if(isMusic){
             return(
-                <Image source={require('../assets/musicon.png')} style={styles.image}/>
+                <Image source={require('../assets/images/musicon.png')} style={styles.image}/>
             )
         }
         else{
             return(
-                <Image source={require('../assets/musicoff.png')} style={styles.image}/>
+                <Image source={require('../assets/images/musicoff.png')} style={styles.image}/>
             )
         }
     }
     
     return (  
-        <ImageBackground style={styles.container} source={require("../assets/cosmos.png")}>
+        <ImageBackground style={styles.container} source={require("../assets/images/cosmos.png")}>
         <SafeAreaView style={styles.container}>
         <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
         <View style={{height: StatusBar.currentHeight + 10}}/>
             <View style={[styles.menuSoundContainer]}>
                 <Pressable onPress={MenuPressed}
                 style={({pressed}) => [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
-                    <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
+                    <Image resizeMode='contain' style={styles.image} source={require("../assets/images/menu.png")}/>
                 </Pressable>
                 <Pressable onPress={turnMusic} style={({pressed})=> [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
                     {showSound()}

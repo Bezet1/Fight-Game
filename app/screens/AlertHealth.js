@@ -5,7 +5,7 @@ function AlertHealth(props) {
     return (    
         <View style={styles.menuContainer}>
             <View style={styles.exclamationMark}>
-                <Image source={require("../assets/wykrzyknik.gif")} style={{opacity: 0.5}}></Image>
+                <Image source={require("../assets/images/wykrzyknik.gif")} style={{opacity: 0.5}}></Image>
             </View>
             <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text1}</Text>
             <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text2}</Text>

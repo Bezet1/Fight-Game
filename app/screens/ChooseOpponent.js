@@ -26,7 +26,7 @@ function ChooseOpponent(props) {
                         onPress={() => props.firstOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
                                 <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{translateY: props.damianUP}]}} source={require("../assets/opp1.png")}></Animated.Image>
+                                transform: [{translateY: props.damianUP}]}} source={require("../assets/images/opp1.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PROXIMITY</Text>
@@ -37,7 +37,7 @@ function ChooseOpponent(props) {
                         onPress={() => props.secondOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
                                 <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{rotate: props.spinPrzemo}]}} source={require("../assets/opp2.png")}></Animated.Image>
+                                transform: [{rotate: props.spinPrzemo}]}} source={require("../assets/images/opp2.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PRZEMO</Text>
@@ -48,7 +48,7 @@ function ChooseOpponent(props) {
                         onPress={() => props.thirdOppPressed()}>
                             <View style={{flex:1, overflow: 'hidden'}}>
                                 <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{translateX: props.rudyUP}]}} source={require("../assets/opp3.png")}></Animated.Image>
+                                transform: [{translateX: props.rudyUP}]}} source={require("../assets/images/opp3.png")}></Animated.Image>
                             </View>
                             <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
                                 <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>DJRUDY</Text>

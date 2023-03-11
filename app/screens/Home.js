@@ -46,12 +46,12 @@ function Home(props) {
     function showSound(){
         if(isMusic){
             return(
-                <Image source={require('../assets/musicon.png')} style={styles.soundIMG}/>
+                <Image source={require('../assets/images/musicon.png')} style={styles.soundIMG}/>
             )
         }
         else{
             return(
-                <Image source={require('../assets/musicoff.png')} style={styles.soundIMG}/>
+                <Image source={require('../assets/images/musicoff.png')} style={styles.soundIMG}/>
             )
         }
     }

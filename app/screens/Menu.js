@@ -2,18 +2,34 @@ import {React} from 'react';
 import { Text, View, StyleSheet, Pressable } from 'react-native';
 
 function Menu(props) {
+
+    function menuPressed(){
+        props.goMenu();
+        props.playClick();
+    }
+
+    function restart(){
+        props.restartPressed();
+        props.playClick();
+    }
+
+    function close(){
+        props.close();
+        props.playClick();
+    }
+
     return (      
         <View style={styles.menuContainer}>
             <Pressable style={({pressed}) => [styles.buttons, pressed && {transform: [{ scale: 0.9 }], 
-            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={props.goMenu}>
+            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={menuPressed}>
                 <Text style={styles.text}>MENU</Text>
             </Pressable>
             <Pressable style={({pressed}) => [styles.buttons, pressed && {transform: [{ scale: 0.9 }], 
-            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={props.restartPressed}>
+            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={restart}>
                 <Text style={styles.text}>RESTART</Text>
             </Pressable>
             <Pressable style={({pressed}) => [styles.buttons, pressed && {transform: [{ scale: 0.9 }], 
-            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={props.close}>
+            backgroundColor: "rgba(37, 37, 64, 0.9)",}]} onPress={close}>
                 <Text style={styles.text}>RETURN</Text>
             </Pressable>
         </View>  

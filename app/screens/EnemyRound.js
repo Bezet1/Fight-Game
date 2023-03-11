@@ -2,6 +2,7 @@ import {React, useState, useRef, useEffect} from 'react';
 import { View, Image, Animated, ImageBackground, 
     StyleSheet, SafeAreaView, StatusBar, Text, Easing, Vibration, Dimensions} from 'react-native';
 import Movable from './MovableHeart';
+import { Audio } from 'expo-av';
 
 function EnemyRound({navigation, route}) {
 
@@ -15,6 +16,7 @@ function EnemyRound({navigation, route}) {
         _1: false,
         _2: false
     });
+    const [soundHit, setSoundHit] = useState();
     
     const healthPass = useRef(0);
     const firstRound = useRef(route?.params?.isFirstRound);
@@ -36,7 +38,25 @@ function EnemyRound({navigation, route}) {
     const oppPosition = useRef(new Animated.ValueXY({x: -100, y: -5})).current;
     const oppOpacity = useRef(new Animated.Value(0)).current;
     
-    function randomNumber(min, max) { 
+    async function playHitSound() {
+        const { sound } = await Audio.Sound.createAsync( assets[0]
+        );
+        setSoundHit(sound);
+        console.log('grane')
+        await sound.playAsync();
+      }
+
+      //unload
+      useEffect(() => {
+        return soundHit
+          ? () => {
+              console.log('Unloading Sound');
+              soundHit.unloadAsync();
+            }
+          : undefined;
+      }, [soundHit]);
+    
+      function randomNumber(min, max) { 
         return Math.random() * (max - min) + min;
     }
     
@@ -69,11 +89,23 @@ function EnemyRound({navigation, route}) {
     
     //navigate when end of screen
     function endOfScreen(){
+        stopAllAnimations();
         navigation.navigate({
             name: 'Game',
             params: { EN_health: healthPass.current },
             merge: true,
           });
+    }
+
+    function stopAllAnimations(){
+        line1Ani.stopAnimation();
+        line2Ani.stopAnimation();
+        oppPosition.stopAnimation();
+        line1Ani.x.removeAllListeners();
+        line1Ani.y.removeAllListeners();
+        line2Ani.x.removeAllListeners();
+        line2Ani.y.removeAllListeners();   
+        resetPositions();
     }
 
     //end of round
@@ -88,7 +120,7 @@ function EnemyRound({navigation, route}) {
         if(health <= 0){
             setHealth(()=>0);
             line1Ani.removeAllListeners();
-            line2Ani.removeAllListeners(); //tutaj
+            line2Ani.removeAllListeners();
 
             setTimeout(() => {
                 endOfScreen();
@@ -156,10 +188,17 @@ function EnemyRound({navigation, route}) {
 
     //initial position
     function setInitialValues(layout){
-        heartPos.current.x = layout.width/2;
         heartPos.current.y = layout.height/2;
+        heartPos.current.x = layout.width/2;
         line1Ani.setValue({x: -layout.width/2, y: 0})      
         line2Ani.setValue({x: -layout.width/2, y: 0})      
+    }
+
+    function resetPositions(){
+        heartPos.current.y = view.current.height/2;
+        heartPos.current.x = view.current.width/2;
+        line1Ani.setValue({x: -view.current.height/2, y: 0});
+        line2Ani.setValue({x: -view.current.width/2, y: 0});   
     }
 
     //on layout when start of the screen
@@ -232,19 +271,21 @@ function EnemyRound({navigation, route}) {
             linePos.current[_lineNr].x - 30 < heartPos.current.x && 
             (linePos.current[_lineNr].y + 17 < heartPos.current.y || 
                 linePos.current[_lineNr].y - 17 > heartPos.current.y)){
-    
-            setLineHit((obj)=>({...obj, _lineNR: true}));
+            
+                playHitSound();
+        
+                setLineHit((obj)=>({...obj, _lineNR: true}));
 
-            setHealth((c)=> c - 2)
-            healthPass.current = healthPass.current + 2;
+                setHealth((c)=> c - 2)
+                healthPass.current = healthPass.current + 2;
 
-            Vibration.vibrate(500);
+                //Vibration.vibrate(500);
 
-            wasHit.current = false;
-            setTimeout(() => {
-                wasHit.current = true;
-            }, 500);
-        }
+                wasHit.current = false;
+                setTimeout(() => {
+                    wasHit.current = true;
+                }, 500);
+            }
     }
 
     //horizontal move of line

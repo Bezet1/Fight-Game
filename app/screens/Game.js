@@ -1,6 +1,7 @@
 import {React, useState, useEffect, useRef, useCallback} from 'react';
 import { Image, Text, View, StyleSheet, ImageBackground, 
-    Pressable, SafeAreaView, Animated, Dimensions, Vibration} from 'react-native';
+    Pressable, SafeAreaView, Animated, Dimensions, Vibration, StatusBar} from 'react-native';
+import { Audio } from 'expo-av';
 import { useFocusEffect } from '@react-navigation/native';
 import * as SQLite from 'expo-sqlite';
 import Menu from "./Menu";
@@ -36,6 +37,8 @@ function Game({navigation, route}) {
         GetHealth: true,
         GetDamage: true,
     });
+    const [sound, setSound] = useState({win: null, loose: null, click: null});
+    const [isMusic, setIsMusic] = useState(true);
         
     const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
@@ -49,6 +52,7 @@ function Game({navigation, route}) {
     const isFinish = useRef(false);
     const timeout = useRef({getDamage: null, getHealth: null});
     const score = useRef(0);
+    const music = useRef(route?.params?.music);
 
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -56,6 +60,76 @@ function Game({navigation, route}) {
     const healthRound = useRef(new Animated.Value(5)).current;
     const TimmerOpacity = useRef(new Animated.Value(0)).current;
     const opponentUPDOWN = useRef(new Animated.Value(0)).current;
+
+    //SOUNDS
+    async function playMusic() {
+        try {
+            const result = await music.current.getStatusAsync();
+            if (result.isLoaded) {
+            if (result.isPlaying === false) {
+                music.current.playAsync();
+            }
+            }
+        } catch (error) {}
+    };
+
+    async function pauseMusic() {
+        try {
+            const result = await music.current.getStatusAsync();
+            if (result.isLoaded) {
+            if (result.isPlaying === true) {
+                music.current.pauseAsync();
+            }
+            }
+        } catch (error) {}
+    };
+
+    function turnMusic(){
+        
+    }
+
+    async function playWin() {
+        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/win.mp3'));
+        setSound((obj)=> ({...obj, win: sound}));
+        await sound.playAsync();
+      }
+  
+      useEffect(() => {
+        return sound.win
+          ? () => {
+              sound.win.unloadAsync();
+            }
+          : undefined;
+      }, [sound.win]);
+
+      async function playLoose() {
+        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/loose.mp3'));
+        setSound((obj)=> ({...obj, loose: sound}));
+        await sound.playAsync();
+      }
+  
+      useEffect(() => {
+        return sound.loose
+          ? () => {
+              sound.loose.unloadAsync();
+            }
+          : undefined;
+      }, [sound.loose]);
+
+      async function playClick() {
+        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/click.mp3')
+        );
+        setSound((obj)=> ({...obj, click: sound}));
+        await sound.playAsync();
+      }
+  
+      useEffect(() => {
+        return sound.click
+          ? () => {
+              sound.click.unloadAsync();
+            }
+          : undefined;
+      }, [sound.click]);
     
     //AIMATIONS
     function startAnimations(){
@@ -237,20 +311,20 @@ function Game({navigation, route}) {
     
     //when attack, opens getDamage
     function attack(){
-
+        playClick();
         Vibration.vibrate(3);
 
         setButtonsActive(() => false);
         
         setTimeout(() => {
-            setIsElem((obj)=> ({...obj, getDamage: true}));   
+            setIsElem((obj)=> ({...obj, getDamage: true}));
         }, 100);
         
     }
     
     //when heal pressed, opens getHealth
     function heal(){
-        
+        playClick();
         Vibration.vibrate(3);
 
         //check if max health
@@ -325,6 +399,7 @@ function Game({navigation, route}) {
                 setTimeout(() => {
                     winOrLoose("mine", "loose");
                     Vibration.vibrate(500);
+                    playLoose();
                 }, 1000);
             }
             if(health.opp <= 0 ){
@@ -333,6 +408,7 @@ function Game({navigation, route}) {
                 setTimeout(() => {
                     winOrLoose("opp", "win");
                     Vibration.vibrate(500);
+                    playWin();
                 }, 1000);
                 
                 measureTime();
@@ -411,6 +487,7 @@ function Game({navigation, route}) {
         if(!isFinish.current){
             setMyTurn(() => false);
             setTimeout(() => {
+                if(isFinish.current){return};
                 navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
                     health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
             }, 500);
@@ -487,6 +564,18 @@ function Game({navigation, route}) {
         setButtonsActive(() => true);
     }
 
+    function turnMusic(){
+        if(isMusic){
+            pauseMusic();
+        }
+        else{
+            playMusic();
+        }
+
+        setIsMusic((current)=> !current);
+        Vibration.vibrate(3);
+    }
+
     function showAlertHealthMax(){
         if(isElem.alertHealthMax){
             return(
@@ -521,7 +610,7 @@ function Game({navigation, route}) {
         if(isElem.menu){
             return(
                 <Animated.View style={{position: 'absolute', top: Dimensions.get('screen').height/2 - 175, alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
-                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu}/>  
+                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu} playClick={playClick}/>  
                 </Animated.View>
             )
         }
@@ -537,15 +626,34 @@ function Game({navigation, route}) {
             )
         }
     }
+
+    function showSound(){
+        if(isMusic){
+            return(
+                <Image source={require('../assets/musicon.png')} style={styles.image}/>
+            )
+        }
+        else{
+            return(
+                <Image source={require('../assets/musicoff.png')} style={styles.image}/>
+            )
+        }
+    }
     
     return (  
         <ImageBackground style={styles.container} source={require("../assets/cosmos.png")}>
         <SafeAreaView style={styles.container}>
         <View style={{height: '100%', width: Math.min(400, Dimensions.get('window').width), alignSelf: 'center'}}>
-            <Pressable onPress={MenuPressed}
-            style={({pressed}) => [styles.menuContainer, pressed && {opacity: 0.5}]}>
-                <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
-            </Pressable>
+        <View style={{height: StatusBar.currentHeight + 10}}/>
+            <View style={[styles.menuSoundContainer]}>
+                <Pressable onPress={MenuPressed}
+                style={({pressed}) => [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
+                    <Image resizeMode='contain' style={styles.image} source={require("../assets/menu.png")}/>
+                </Pressable>
+                <Pressable onPress={turnMusic} style={({pressed})=> [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
+                    {showSound()}
+                </Pressable>
+            </View>
             <View style={styles.container}>                         
                 <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}
                 score={score.current} time={time.current.total} />                
@@ -641,17 +749,24 @@ function Game({navigation, route}) {
         flex: 1,  
     },
     menuContainer: {
-        top: 20,
         width: 50,
         height: 50,
-        marginTop: 20,
-        marginLeft: 20,
         justifyContent: "center",
         alignItems: "center",
         overflow: "hidden",
     },
+    menuSoundContainer:{
+        height: 40, 
+        width: '100%', 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        alignSelf: 'center',
+        paddingHorizontal: 20,
+    },
     image: {
         width: 40,
+        height: 40
     },
     namesContainer: {
         flex: 1,
@@ -752,7 +867,7 @@ function Game({navigation, route}) {
         justifyContent: 'center',
         borderRadius: 40,
         marginHorizontal: 15,
-        top: 25,   
+        marginTop: 10,
     },
     bigHealth: {
         fontFamily: "Buttons",
@@ -788,16 +903,6 @@ function Game({navigation, route}) {
         fontSize: 25,
         bottom: 30,
     },
-    menu:{
-        position: 'absolute', 
-        top: 0, 
-        left: 0, 
-        right: 0, 
-        bottom: 0, 
-        justifyContent: 'center', 
-        alignItems: 'center',
-    }
-    
 })
 
 export default Game;

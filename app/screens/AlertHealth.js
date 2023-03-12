@@ -4,9 +4,6 @@ import { Text, View, Image, StyleSheet, Pressable } from 'react-native';
 function AlertHealth(props) {
     return (    
         <View style={styles.menuContainer}>
-            <View style={styles.exclamationMark}>
-                <Image source={require("../assets/images/wykrzyknik.gif")} style={{opacity: 0.5}}></Image>
-            </View>
             <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text1}</Text>
             <Text style={styles.text2} adjustsFontSizeToFit={true} numberOfLines={1}>{props.text2}</Text>
             <Pressable style={({pressed}) => [styles.buttons, pressed && {transform: [{ scale: 0.9 }], 
@@ -21,9 +18,10 @@ const styles = StyleSheet.create({
         width: 300, 
         height: 400,
         backgroundColor: "white",
-        borderRadius: 5,
+        borderRadius: 10,
         alignItems: "center",
         justifyContent: "space-evenly",
+        padding: 20,
     },
     exclamationMark: {
         position: 'absolute', 
@@ -36,7 +34,7 @@ const styles = StyleSheet.create({
         transform: [{scale: 0.24}]
     },
     buttons: {
-        backgroundColor: "rgba(50, 50, 50, 0.5)",
+        backgroundColor: "rgba(50, 50, 50, 0.7)",
         width: "70%",
         height: 70,
         borderRadius: 10,
@@ -51,7 +49,7 @@ const styles = StyleSheet.create({
         color: "white"
     },
     text2: {
-        fontSize: 25,
+        fontSize: 40,
         fontFamily: "Buttons",
         textAlign: "center",
         color: "rgb(40,40,40)",

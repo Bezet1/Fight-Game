@@ -20,6 +20,7 @@ const GetDamage = (props) => {
     const restSpeedThreshold_value = useRef(null);
     const restDisplacementThreshold_value = useRef(null);
     const oppVal = useRef({name: props.oppName, path: props.imgpath});
+    const isFinish = useRef(false);
     
     const textProgress = useRef(new Animated.Value(0)).current;
     const pointPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
@@ -62,6 +63,7 @@ const GetDamage = (props) => {
         oppVal.current.path = props.imgpath;
         opponentPosition.setValue({x: view.current.width/2, y: view.current.height * 1.5});
         spinValue.setValue(0);
+        isFinish.current = false;
     }
 
     //check if first round
@@ -94,7 +96,10 @@ const GetDamage = (props) => {
         
         //set end of round
         setTimeout(() => {
-            endOfModal();
+            if(!isFinish.current){
+                endOfModal();
+                isFinish.current = true;
+            }
         }, firstRound.current ? GetDamageDuration + 2000: GetDamageDuration);
         
     }
@@ -151,7 +156,10 @@ const GetDamage = (props) => {
         //when opponent hp = 0, end of modal
         if(healthPass.current <= 0){
             setTimeout(() => {
-                endOfModal();
+                if(!isFinish.current){
+                    endOfModal();
+                    isFinish.current = true;
+                }
             }, 300);
         }
 

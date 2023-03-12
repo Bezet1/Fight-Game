@@ -180,11 +180,6 @@ function Game({navigation, route}) {
         }
     }
 
-    //find random number
-    function randomNumber(min, max) { 
-        return Math.random() * (max - min) + min;
-    } 
-
     //count down timer    
     function startTimer(){
 
@@ -342,11 +337,12 @@ function Game({navigation, route}) {
             setHealth((obj)=> ({...obj, opp: healthPassed}));
               
             timeout.current.getDamage = setTimeout(() => {
-                setHealthChange((obj)=> ({...obj, opp_minus: ['']}));   
-                startEnemyRound();
-                
-            }, 1000);
-        }, randomNumber(100,700));   
+                setHealthChange((obj)=> ({...obj, opp_minus: ['']}));
+                if(!isFinish.current){
+                    startEnemyRound();
+                }
+            }, 600);
+        }, 900);   
     }
     
     //close getHealht, changes health, sets enemy round
@@ -364,10 +360,11 @@ function Game({navigation, route}) {
             
             timeout.current.getHealth = setTimeout(() => {
                 setHealthChange((obj)=> ({...obj, my_plus: ['']}));
-                startEnemyRound();
-                
-            }, 1000);
-        }, randomNumber(100,700));   
+                if(!isFinish.current){
+                    startEnemyRound();
+                }
+            }, 600);
+        }, 900);   
     }
     
     //track health and check if win or loose
@@ -464,16 +461,13 @@ function Game({navigation, route}) {
 
     
     function startEnemyRound(){
-        if(!isFinish.current){
-            setMyTurn(() => false);
-            setTimeout(() => {
-                if(isFinish.current){return};
-                navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
-                    health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth})
-            }, 500);
-        }
-        else{return}
-        }
+        
+        setMyTurn(() => false);
+     
+        navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
+            health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth});
+    } 
+        
 
         
     //when screen is back after enemys round
@@ -485,7 +479,6 @@ function Game({navigation, route}) {
     
     useFocusEffect(
         useCallback(() => {
-
             //start of screen
             if(!wasFirstFocus.current){
                 wasFirstFocus.current = true;
@@ -497,7 +490,6 @@ function Game({navigation, route}) {
                 if(isFirstRound.EnemyRound){
                     setIsFirstRound((obj)=>({...obj, EnemyRound: false}));
                 }
-    
                 setTimeout(() => {
                     setHealthChange((obj)=> ({...obj, my_minus: ['-',ER_healthPassed.current]}));
                     myHealthRef.current = myHealthRef.current - ER_healthPassed.current;

@@ -30,7 +30,8 @@ function EnemyRound({navigation, route}) {
     const verticalDuration  = useRef({_1: 0, _2: 0});
     const viewForLine = useRef({_1: 0, _2: 0});
     const wasHit = useRef(true);
-    
+    const isFinish = useRef(false);
+
     const textProgress = useRef(new Animated.Value(0)).current;
     const line1Ani = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
     const line2Ani = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
@@ -92,7 +93,10 @@ function EnemyRound({navigation, route}) {
     //end of round
     useEffect(()=> {
         setTimeout(() => {
-            endOfScreen();
+            if(!isFinish.current){
+                endOfScreen();
+                isFinish.current = true;
+            }
         }, firstRound.current ? 18500: 15000);
     }, [])
 
@@ -104,7 +108,10 @@ function EnemyRound({navigation, route}) {
             line2Ani.removeAllListeners();
 
             setTimeout(() => {
-                endOfScreen();
+                if(!isFinish.current){
+                    endOfScreen();
+                    isFinish.current = true;
+                }
             }, 300);
         }
     }, [health])
@@ -171,8 +178,9 @@ function EnemyRound({navigation, route}) {
     function setInitialValues(layout){
         heartPos.current.y = layout.height/2;
         heartPos.current.x = layout.width/2;
-        line1Ani.setValue({x: -layout.width/2, y: 0})      
-        line2Ani.setValue({x: -layout.width/2, y: 0})      
+        line1Ani.setValue({x: -layout.width/2, y: 0});     
+        line2Ani.setValue({x: -layout.width/2, y: 0});
+        isFinish.current = false; 
     }
 
     function resetPositions(){

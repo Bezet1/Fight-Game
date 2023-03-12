@@ -84,10 +84,6 @@ function Game({navigation, route}) {
         } catch (error) {}
     };
 
-    function turnMusic(){
-        
-    }
-
     async function playWin() {
         const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/win.mp3'));
         setSound((obj)=> ({...obj, win: sound}));

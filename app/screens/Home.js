@@ -32,13 +32,7 @@ function Home(props) {
     }
 
     function turnMusic(){
-        if(isMusic){
-            props.pauseMusic();
-        }
-        else{
-            props.playMusic();
-        }
-
+        isMusic ? props.pauseMusic() : props.playMusic();
         setIsMusic((current)=> !current);
         Vibration.vibrate(3);
     }

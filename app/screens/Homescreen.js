@@ -1,4 +1,4 @@
-import {React, useEffect, useState, useRef, useCallback} from 'react';
+import {React, useEffect, useState, useRef, useCallback, useContext} from 'react';
 import { ImageBackground, StyleSheet, Animated, BackHandler, 
   SafeAreaView, Vibration, View, Dimensions} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -10,6 +10,8 @@ import Home from './Home';
 import ChooseCharacter from './ChooseCharacter';
 import ChooseOpponent from './ChooseOpponent';
 import ChooseDifficulty from './ChooseDifficulty';
+import { MusicContext } from '../assets/modules/MusicContext';
+import {toggleMusic} from '../assets/modules/SoundFunctions'
 
 function Homescreen({navigation}) {
 
@@ -29,8 +31,8 @@ function Homescreen({navigation}) {
     const rudyUP = useRef(new Animated.Value(-5)).current;
     const spinValue =  useRef(new Animated.Value(-1)).current
     
-    const [sound, setSound] = useState({click: null, background: null, music: null});
-    const music = useRef(new Audio.Sound());
+    const [sound, setSound] = useState({click: null});
+    const {musicObj, setMusicObj} = useContext(MusicContext);
 
     const spinPrzemo = spinValue.interpolate({
         inputRange: [-1, 0, 1],
@@ -68,49 +70,11 @@ function Homescreen({navigation}) {
     
     }, [])
 
-    useEffect(()=> {
-      LoadMusic();
-    }, []);
-
-    const playMusic = async () => {
-      try {
-        const result = await music.current.getStatusAsync();
-        if (result.isLoaded) {
-          if (result.isPlaying === false) {
-            music.current.playAsync();
-          }
-        }
-      } catch (error) {}
-    };
-  
-    const pauseMusic = async () => {
-      try {
-        const result = await music.current.getStatusAsync();
-        if (result.isLoaded) {
-          if (result.isPlaying === true) {
-            music.current.pauseAsync();
-          }
-        }
-      } catch (error) {}
-    };
-    
-    const LoadMusic = async () => {
-      const checkLoading = await music.current.getStatusAsync();
-      if (checkLoading.isLoaded === false) {
-        try {
-          const result = await music.current.loadAsync(require('../assets/sounds/menuLoop.mp3'), {}, true);
-          if (result.isLoaded === false) {
-            console.log('Error in Loading Audio');
-          }
-          else{
-            playMusic();
-            music.current.setIsLoopingAsync(true);
-          }
-        } catch (error) {
-            console.log(error);
-          }
-        } 
-      };
+    function toggleMusicHandler(){
+        toggleMusic(musicObj.ref, musicObj.isMusic);
+        setMusicObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
+        Vibration.vibrate(3);
+    }
 
       async function playClick() {
         const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/click.mp3')
@@ -196,11 +160,9 @@ function Homescreen({navigation}) {
         }
         stopAnimation();
 
-        console.log(music.current)
-
         navigation.navigate("Game", {difficulty: passValues.current.difficulty, 
           health: passValues.current.health, char: passValues.current.charID, opp: 
-          passValues.current.oppID, myname: name.mine, oppname: name.opp,
+          passValues.current.oppID, myname: name.mine, oppname: name.opp
           });
       }
       
@@ -354,7 +316,7 @@ function Homescreen({navigation}) {
                 <Home aniOpacity={aniOpacity} setIsHomeScreen={(val)=> setIsScreen((obj)=> ({...obj, homeScreen: false}))} 
                 setIsChooseCharacter={(val)=> setIsScreen((obj)=> ({...obj, chooseCharacter: true}))}
                 navigation={navigation} exit={()=> setTimeout(() => BackHandler.exitApp(), 100)}
-                playClick={playClick} playMusic={playMusic} pauseMusic={pauseMusic}/>
+                playClick={playClick} pressedMusic={toggleMusicHandler} isMusic={musicObj.isMusic}/>
             )
         }
       }

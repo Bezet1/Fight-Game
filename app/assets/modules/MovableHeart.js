@@ -158,7 +158,7 @@ export class Movable extends Component {
         styles.heartContainer
       ]}
     >
-      <Image style={styles.IMG} source={require('../assets/images/heart.png')}/>
+      <Image style={styles.IMG} source={require('../images/heart.png')}/>
       </Animated.View>
   )
 }

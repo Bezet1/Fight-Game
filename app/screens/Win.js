@@ -13,7 +13,6 @@ function Win(props) {
     //when star of modal
     function startOfModal(){
         
-        
         //set values and start animation
         passedArg.current.score = props.score;
         passedArg.current.imgPath = props.imgpath;

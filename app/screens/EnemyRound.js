@@ -1,7 +1,7 @@
 import {React, useState, useRef, useEffect} from 'react';
 import { View, Image, Animated, ImageBackground, 
     StyleSheet, SafeAreaView, StatusBar, Text, Easing, Vibration, Dimensions} from 'react-native';
-import Movable from './MovableHeart';
+import Movable from '../assets/modules/MovableHeart';
 
 function EnemyRound({navigation, route}) {
 

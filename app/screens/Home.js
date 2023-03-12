@@ -1,21 +1,12 @@
-import {React, useRef, useState} from 'react';
+import {React, useRef, useState, useContext} from 'react';
 import {View, Text, Pressable, StyleSheet, Animated, StatusBar, Image, Vibration} from 'react-native';
 
 function Home(props) {
-
-    const statusBarHeight = useRef(StatusBar.currentHeight)
-    const [isMusic, setIsMusic] = useState(true);
 
     //start button clicked
     function start(){
         props.setIsHomeScreen(false);
         props.setIsChooseCharacter(true);
-        props.playClick();
-    }
-
-    //how to play button clicked
-    function howToPlay(){
-        props.navigation.navigate("howtoplay");
         props.playClick();
     }
 
@@ -31,14 +22,8 @@ function Home(props) {
         props.playClick();
     }
 
-    function turnMusic(){
-        isMusic ? props.pauseMusic() : props.playMusic();
-        setIsMusic((current)=> !current);
-        Vibration.vibrate(3);
-    }
-
     function showSound(){
-        if(isMusic){
+        if(props.isMusic){
             return(
                 <Image source={require('../assets/images/musicon.png')} style={styles.soundIMG}/>
             )
@@ -53,7 +38,7 @@ function Home(props) {
     return (
         <Animated.View style={[styles.container, {opacity: props.aniOpacity}]}>
             <Pressable style={styles.soundContainer}>
-                <Pressable onPress={turnMusic} style={({pressed}) => [{right: 25}, pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
+                <Pressable onPress={()=> props.pressedMusic()} style={({pressed}) => [{right: 25}, pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
                     {showSound()}
                 </Pressable>
             </Pressable>

@@ -1,4 +1,4 @@
-import {React, useState, useEffect, useRef, useCallback} from 'react';
+import {React, useState, useEffect, useRef, useCallback, useContext} from 'react';
 import { Image, Text, View, StyleSheet, ImageBackground, 
     Pressable, SafeAreaView, Animated, Dimensions, Vibration, StatusBar} from 'react-native';
 import { Audio } from 'expo-av';
@@ -11,10 +11,13 @@ import Countdown from './Countdown';
 import GetDamage from './GetDamage';
 import GetHealth from './GetHealth';
 import AlertHealth from './AlertHealth';
+import { MusicContext } from '../assets/modules/MusicContext';
+import {toggleMusic} from '../assets/modules/SoundFunctions'
 
 function Game({navigation, route}) {
 
     const db = SQLite.openDatabase('database10.db');
+    const {musicObj, setMusicObj} = useContext(MusicContext);
 
     let timerValue = 3;
     let opponentAmountHealth =4//route?.params?.health;
@@ -38,8 +41,7 @@ function Game({navigation, route}) {
         GetDamage: true,
     });
     const [sound, setSound] = useState({win: null, loose: null, click: null});
-    const [isMusic, setIsMusic] = useState(true);
-        
+
     const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
         oppID: route?.params?.opp, myName: route?.params?.myname?.toUpperCase(),
@@ -52,7 +54,6 @@ function Game({navigation, route}) {
     const isFinish = useRef(false);
     const timeout = useRef({getDamage: null, getHealth: null});
     const score = useRef(0);
-    const music = useRef(route?.params?.music);
 
     const progress = useRef(new Animated.Value(0)).current;
     const playerRight = useRef(new Animated.Value(windowWidth)).current;
@@ -61,28 +62,11 @@ function Game({navigation, route}) {
     const TimmerOpacity = useRef(new Animated.Value(0)).current;
     const opponentUPDOWN = useRef(new Animated.Value(0)).current;
 
-    //SOUNDS
-    async function playMusic() {
-        try {
-            const result = await music.current.getStatusAsync();
-            if (result.isLoaded) {
-            if (result.isPlaying === false) {
-                music.current.playAsync();
-            }
-            }
-        } catch (error) {}
-    };
-
-    async function pauseMusic() {
-        try {
-            const result = await music.current.getStatusAsync();
-            if (result.isLoaded) {
-            if (result.isPlaying === true) {
-                music.current.pauseAsync();
-            }
-            }
-        } catch (error) {}
-    };
+    function toggleMusicHandler(){
+        toggleMusic(musicObj.ref, musicObj.isMusic);
+        setMusicObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
+        Vibration.vibrate(3);
+    }
 
     async function playWin() {
         const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/win.mp3'));
@@ -560,18 +544,6 @@ function Game({navigation, route}) {
         setButtonsActive(() => true);
     }
 
-    function turnMusic(){
-        if(isMusic){
-            pauseMusic();
-        }
-        else{
-            playMusic();
-        }
-
-        setIsMusic((current)=> !current);
-        Vibration.vibrate(3);
-    }
-
     function showAlertHealthMax(){
         if(isElem.alertHealthMax){
             return(
@@ -624,7 +596,7 @@ function Game({navigation, route}) {
     }
 
     function showSound(){
-        if(isMusic){
+        if(musicObj.isMusic){
             return(
                 <Image source={require('../assets/images/musicon.png')} style={styles.image}/>
             )
@@ -646,7 +618,7 @@ function Game({navigation, route}) {
                 style={({pressed}) => [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
                     <Image resizeMode='contain' style={styles.image} source={require("../assets/images/menu.png")}/>
                 </Pressable>
-                <Pressable onPress={turnMusic} style={({pressed})=> [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
+                <Pressable onPress={toggleMusicHandler} style={({pressed})=> [styles.menuContainer,pressed && {opacity: 0.5, transform: [{ scale: 0.9 }]}]}>
                     {showSound()}
                 </Pressable>
             </View>

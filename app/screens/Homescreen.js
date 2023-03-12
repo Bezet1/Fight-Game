@@ -3,15 +3,13 @@ import { ImageBackground, StyleSheet, Animated, BackHandler,
   SafeAreaView, Vibration, View, Dimensions} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
-import * as SQLite from 'expo-sqlite'
-import {Audio} from 'expo-av'
 
 import Home from './Home';
 import ChooseCharacter from './ChooseCharacter';
 import ChooseOpponent from './ChooseOpponent';
 import ChooseDifficulty from './ChooseDifficulty';
 import { MusicContext } from '../assets/modules/MusicContext';
-import {toggleMusic} from '../assets/modules/SoundFunctions'
+import {toggleMusic, playClick} from '../assets/modules/SoundFunctions'
 
 function Homescreen({navigation}) {
 
@@ -31,81 +29,36 @@ function Homescreen({navigation}) {
     const rudyUP = useRef(new Animated.Value(-5)).current;
     const spinValue =  useRef(new Animated.Value(-1)).current
     
-    const [sound, setSound] = useState({click: null});
-    const {musicObj, setMusicObj} = useContext(MusicContext);
+    //const [sound, setSound] = useState({click: null});
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     const spinPrzemo = spinValue.interpolate({
         inputRange: [-1, 0, 1],
         outputRange: ['-10deg','0deg', '10deg']
     });
 
-    const db = SQLite.openDatabase('database10.db');
-
-    useEffect(()=> {
-      db.transaction(tx => {
-        tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS rankingEasy (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
-          [],
-          (txObj, resultSet) => {
-            //console.log('Table created');
-          },
-          (txObj, error) => {
-            console.log('Error:', error);
-          }
-        );
-      });
-
-      db.transaction(tx => {
-        tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS rankingHard (id INTEGER PRIMARY KEY AUTOINCREMENT, name INTEGER, score TEXT, time TEXT)',
-          [],
-          (txObj, resultSet) => {
-            //console.log('Table created');
-          },
-          (txObj, error) => {
-            console.log('Error:', error);
-          }
-        );
-      });
-    
-    }, [])
 
     function toggleMusicHandler(){
-        toggleMusic(musicObj.ref, musicObj.isMusic);
-        setMusicObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
+        toggleMusic(contextObj.ref, contextObj.isMusic);
+        setContextObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
         Vibration.vibrate(3);
     }
-
-      async function playClick() {
-        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/click.mp3')
-        );
-        setSound((obj)=> ({...obj, click: sound}));
-        await sound.playAsync();
-      }
-        
-      useEffect(() => {
-        return sound.click
-          ? () => {
-              sound.click.unloadAsync();
-            }
-          : undefined;
-      }, [sound.click]);
-      
-      //reset values when focus
-      useFocusEffect(
-        useCallback(() => { 
-          setIsScreen((obj)=>({...obj, homeScreen: true, chooseCharacter: false, 
-              chooseOpponent: false, chooseDifficulty: false}));
-            setAlertText(()=>false);
-            setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
-            setName((obj)=> ({...obj, mine: '', opp: ''}));
-            setNoElem((obj)=>({...obj, name: false, opp: false, char: false}));
-            setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-            setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-            passValues.current.charID = '';
-            passValues.current.oppID = '';
-        }, [])
-      );
+    
+    //reset values when focus
+    useFocusEffect(
+      useCallback(() => { 
+        setIsScreen((obj)=>({...obj, homeScreen: true, chooseCharacter: false, 
+            chooseOpponent: false, chooseDifficulty: false}));
+          setAlertText(()=>false);
+          setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
+          setName((obj)=> ({...obj, mine: '', opp: ''}));
+          setNoElem((obj)=>({...obj, name: false, opp: false, char: false}));
+          setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
+          setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
+          passValues.current.charID = '';
+          passValues.current.oppID = '';
+      }, [])
+    );
 
     //ANIMATION when change sreen
     useEffect(()=> { 
@@ -153,7 +106,7 @@ function Homescreen({navigation}) {
   
     //check if hp choosen, stop animations, and navigate to game
     function startGame(){
-        playClick();
+        playClick(setContextObj);
         if(!isHpPress._50 && !isHpPress._30){
           setAlertText(()=>["CHOOSE HEALTH!"]);
           return;
@@ -275,7 +228,7 @@ function Homescreen({navigation}) {
 
       //next screen after choose character
       function confirmChooseCharacter(){
-        playClick();
+        playClick(setContextObj);
         if(name.mine == '' && !charPress._1 && !charPress._2 && !charPress._3){    
             setNoElem((obj)=> ({...obj, name: true, char: true}));
             return;                
@@ -293,7 +246,7 @@ function Homescreen({navigation}) {
 
       //next screen after choose opponent
       function confirmChooseOpponent(){
-        playClick();
+        playClick(setContextObj);
         if(!oppPress._1 && !oppPress._2 && !oppPress._3){
           setNoElem((obj)=> ({...obj, opp: true}));
           return;
@@ -316,7 +269,7 @@ function Homescreen({navigation}) {
                 <Home aniOpacity={aniOpacity} setIsHomeScreen={(val)=> setIsScreen((obj)=> ({...obj, homeScreen: false}))} 
                 setIsChooseCharacter={(val)=> setIsScreen((obj)=> ({...obj, chooseCharacter: true}))}
                 navigation={navigation} exit={()=> setTimeout(() => BackHandler.exitApp(), 100)}
-                playClick={playClick} pressedMusic={toggleMusicHandler} isMusic={musicObj.isMusic}/>
+                playClick={()=> playClick(setContextObj)} pressedMusic={toggleMusicHandler} isMusic={contextObj.isMusic}/>
             )
         }
       }
@@ -329,7 +282,7 @@ function Homescreen({navigation}) {
                 Char3Pressed={charPress._3} thirdCharPressed={thirdCharPressed} noName={noElem.name} myName={name.mine} 
                 confirmChooseCharacter={confirmChooseCharacter} setNoName={(val) => setNoElem((obj)=> ({...obj, name: val}))}
                 setMyName={(name)=> setName((obj)=> ({...obj, mine: name}))} backChooseCharacter={backChooseCharacter} 
-                aniScale={aniScale} aniOpacity={aniOpacity} playClick={playClick}/>
+                aniScale={aniScale} aniOpacity={aniOpacity}/>
             )
         }
       }
@@ -341,7 +294,7 @@ function Homescreen({navigation}) {
                 firstOppPressed={firstOppPressed} opp2Pressed={oppPress._2} secondOppPressed={secondOppPressed} 
                 opp3Pressed={oppPress._3} thirdOppPressed={thirdOppPressed} confirmChooseOpponent={confirmChooseOpponent} 
                 backChooseOpponent={backChooseOpponent} aniScale={aniScale} aniOpacity={aniOpacity}
-                damianUP={damianUP} spinPrzemo={spinPrzemo} rudyUP={rudyUP} playClick={playClick}/>
+                damianUP={damianUP} spinPrzemo={spinPrzemo} rudyUP={rudyUP} />
             )
         }
       }
@@ -351,7 +304,7 @@ function Homescreen({navigation}) {
             return(
                 <ChooseDifficulty backChooseDifficulty={backChooseDifficulty} pressed30={pressed30} is30Pressed={isHpPress._30}
                 pressed50={pressed50} is50Pressed={isHpPress._50} alertText={alertText} goEasyLevel={goEasyLevel} goHardLevel={goHardLevel}
-                aniScale={aniScale} aniOpacity={aniOpacity} playClick={playClick}/>
+                aniScale={aniScale} aniOpacity={aniOpacity}/>
             )
         }
       }

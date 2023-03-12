@@ -1,7 +1,9 @@
-import {React, useEffect, useRef, useState} from 'react';
+import {React, useEffect, useRef, useState, useContext} from 'react';
 import {View, Text, Pressable, StyleSheet, ImageBackground, 
   Dimensions, FlatList, Vibration} from 'react-native';
-import * as SQLite from 'expo-sqlite'
+
+import { MusicContext } from '../assets/modules/MusicContext';
+import { fetchData } from '../assets/modules/sqlFunctions';
 
 function Ranking({navigation}) {
     const screenWidth= useRef( Dimensions.get('window').width);
@@ -11,44 +13,16 @@ function Ranking({navigation}) {
     const [rankingHard, setRankingHard] = useState([]);
     const [isEmpty, setIsEmpty] = useState({easy: true, hard: true});
 
-    const db = SQLite.openDatabase('database10.db');
-
-    useEffect(() => {
-        fetchData();
-      }, []);
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     //get database tables to states
-    function fetchData() {
-       
-        db.transaction(tx => {
-          tx.executeSql(
-            'SELECT * FROM rankingEasy ORDER BY score DESC',
-            [],
-            (_, { rows }) => {
-              setRankingEasy(rows._array);
-            },
-            (txObj, error) => {
-              console.log('Error:', error);
-            }
-          );
-        });
-    
-        db.transaction(tx => {
-          tx.executeSql(
-            'SELECT * FROM rankingHard ORDER BY score DESC',
-            [],
-            (_, { rows }) => {
-              setRankingHard(rows._array);
-            },
-            (txObj, error) => {
-              console.log('Error:', error);
-            }
-          );
-        });
-
-        
+    useEffect(() => {
+        fetchData(contextObj.db, "rankingEasy", setRankingEasy);
+        fetchData(contextObj.db, "rankingHard", setRankingHard);
         setIsRankingLoading(false);
-      }
+      }, []);
+
+ 
       
       function checkIfEmpty(ranking, diffculty){
         if(ranking.length === 0){

@@ -1,3 +1,24 @@
+import { Audio } from 'expo-av';
+
+export async function playClick(setSound) {
+  const { sound } = await Audio.Sound.createAsync( require('../sounds/click.mp3')
+  );
+  setSound((obj)=> ({...obj, click: sound}));
+  await sound.playAsync();
+}
+
+export async function playWin(setSound) {
+  const { sound } = await Audio.Sound.createAsync( require('../sounds/win.mp3'));
+  setSound((obj)=> ({...obj, win: sound}));
+  await sound.playAsync();
+}
+
+export async function playLoose(setSound) {
+  const { sound } = await Audio.Sound.createAsync( require('../sounds/loose.mp3'));
+  setSound((obj)=> ({...obj, loose: sound}));
+  await sound.playAsync();
+}
+
 export async function playMusic (music){
       try {
         const result = await music.getStatusAsync();

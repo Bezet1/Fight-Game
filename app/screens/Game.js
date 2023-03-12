@@ -1,9 +1,7 @@
 import {React, useState, useEffect, useRef, useCallback, useContext} from 'react';
 import { Image, Text, View, StyleSheet, ImageBackground, 
     Pressable, SafeAreaView, Animated, Dimensions, Vibration, StatusBar} from 'react-native';
-import { Audio } from 'expo-av';
 import { useFocusEffect } from '@react-navigation/native';
-import * as SQLite from 'expo-sqlite';
 import Menu from "./Menu";
 import Win from './Win';
 import Lose from './Lose';
@@ -12,12 +10,13 @@ import GetDamage from './GetDamage';
 import GetHealth from './GetHealth';
 import AlertHealth from './AlertHealth';
 import { MusicContext } from '../assets/modules/MusicContext';
-import {toggleMusic} from '../assets/modules/SoundFunctions'
+import {toggleMusic, playClick, playLoose, playWin} from '../assets/modules/SoundFunctions'
+import { addRecord } from '../assets/modules/sqlFunctions';
+
 
 function Game({navigation, route}) {
 
-    const db = SQLite.openDatabase('database10.db');
-    const {musicObj, setMusicObj} = useContext(MusicContext);
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     let timerValue = 3;
     let opponentAmountHealth =4//route?.params?.health;
@@ -40,7 +39,6 @@ function Game({navigation, route}) {
         GetHealth: true,
         GetDamage: true,
     });
-    const [sound, setSound] = useState({win: null, loose: null, click: null});
 
     const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
@@ -63,53 +61,10 @@ function Game({navigation, route}) {
     const opponentUPDOWN = useRef(new Animated.Value(0)).current;
 
     function toggleMusicHandler(){
-        toggleMusic(musicObj.ref, musicObj.isMusic);
-        setMusicObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
+        toggleMusic(contextObj.ref, contextObj.isMusic);
+        setContextObj((obj)=> ({...obj, isMusic: !obj.isMusic}));
         Vibration.vibrate(3);
     }
-
-    async function playWin() {
-        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/win.mp3'));
-        setSound((obj)=> ({...obj, win: sound}));
-        await sound.playAsync();
-      }
-  
-      useEffect(() => {
-        return sound.win
-          ? () => {
-              sound.win.unloadAsync();
-            }
-          : undefined;
-      }, [sound.win]);
-
-      async function playLoose() {
-        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/loose.mp3'));
-        setSound((obj)=> ({...obj, loose: sound}));
-        await sound.playAsync();
-      }
-  
-      useEffect(() => {
-        return sound.loose
-          ? () => {
-              sound.loose.unloadAsync();
-            }
-          : undefined;
-      }, [sound.loose]);
-
-      async function playClick() {
-        const { sound } = await Audio.Sound.createAsync( require('../assets/sounds/click.mp3')
-        );
-        setSound((obj)=> ({...obj, click: sound}));
-        await sound.playAsync();
-      }
-  
-      useEffect(() => {
-        return sound.click
-          ? () => {
-              sound.click.unloadAsync();
-            }
-          : undefined;
-      }, [sound.click]);
     
     //AIMATIONS
     function startAnimations(){
@@ -286,7 +241,7 @@ function Game({navigation, route}) {
     
     //when attack, opens getDamage
     function attack(){
-        playClick();
+        playClick(setContextObj);
         Vibration.vibrate(3);
 
         setButtonsActive(() => false);
@@ -299,7 +254,7 @@ function Game({navigation, route}) {
     
     //when heal pressed, opens getHealth
     function heal(){
-        playClick();
+        playClick(setContextObj);
         Vibration.vibrate(3);
 
         //check if max health
@@ -376,7 +331,7 @@ function Game({navigation, route}) {
                 setTimeout(() => {
                     winOrLoose("mine", "loose");
                     Vibration.vibrate(500);
-                    playLoose();
+                    playLoose(setContextObj);
                 }, 1000);
             }
             if(health.opp <= 0 ){
@@ -385,51 +340,20 @@ function Game({navigation, route}) {
                 setTimeout(() => {
                     winOrLoose("opp", "win");
                     Vibration.vibrate(500);
-                    playWin();
+                    playWin(setContextObj);
                 }, 1000);
                 
                 measureTime();
 
                 calculateScore();
 
-                addNewScore();
+                addRecord(contextObj.db, passedArg.current.difficulty, passedArg.current.myName, 
+                    score.current, time.current.total);
 
             }
         }
     }, [health.mine, health.opp]);
     
-    //adding new score to database
-    function addNewScore(){
-        if(passedArg.current.difficulty == "easy"){
-            db.transaction(tx => {
-                tx.executeSql(
-                    'INSERT INTO rankingEasy (name, score, time) VALUES (?, ?, ?)',
-                    [passedArg.current.myName, score.current, time.current.total],
-                    (txObj, resultSet) => {
-                        //console.log('Correct added', resultSet.rowsAffected);
-                    },
-                    (txObj, error) => {
-                        console.log('Error:', error);
-                    }
-                );
-            });
-        }
-        else{
-            db.transaction(tx => {
-                tx.executeSql(
-                    'INSERT INTO rankingHard (name, score, time) VALUES (?, ?, ?)',
-                    [passedArg.current.myName, score.current, time.current.total],
-                    (txObj, resultSet) => {
-                        //console.log('Correct added', resultSet.rowsAffected);
-                    },
-                    (txObj, error) => {
-                        console.log('Error:', error);
-                    }
-                );
-            });
-        }
-    }
-
     function calculateScore(){
         let newScore = Math.round((health.mine / passedArg.current.maxHealth) * 100);
         score.current = newScore;
@@ -570,7 +494,7 @@ function Game({navigation, route}) {
         if(isElem.menu){
             return(
                 <Animated.View style={{position: 'absolute', top: Dimensions.get('screen').height/2 - 175, alignSelf: 'center', opacity: progress, transform: [{scale: progress}]}}> 
-                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu} playClick={playClick}/>  
+                    <Menu restartPressed={restart} goMenu={goMenu} isVisible={isElem.menu} close={closeMenu} playClick={()=>playClick(setContextObj)}/> 
                 </Animated.View>
             )
         }
@@ -588,7 +512,7 @@ function Game({navigation, route}) {
     }
 
     function showSound(){
-        if(musicObj.isMusic){
+        if(contextObj.isMusic){
             return(
                 <Image source={require('../assets/images/musicon.png')} style={styles.image}/>
             )

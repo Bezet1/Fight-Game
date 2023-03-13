@@ -19,12 +19,12 @@ function Game({navigation, route}) {
     const {contextObj, setContextObj} = useContext(MusicContext);
 
     let timerValue = 3;
-    let opponentAmountHealth =4//route?.params?.health;
-    let myAmountHealth = 12//route?.params?.health;
+    let opponentAmountHealth = route?.params?.health;
+    let myAmountHealth = route?.params?.health;
     let usesOfGetHealth = 2;
     let windowWidth = Dimensions.get("window").width;
     
-    const [health, setHealth] = useState({mine: myAmountHealth -2, opp: opponentAmountHealth});
+    const [health, setHealth] = useState({mine: myAmountHealth, opp: opponentAmountHealth});
     const [isElem, setIsElem] = useState({alertHealthMax: false, alertHealthLimit: false,
      getDamage: false, getHealth: false, win: false, loose: false, menu: false,
     timer: true})
@@ -396,7 +396,9 @@ function Game({navigation, route}) {
         
     //when screen is back after enemys round
     useEffect(() => {
-        if (route.params?.EN_health) {
+        console.log('useeffect')
+        if (route.params !== undefined && route.params.EN_health !== undefined && route.params.EN_health !== null) {
+            console.log('if')
             ER_healthPassed.current = route.params.EN_health;
         }
     }, [route.params?.EN_health]);
@@ -423,7 +425,7 @@ function Game({navigation, route}) {
                         setButtonsActive(() => true)
                         setMyTurn(() => true)
                         setHealthChange((obj)=> ({...obj, my_minus: ['']}));
-                        ER_healthPassed.current = 0;
+                        //ER_healthPassed.current = 0;
                     }, 1000);
                 }, 1000);
             }

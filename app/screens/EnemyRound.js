@@ -11,11 +11,6 @@ function EnemyRound({navigation, route}) {
     const [maxHealth] = useState(route?.params?.maxHealth);
     const [isElem, setIsElem] = useState({heart: false, text: false});
     const [viewHeight_s, setViewHeight_s] = useState(0);
-    const [lineHit, setLineHit] = useState({
-        _1: false,
-        _2: false
-    });
-    const [soundHit, setSoundHit] = useState();
     
     const healthPass = useRef(0);
     const firstRound = useRef(route?.params?.isFirstRound);
@@ -24,7 +19,6 @@ function EnemyRound({navigation, route}) {
     const view = useRef({x: 0, y: 0, width: 0, height: 0});
     const heartPos = useRef({x: 0, y: 0});
     const linePos = useRef({_1: {x: 0, y: 0}, _2: {x: 0, y: 0}});
-    const changeColorLine = useRef({_1: null, _2: null});
     const randomHeight = useRef({_1: 0, _2: 0});
     const UpDown = useRef({_1: 0.0, _2: 0.0});
     const verticalDuration  = useRef({_1: 0, _2: 0});
@@ -119,8 +113,8 @@ function EnemyRound({navigation, route}) {
     //how fast lines moves
     function setDifficulty(){
         if(route?.params?.difficulty == 'easy'){
-            lineSpeed.current.vertical = 2000;
-            lineSpeed.current.horizontal = 2500;
+            lineSpeed.current.vertical = 1700;
+            lineSpeed.current.horizontal = 2300;
         }else{
             lineSpeed.current.vertical = 1200;
             lineSpeed.current.horizontal = 1700;
@@ -261,8 +255,6 @@ function EnemyRound({navigation, route}) {
             (linePos.current[_lineNr].y + 17 < heartPos.current.y || 
                 linePos.current[_lineNr].y - 17 > heartPos.current.y)){
                     
-                setLineHit((obj)=>({...obj, _lineNR: true}));
-
                 setHealth((c)=> c - 2)
                 healthPass.current = healthPass.current + 2;
 
@@ -292,11 +284,7 @@ function EnemyRound({navigation, route}) {
         Animated.timing(lineAni.x, {toValue: view.current.width/2 + 20, duration: lineSpeed.current.horizontal, 
         easing: Easing.linear ,useNativeDriver: true}).start(({finished})=>{
             if(finished){
-                //reset red
-                clearTimeout(changeColorLine.current[_lineNr]);
-                setLineHit((obj)=>({...obj, [_lineNr]: false}));
-    
-                // setWasHit((current)=> !current);
+                
                 startHorizontalMove(lineAni,_lineNr);
             }
         }); 
@@ -375,8 +363,7 @@ function EnemyRound({navigation, route}) {
 
     function line2(){
         return(
-            <Animated.View style={[styles.lineVertical, lineHit._2 && {backgroundColor:"rgba(255, 0, 0, 0.6)"}, 
-            {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
+            <Animated.View style={[styles.lineVertical, {height: viewHeight_s* 2.5,width: viewHeight_s/80 ,
             transform: [{translateX: line2Ani.x}, {translateY: line2Ani.y}]}]}>
                 <Image resizeMode='contain' style={styles.image100} 
                 source={require('../assets/images/lineHorizontal.png')}></Image>

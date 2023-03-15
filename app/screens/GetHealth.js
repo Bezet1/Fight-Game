@@ -15,7 +15,8 @@ function GetHealth(props) {
     const bonusCounter = useRef(0);
     const healthPass = useRef(0);
     const view = useRef({width: 0.0, height: 0.0});
-    const maxHealth = useRef(props.maxHealth)
+    const maxHealth = useRef(props.maxHealth);
+    const isFinish = useRef(false);
     
     const medKitPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
     const pointPosition =  useRef(new Animated.ValueXY({x: 0, y: 0})).current
@@ -62,6 +63,7 @@ function GetHealth(props) {
         healthPass.current = props.health;
         setHealth(()=> props.health);
         maxHealth.current = props.maxHealth;
+        isFinish.current = false;
     }
 
     //start animations of bonus
@@ -81,7 +83,7 @@ function GetHealth(props) {
         setDifficulty();
         
         firstRound.current = props.firstRound;
-        
+
         checkFirstRound();
         
         setInitialValues();
@@ -98,8 +100,11 @@ function GetHealth(props) {
     //end of modal
     useEffect(()=>{
         if(counterOfKit == 6){     
-            setTimeout(() => {              
-                endModal();
+            setTimeout(() => {    
+                if(!isFinish.current){
+                    endModal();
+                    isFinish.current = true;
+                }          
             }, 1500);
         }
     }, [counterOfKit])
@@ -107,8 +112,7 @@ function GetHealth(props) {
     //changes of position 
     function kitHit(){
 
-        Vibration.vibrate(10);
-
+        
         //set new position
         medKitPosition.x.setValue(randomNumber(0, view.current.width - 80))
         medKitPosition.y.setValue(randomNumber(0, view.current.height - 80))
@@ -134,7 +138,7 @@ function GetHealth(props) {
     }
     
     function pointAnimation(evt){
-
+        
         //set point position
         pointPosition.setValue({x: evt.nativeEvent.pageX, y: evt.nativeEvent.pageY - 180});
         pointOpacity.setValue(0);
@@ -158,6 +162,8 @@ function GetHealth(props) {
             return;
         }
         
+        Vibration.vibrate(10);
+
         //track bonus
         bonusCounter.current = bonusCounter.current + 1;
         
@@ -186,7 +192,10 @@ function GetHealth(props) {
             setHealth(()=>maxHealth.current);
             
             setTimeout(() => {
-                endModal();
+                if(!isFinish.current){
+                    endModal();
+                    isFinish.current = true;
+                }
             }, 300);
         }
         

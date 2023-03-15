@@ -305,7 +305,7 @@ function Game({navigation, route}) {
         setIsElem((obj)=> ({...obj, getHealth: false}));
         
         setTimeout(() => {
-            if(isFirstRound.getHealth){
+            if(isFirstRound.GetHealth){
                 setIsFirstRound((obj)=>({...obj, GetHealth: false}));
             } 
            
@@ -396,9 +396,7 @@ function Game({navigation, route}) {
         
     //when screen is back after enemys round
     useEffect(() => {
-        console.log('useeffect')
         if (route.params !== undefined && route.params.EN_health !== undefined && route.params.EN_health !== null) {
-            console.log('if')
             ER_healthPassed.current = route.params.EN_health;
         }
     }, [route.params?.EN_health]);

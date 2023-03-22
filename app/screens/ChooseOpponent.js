@@ -1,71 +1,101 @@
-import React from 'react';
-import {View, Text, Pressable, StyleSheet, Animated} from 'react-native';
+import React, {useRef, useState, useContext} from 'react';
+import {View, Text, Pressable, StyleSheet, Animated, Image, TextInput} from 'react-native';
+import {Camera} from 'expo-camera'
 
+import CameraModal from './CameraModal';
+import { MusicContext } from '../assets/modules/MusicContext';
 function ChooseOpponent(props) {
+    //zrobic camera ref i hascamerapermission na context chyba
+    const {contextObj, setContextObj} = useContext(MusicContext);
+    const cameraRef = useRef();
+
+    const [hasCameraPermission, setHasCameraPermission] = useState();
+    const [isCamera, setIsCamera] = useState(false);
+
+    //input logic
+    function inputChange (newText) {
+        props.setNoName(false);
+        props.setOppName(newText); 
+    }
+
+    function displayPicture(){
+        if(contextObj.oppPicture === undefined){
+            if(hasCameraPermission === undefined || hasCameraPermission){
+                return (
+                    <Text style={styles.noPicture}>No picture...</Text>
+                )
+           
+            }else if(!hasCameraPermission){
+                return (
+                    <>
+                    <Text style={styles.noPicture} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>No picture...</Text>
+                    <Text style={styles.noGranted} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>Permisions not granted</Text>
+                    <Text style={styles.noGranted} adjustsFontSizeToFit={true} 
+                    numberOfLines={1}>change this in settings</Text>
+                    </>
+                )
+            }
+        } else{
+            return(
+                <Image resizeMode='cover' style={styles.takeImg} source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
+            )
+        }
+    }
+
+    function TakePicture(){
+        if(!hasCameraPermission){            
+            Camera.requestCameraPermissionsAsync().then((cameraPermission) => {
+                setHasCameraPermission(cameraPermission.status === "granted");
+                if (cameraPermission.status === "granted") {
+                  setIsCamera(true);
+                }
+              });
+        }else{
+            setIsCamera(true);   
+        }
+
+    }
+
     return (
         <>
-        <View style={{flex: 0.2}}>
+            <CameraModal isVisible={isCamera} cameraRef={cameraRef} 
+            back={()=> setIsCamera(false)} setNoElem={(val)=>props.setNoElem(val)}/>
+            <View style={{flex: 0.2}}>
                 <Pressable onPress={props.backChooseOpponent} style={({pressed})=>
                 [styles.backContainer, pressed && {transform: [{ scale: 0.9 }]}]}>
                     <Text style={styles.backText}>BACK</Text>   
                 </Pressable>
             </View>
-            <Animated.View style={{flex: 1, justifyContent: "center", 
-            transform: [{scale: props.aniScale}], opacity: props.aniOpacity}}>
-                
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Animated.View style={[styles.container, {transform: [{scale: props.aniScale}], opacity: props.aniOpacity}]}>        
+                <View style={styles.center}>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
-                    numberOfLines={1}>CHOOSE YOUR</Text>
+                    numberOfLines={1}>TAKE PICTURE</Text>
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} 
-                    numberOfLines={1}>OPPONENT</Text>
+                    numberOfLines={1}>OF OPPONENT</Text>
                 </View>
-                <View style={{flex: 1, justifyContent:'center'}}>
-                    <View style={[styles.myOpponentsContainer, props.noOpponent && {borderColor: 'red'}]}>
-                        <Pressable style={[styles.individualOpponent, props.opp1Pressed && 
-                        {borderWidth: 3, borderColor: "white"}]}
-                        onPress={() => props.firstOppPressed()}>
-                            <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{translateY: props.damianUP}]}} source={require("../assets/images/opp1.png")}></Animated.Image>
-                            </View>
-                            <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PROXIMITY</Text>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 13}}>LIKES TO TOW</Text>
-                            </View>
-                        </Pressable>
-                        <Pressable style={[styles.individualOpponent, props.opp2Pressed && {borderWidth: 3, borderColor: "white"}]}
-                        onPress={() => props.secondOppPressed()}>
-                            <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{rotate: props.spinPrzemo}]}} source={require("../assets/images/opp2.png")}></Animated.Image>
-                            </View>
-                            <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>PRZEMO</Text>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 13}}>SINGS "LENO PALENO"</Text>
-                            </View>
-                        </Pressable>
-                        <Pressable style={[styles.individualOpponent, props.opp3Pressed && {borderWidth: 3, borderColor: "white"}]}
-                        onPress={() => props.thirdOppPressed()}>
-                            <View style={{flex:1, overflow: 'hidden'}}>
-                                <Animated.Image resizeMode={'contain'} style={{width:'100%', height:'100%', 
-                                transform: [{translateX: props.rudyUP}]}} source={require("../assets/images/opp3.png")}></Animated.Image>
-                            </View>
-                            <View style={{flex:3, justifyContent: 'center', alignItems:'center'}}>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 20, color: '#20624D'}}>DJRUDY</Text>
-                                <Text style={{fontFamily:"Buttons", color: "white", fontSize: 13}}>SAYS "OSTRYYY"</Text>
-                            </View>
-                        </Pressable>
-                    </View>               
+                <View style={styles.center}>
+                    <View style={[styles.myOpponentsContainer, props.noOpponent && {borderColor: "rgba(255,70,70, 0.8)"}]}>
+                        {displayPicture()}
+                    </View>
+                    <Pressable onPress={TakePicture} style={({pressed})=> [styles.takePhoto, pressed && {transform: [{ scale: 0.9 }]}]}>
+                        <Image resizeMode='contain' source={require("../assets/images/photo.png")} style={styles.takeImg}/>
+                    </Pressable>               
                 </View>
-                <View style={{flex: 1, alignItems:'center' ,justifyContent: 'center'}}>
-                        <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, 
-                        {marginHorizontal: 0, marginVertical: 0}, pressed && {transform: [{ scale: 0.9 }], 
-                        backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
-                        onPress={() => 
-                            props.confirmChooseOpponent()
-                        }>
-                            <Text style={{textAlign:'center', fontSize: 30, fontFamily: 'Buttons', color: 'white'}}>CONFIRM</Text>
-                        </Pressable>
+                <View style={styles.center}>
+                    <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"rgba(255,70,70, 0.8)"}]} placeholder="Opponent's name" 
+                            placeholderTextColor={"#444444"} textAlign={"center"}
+                            onChangeText={newText => {inputChange(newText)}} value={props.myName} maxLength={15}
+                            />
+                </View>
+                <View style={styles.center}>
+                    <Pressable style={({pressed}) => [styles.buttonChooseDifficulty, 
+                    {marginHorizontal: 0, marginVertical: 0}, pressed && {transform: [{ scale: 0.9 }], 
+                    backgroundColor: "rgba(37, 37, 64, 0.5)",}]} 
+                    onPress={() => props.confirmChooseOpponent()}>
+                        <Text style={{textAlign:'center', fontSize: 30, fontFamily: 'Buttons', color: 'white'}}>CONFIRM</Text>
+                    </Pressable>
                 </View>
             </Animated.View>
         </>
@@ -75,6 +105,15 @@ function ChooseOpponent(props) {
 
 
 const styles = StyleSheet.create({
+    container:{
+        flex: 1, 
+        justifyContent: "space-between", 
+        marginBottom: 50,
+    },
+    center:{
+        justifyContent:'center', 
+        alignItems: "center"
+    },
     textChooseDifficulty: {
         fontSize: 40,
         textAlign: "center",
@@ -82,16 +121,14 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
     },
     myOpponentsContainer: {
-        top: 20,
-        flex: 1,
-        marginHorizontal: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: "space-evenly",     
+        justifyContent: "center",
+        width: 250,
+        height: 250,
+        borderRadius: 50,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         borderWidth: 3,
         borderColor: 'rgba(0, 0, 0, 0.7)',
-        paddingVertical: 5,
+        overflow: "hidden"
     },
     individualOpponent:{
         margin: 5,
@@ -130,6 +167,41 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
         textAlign:"center",
     },
+    takePhoto: {
+        width: 60,
+        height: 60,
+        borderRadius: 40,
+        borderWidth: 3,
+        marginTop: 10,
+        padding:8,
+        borderColor: "rgba(150,150,150, 0.8)",
+        backgroundColor: "rgba(100,100,100, 0.5)"
+    },
+    noPicture: {
+        fontSize: 20,
+        textAlign: "center",
+        color: "rgba(255,255,255, 0.8)",
+        fontFamily: "Buttons",
+    },
+    noGranted: {
+        fontSize: 15,
+        textAlign: "center",
+        color: "rgba(255,70,70, 0.8)",
+        fontFamily: "Buttons",
+    },
+    takeImg: {
+        width: '100%',
+        height: '100%',
+    },
+    input: {
+        height: 40,
+        width: 260,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 20,
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+      },
 })
 
 

@@ -22,7 +22,7 @@ export default function App() {
 
 
   const [contextObj, setContextObj] = useState({ref: music.current, isMusic: true, click: null, 
-    win: null, loose: null, db: SQLite.openDatabase('database12.db')});
+    win: null, loose: null, db: SQLite.openDatabase('database12.db'), oppPicture: undefined});
   
   //unload sounds
   useEffect(() => {

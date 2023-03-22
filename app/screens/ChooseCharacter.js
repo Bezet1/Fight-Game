@@ -22,7 +22,7 @@ function ChooseCharacter(props) {
                     <Text style={[styles.textChooseDifficulty, {fontSize: 40}]} adjustsFontSizeToFit={true} numberOfLines={1}>CHARACTER</Text>
                 </View>
                 <View style={{flex: 1}}>
-                    <View style={[styles.myCharactersContainer, props.noCharacter && {borderColor: 'red'}]}>
+                    <View style={[styles.myCharactersContainer, props.noCharacter && {borderColor: "rgba(255,70,70, 0.8)"}]}>
                         <Pressable style={[styles.individualCharacter, props.Char1Pressed && {borderWidth: 3, borderColor: "white"}]}
                         onPress={() => props.firstCharPressed()}
                         >
@@ -58,7 +58,7 @@ function ChooseCharacter(props) {
                         <View style={{flex: 1, justifyContent: "center", alignItems: 'center'}}>
                             <Text style={{color: 'white', fontFamily:'Buttons', textAlign:"center", fontSize:30}} adjustsFontSizeToFit={true} 
                             numberOfLines={1}>SET YOUR NAME</Text>
-                            <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"red"}]} placeholder="YOUR NAME" 
+                            <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"rgba(255,70,70, 0.8)"}]} placeholder="Your name" 
                             placeholderTextColor={"#444444"} textAlign={"center"}
                             onChangeText={newText => {inputChange(newText)}} value={props.myName} maxLength={15}
                             />
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        width: '70%',
+        width: 260,
         margin: 12,
         borderWidth: 1,
         padding: 10,

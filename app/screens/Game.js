@@ -123,16 +123,6 @@ function Game({navigation, route}) {
         else if(passedArg.current.charID == "3"){
             imgPath.current.char = require("../assets/images/char3.gif");
         }
-    
-        if(passedArg.current.oppID == "1"){
-            imgPath.current.opp= require("../assets/images/opp1.png");
-        }
-        else if(passedArg.current.oppID == "2"){
-            imgPath.current.opp = require("../assets/images/opp2.png");
-        }
-        else if(passedArg.current.oppID == "3"){
-            imgPath.current.opp = require("../assets/images/opp3.png");
-        }
     }
 
     //count down timer    
@@ -388,8 +378,8 @@ function Game({navigation, route}) {
         
         setMyTurn(() => false);
      
-        navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, path: imgPath.current.opp, 
-            health: myHealthRef.current, isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth});
+        navigation.navigate("EnemyRound", {difficulty: passedArg.current.difficulty, health: myHealthRef.current, 
+            isFirstRound: isFirstRound.EnemyRound, maxHealth: passedArg.current.maxHealth});
     } 
         
 
@@ -542,7 +532,7 @@ function Game({navigation, route}) {
                 <Win goMenu={goMenu} isVisible={isElem.win} restart={restart} imgpath={imgPath.current.char} name={passedArg.current.myName}
                 score={score.current} time={time.current.total} />                
                 <Lose goMenu={goMenu} isVisible={isElem.loose} restart={restart} imgpath={imgPath.current.opp} name={passedArg.current.oppName}/>
-                <GetDamage isVisible={isElem.getDamage} close={closeGetDamage} difficulty={passedArg.current.difficulty} imgpath={imgPath.current.opp}
+                <GetDamage isVisible={isElem.getDamage} close={closeGetDamage} difficulty={passedArg.current.difficulty}
                 health={health.opp} firstRound={isFirstRound.GetDamage} maxHealth={passedArg.current.maxHealth} oppName={passedArg.current.oppName}/>
 
                 <GetHealth isVisible={isElem.getHealth} close={closeGetHealth} difficulty={passedArg.current.difficulty} 
@@ -586,16 +576,21 @@ function Game({navigation, route}) {
                         </View>
                     </View>
                     <View style={styles.players}>
-                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerLeft}]}]} source={imgPath.current.char}/>
-                        <Animated.Image style={[styles.meGif, {transform: [{translateX: playerRight}, {translateY: opponentUPDOWN}]}]} source={imgPath.current.opp}/>
+                        <View style={styles.singlePlayerContainer}>
+                            <Animated.Image style={[styles.charGif, {transform: [{translateX: playerLeft}]}]} source={imgPath.current.char}/>
+                        </View>
+                        <View style={styles.singlePlayerContainer}>
+                            <Animated.View style={[styles.oppIMGContainer, {transform: [{translateX: playerRight}, {translateY: opponentUPDOWN}]}]}>
+                                <Animated.Image style={[styles.oppImg]} 
+                                source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
+                            </Animated.View>
+                        </View>
                     </View>
                     <View style={styles.buttonsContainer}>
                         <Pressable onPress={attack} disabled={!buttonsActive} style={({pressed}) => [
                             styles.hitButton, pressed && buttonsActive && {
                                 backgroundColor: "rgba(56, 13, 21, 0.6)",
-                                transform: [{ scale: 0.9 }]
-                                
-                            }, 
+                                transform: [{ scale: 0.9 }]}, 
                             !buttonsActive && {
                                 backgroundColor: "rgba(150, 150, 150, 0.6)", 
                                 borderColor: "rgba(60, 60, 60, 0.6)",
@@ -716,13 +711,25 @@ function Game({navigation, route}) {
     },
     players:{
         flex:1,
-        justifyContent: "space-evenly",
         flexDirection: "row",
     },
-    meGif:{
+    singlePlayerContainer:{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: 'center',
+    },
+    charGif:{
         height: 150,
         width: 150,
-        marginHorizontal: 30,
+    },
+    oppImg:{
+        height: 130,
+        width: 130,
+    },
+    oppIMGContainer:{
+        borderRadius: 20,
+        borderWidth: 3,
+        overflow: 'hidden'
     },
     healthContainer: {
         width: "100%",

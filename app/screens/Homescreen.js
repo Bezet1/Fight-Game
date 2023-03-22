@@ -18,25 +18,14 @@ function Homescreen({navigation}) {
     const[alertText, setAlertText] = useState([""]);
     const[isHpPress, setIsHpPress] = useState({_30: false, _50: false})
     const [name, setName] = useState({mine: '', opp: ''})
-    const [noElem, setNoElem] = useState({name: false, char: false, opp: false})
+    const [noElem, setNoElem] = useState({name: false, oppName: false, char: false, opp: false})
     const [charPress, setCharPress] = useState({_1: false, _2: false, _3: false})
-    const [oppPress, setOppPress] = useState({_1: false, _2: false, _3: false})
     const passValues = useRef({health:0, difficulty:'', charID: '', oppID: ''});
 
     const aniScale = useRef(new Animated.Value(0.8)).current;
     const aniOpacity = useRef(new Animated.Value(0)).current;
-    const damianUP = useRef(new Animated.Value(-2)).current;
-    const rudyUP = useRef(new Animated.Value(-5)).current;
-    const spinValue =  useRef(new Animated.Value(-1)).current
     
-    //const [sound, setSound] = useState({click: null});
     const {contextObj, setContextObj} = useContext(MusicContext);
-
-    const spinPrzemo = spinValue.interpolate({
-        inputRange: [-1, 0, 1],
-        outputRange: ['-10deg','0deg', '10deg']
-    });
-
 
     function toggleMusicHandler(){
         toggleMusic(contextObj.ref, contextObj.isMusic);
@@ -54,9 +43,9 @@ function Homescreen({navigation}) {
           setName((obj)=> ({...obj, mine: '', opp: ''}));
           setNoElem((obj)=>({...obj, name: false, opp: false, char: false}));
           setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-          setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
           passValues.current.charID = '';
           passValues.current.oppID = '';
+          setContextObj((obj)=> ({...obj, oppPicture: undefined}));
       }, [])
     );
 
@@ -68,35 +57,6 @@ function Homescreen({navigation}) {
         Animated.timing(aniOpacity, {toValue: 1, duration: 200,useNativeDriver: true}).start();
 
     }, [isScreen.homeScreen, isScreen.chooseCharacter, isScreen.chooseOpponent, isScreen.chooseDifficulty])
-
-    //start and stop animation when choose opponent screen
-    useEffect(()=> {
-        if(isScreen.chooseOpponent){
-            Animated.loop(
-                Animated.sequence([
-                    Animated.spring(damianUP, {toValue: 2, useNativeDriver: true, 
-                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
-                    Animated.spring(damianUP, {toValue: -2, useNativeDriver: true, 
-                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 1}),
-                ])
-            ).start();
-            Animated.loop(
-                Animated.sequence([
-                    Animated.spring(spinValue, {toValue: 1, useNativeDriver: true, mass: 1}),
-                    Animated.spring(spinValue, {toValue: -1, useNativeDriver: true, mass: 1}),
-                ])
-            ).start();
-            Animated.loop(
-                Animated.sequence([
-                    Animated.spring(rudyUP, {toValue: 5, useNativeDriver: true, 
-                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
-                    Animated.spring(rudyUP, {toValue: -5, useNativeDriver: true, 
-                      restDisplacementThreshold: 1, restSpeedThreshold: 1, mass: 3}),
-                ])
-            ).start();
-        }
-        else {damianUP.stopAnimation()}
-    }, [isScreen.chooseOpponent])
 
     //set difficulty and start
     function goEasyLevel(){passValues.current.difficulty = "easy"; startGame();}
@@ -136,15 +96,7 @@ function Homescreen({navigation}) {
         setIsHpPress((obj)=>({...obj, _30: true, _50: false}))
         passValues.current.health = 30;
       }
-
-      //go back from choose difficulty
-      function backChooseDifficulty(){
-        setIsScreen((obj)=>({...obj, chooseOpponent: true, chooseDifficulty: false}));
-        setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
-        setAlertText(()=> []);
-        Vibration.vibrate(6);
-      }
-
+      
       //go back from choose character
       function backChooseCharacter(){
         setIsScreen((obj)=>({...obj, chooseCharacter: false, homeScreen: true}));
@@ -152,14 +104,23 @@ function Homescreen({navigation}) {
         setNoElem((obj)=> ({...obj, name: false, char: false}));
         setName((obj)=> ({...obj, mine: ''}));
         Vibration.vibrate(6);
-
+        
       }
-
+      
       //go back from choose opponent
       function backChooseOpponent(){
         setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseCharacter: true}));
-        setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
-        setNoElem((obj)=> ({...obj, opp: false}));
+        setNoElem((obj)=> ({...obj, opp: false, oppName: false}));
+        setName((obj)=> ({...obj, opp: ''}));
+        setContextObj((obj)=>({...obj, oppPicture: undefined}));
+        Vibration.vibrate(6);
+      }
+      
+      //go back from choose difficulty
+      function backChooseDifficulty(){
+        setIsScreen((obj)=>({...obj, chooseOpponent: true, chooseDifficulty: false}));
+        setIsHpPress((obj)=>({...obj, _30: false, _50: false}));
+        setAlertText(()=> []);
         Vibration.vibrate(6);
       }
 
@@ -192,39 +153,6 @@ function Homescreen({navigation}) {
         setNoElem((obj)=> ({...obj, char: false}));
         passValues.current.charID = '3';
       }
-      
-      //set 1 opponent
-      function firstOppPressed(){
-        if(!oppPress._1){
-          Vibration.vibrate(3);
-        }
-          setOppPress((obj)=> ({...obj, _1: true, _2: false, _3: false}));
-          setNoElem((obj)=> ({...obj, opp: false}))
-          passValues.current.oppID = '1';
-          setName((obj)=> ({...obj, opp: 'PROXIMITY'}));
-      }
-
-      //set 2 opponent
-      function secondOppPressed(){
-        if(!oppPress._2){
-          Vibration.vibrate(3);
-        }
-          setOppPress((obj)=> ({...obj, _1: false, _2: true, _3: false}));
-          setNoElem((obj)=> ({...obj, opp: false}));
-          passValues.current.oppID = '2';
-          setName((obj)=> ({...obj, opp: 'PRZEMO'}));
-      }
-
-      //set 3 opponent
-      function thirdOppPressed(){
-        if(!oppPress._3){
-          Vibration.vibrate(3);
-        }
-          setOppPress((obj)=> ({...obj, _1: false, _2: false, _3: true}));
-          setNoElem((obj)=> ({...obj, opp: false}));
-          passValues.current.oppID = '3';
-          setName((obj)=> ({...obj, opp: 'DJRUDY'}));
-      }
 
       //next screen after choose character
       function confirmChooseCharacter(){
@@ -247,8 +175,14 @@ function Homescreen({navigation}) {
       //next screen after choose opponent
       function confirmChooseOpponent(){
         playClick(setContextObj);
-        if(!oppPress._1 && !oppPress._2 && !oppPress._3){
+        if(contextObj.oppPicture == undefined && name.opp == ''){
+          setNoElem((obj)=> ({...obj, opp: true, oppName: true}));
+          return;
+        }else if(contextObj.oppPicture == undefined){
           setNoElem((obj)=> ({...obj, opp: true}));
+          return;
+        }else if(name.opp == ''){
+          setNoElem((obj)=> ({...obj, oppName: true}));
           return;
         }
         setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseDifficulty: true}));
@@ -258,9 +192,6 @@ function Homescreen({navigation}) {
       function stopAnimation(){
         aniScale.stopAnimation(); 
         aniOpacity.stopAnimation(); 
-        damianUP.stopAnimation(); 
-        rudyUP.stopAnimation(); 
-        spinValue.stopAnimation(); 
       }
 
       function Home_Screen(){
@@ -290,11 +221,11 @@ function Homescreen({navigation}) {
       function chooseOpponent_Screen(){
         if(isScreen.chooseOpponent){
             return(
-                <ChooseOpponent noOpponent={noElem.opp} opp1Pressed={oppPress._1} 
-                firstOppPressed={firstOppPressed} opp2Pressed={oppPress._2} secondOppPressed={secondOppPressed} 
-                opp3Pressed={oppPress._3} thirdOppPressed={thirdOppPressed} confirmChooseOpponent={confirmChooseOpponent} 
+                <ChooseOpponent noOpponent={noElem.opp} confirmChooseOpponent={confirmChooseOpponent} 
                 backChooseOpponent={backChooseOpponent} aniScale={aniScale} aniOpacity={aniOpacity}
-                damianUP={damianUP} spinPrzemo={spinPrzemo} rudyUP={rudyUP} />
+                
+                noName={noElem.oppName} myName={name.opp} setNoName={(val) => setNoElem((obj)=> ({...obj, oppName: val}))}
+                setOppName={(name)=> setName((obj)=> ({...obj, opp: name}))} setNoElem={(val)=> setNoElem((obj)=> ({...obj, opp: val}))}/>
             )
         }
       }

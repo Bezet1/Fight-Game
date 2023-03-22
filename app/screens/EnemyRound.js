@@ -1,9 +1,13 @@
-import {React, useState, useRef, useEffect} from 'react';
+import {React, useState, useRef, useEffect, useContext} from 'react';
 import { View, Image, Animated, ImageBackground, 
     StyleSheet, SafeAreaView, StatusBar, Text, Easing, Vibration, Dimensions} from 'react-native';
 import Movable from '../assets/modules/MovableHeart';
+import { MusicContext } from '../assets/modules/MusicContext';
+
 
 function EnemyRound({navigation, route}) {
+
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     const throttleDelay = 0;
 
@@ -14,7 +18,6 @@ function EnemyRound({navigation, route}) {
     
     const healthPass = useRef(0);
     const firstRound = useRef(route?.params?.isFirstRound);
-    const oppPath = useRef(route?.params?.path);
     const lineSpeed = useRef({vertical: 0, horizontal: 0});
     const view = useRef({x: 0, y: 0, width: 0, height: 0});
     const heartPos = useRef({x: 0, y: 0});
@@ -344,7 +347,7 @@ function EnemyRound({navigation, route}) {
         return(
             <Animated.View style={[styles.opponent, {opacity: oppOpacity, 
             transform: [{translateX: oppPosition.x}, {translateY: oppPosition.y}]}]}>
-                <Image source={oppPath.current}  style={styles.image100} />
+                <Image source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}  style={styles.image100} />
             </Animated.View>
         )
     }
@@ -419,8 +422,12 @@ const styles = StyleSheet.create({
         alignItems:'center',
     },
     opponent: {
-        height: 100,
-        width: 100,
+        height: 80,
+        width: 80,
+        borderRadius: 20,
+        overflow: "hidden",
+        marginBottom: 10,
+        borderWidth: 2
     },
     image100:{
         width: '100%',

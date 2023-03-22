@@ -1,10 +1,14 @@
-import {React, useRef, useState} from 'react';
+import {React, useRef, useState, useContext} from 'react';
 import { View, StyleSheet, Text, Modal, Pressable, ImageBackground, Image, 
     SafeAreaView, Animated, StatusBar, Dimensions, Vibration} from 'react-native';
+
+import { MusicContext } from '../assets/modules/MusicContext';
 
 const GetDamage = (props) => {
 
     let GetDamageDuration = 8000;
+
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     const[health, setHealth] =  useState(0);
     const [isElem, setIsElem] = useState({point: false, text: false})
@@ -19,7 +23,7 @@ const GetDamage = (props) => {
     const firstRound = useRef(true);
     const restSpeedThreshold_value = useRef(null);
     const restDisplacementThreshold_value = useRef(null);
-    const oppVal = useRef({name: props.oppName, path: props.imgpath});
+    const oppVal = useRef({name: props.oppName});
     const isFinish = useRef(false);
     
     const textProgress = useRef(new Animated.Value(0)).current;
@@ -60,7 +64,6 @@ const GetDamage = (props) => {
         healthPass.current = props.health;
         maxHealth.current = props.maxHealth;
         firstRound.current = props.firstRound;
-        oppVal.current.path = props.imgpath;
         opponentPosition.setValue({x: view.current.width/2, y: view.current.height * 1.5});
         spinValue.setValue(0);
         isFinish.current = false;
@@ -207,7 +210,7 @@ const GetDamage = (props) => {
         return (
             <Animated.View style={[{transform: [{translateX: opponentPosition.x}, {translateY: opponentPosition.y}, {rotate: spinOpponent} ]}, styles.opponentContainer]}>
                 <Pressable onPress={(evt) => enemyHit(evt)}>
-                    <Image source={oppVal.current.path} style={styles.opponentIMG}/>
+                    <Image source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}} style={styles.opponentIMG}/>
                 </Pressable>
             </Animated.View>
         ) 
@@ -280,7 +283,9 @@ const styles = StyleSheet.create({
     opponentContainer: {
         width: 30,
         height: 30,
-        borderRadius: 10,  
+        borderRadius: 7,
+        overflow: "hidden",
+        borderWidth: 0.7
     }, 
     valueText: {
         textAlign: "center",

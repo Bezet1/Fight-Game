@@ -43,7 +43,7 @@ function Game({navigation, route}) {
     const interval = useRef({timer: null, oppHp: null, mineHp: null});
     const passedArg = useRef({difficulty: route?.params?.difficulty, charID: route?.params?.char,
         oppID: route?.params?.opp, myName: route?.params?.myname?.toUpperCase(),
-        oppName: route?.params?.oppname, maxHealth: route?.params?.health});
+        oppName: route?.params?.oppname?.toUpperCase(), maxHealth: route?.params?.health});
     const imgPath = useRef({char: 0, opp: 0})
     const wasFirstFocus = useRef(false);
     const myHealthRef = useRef(myAmountHealth);
@@ -581,8 +581,8 @@ function Game({navigation, route}) {
                         </View>
                         <View style={styles.singlePlayerContainer}>
                             <Animated.View style={[styles.oppIMGContainer, {transform: [{translateX: playerRight}, {translateY: opponentUPDOWN}]}]}>
-                                <Animated.Image style={[styles.oppImg]} 
-                                source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
+                                <Animated.Image resizeMode='cover' style={styles.oppImg} source={{uri: contextObj.oppPictureType == "media" ? 
+                                    contextObj.oppPicture: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
                             </Animated.View>
                         </View>
                     </View>

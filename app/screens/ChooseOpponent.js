@@ -1,6 +1,7 @@
 import React, {useRef, useState, useContext} from 'react';
 import {View, Text, Pressable, StyleSheet, Animated, Image, TextInput} from 'react-native';
 import {Camera} from 'expo-camera'
+import * as ImagePicker from 'expo-image-picker';
 
 import CameraModal from './CameraModal';
 import { MusicContext } from '../assets/modules/MusicContext';
@@ -39,7 +40,8 @@ function ChooseOpponent(props) {
             }
         } else{
             return(
-                <Image resizeMode='cover' style={styles.takeImg} source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
+                <Image resizeMode='cover' style={styles.takeImg} source={{uri: contextObj.oppPictureType == "media" ? 
+                contextObj.oppPicture: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
             )
         }
     }
@@ -55,9 +57,23 @@ function ChooseOpponent(props) {
         }else{
             setIsCamera(true);   
         }
-
     }
 
+    async function pickImage(){
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 1,
+        });
+    
+        if (!result.canceled) {
+            setContextObj((obj)=> ({...obj, oppPicture: result.assets[0].uri, oppPictureType: "media"}));
+            
+        }
+    
+    }
     return (
         <>
             <CameraModal isVisible={isCamera} cameraRef={cameraRef} 
@@ -79,9 +95,16 @@ function ChooseOpponent(props) {
                     <View style={[styles.myOpponentsContainer, props.noOpponent && {borderColor: "rgba(255,70,70, 0.8)"}]}>
                         {displayPicture()}
                     </View>
-                    <Pressable onPress={TakePicture} style={({pressed})=> [styles.takePhoto, pressed && {transform: [{ scale: 0.9 }]}]}>
-                        <Image resizeMode='contain' source={require("../assets/images/photo.png")} style={styles.takeImg}/>
-                    </Pressable>               
+                    <View style={styles.pictureButtonsContainer}>
+                        <Pressable onPress={TakePicture} style={({pressed})=> [styles.takePhoto, pressed && {transform: [{ scale: 0.9 }]}]}>
+                            <Image resizeMode='contain' source={require("../assets/images/photo.png")} style={styles.takeImg}/>
+                        </Pressable>
+                        <Text style={styles.orText}>or</Text>              
+                        <Pressable onPress={pickImage} style={({pressed})=> [styles.takePhoto, pressed && {transform: [{ scale: 0.9 }]}]}>
+                            <Image resizeMode='contain' source={require("../assets/images/folder.png")} style={styles.takeImg}/>
+                        </Pressable>
+                                     
+                    </View>
                 </View>
                 <View style={styles.center}>
                     <TextInput style={[styles.input, props.noName && {borderWidth: 3, borderColor:"rgba(255,70,70, 0.8)"}]} placeholder="Opponent's name" 
@@ -167,6 +190,11 @@ const styles = StyleSheet.create({
         fontFamily: "Buttons",
         textAlign:"center",
     },
+    pictureButtonsContainer:{
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     takePhoto: {
         width: 60,
         height: 60,
@@ -174,8 +202,15 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         marginTop: 10,
         padding:8,
-        borderColor: "rgba(150,150,150, 0.8)",
-        backgroundColor: "rgba(100,100,100, 0.5)"
+        borderColor: "rgba(150,150,150, 0.5)",
+        backgroundColor: "rgba(10,10,10, 0.8)"
+    },
+    orText:{
+      fontSize: 20,
+      textAlign: "center",
+      color: "white",
+      fontFamily: "Buttons",
+      marginHorizontal: 10
     },
     noPicture: {
         fontSize: 20,

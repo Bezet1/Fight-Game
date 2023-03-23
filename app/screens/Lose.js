@@ -1,7 +1,11 @@
-import {React, useRef, useState} from 'react';
-import { View, StyleSheet, Text, Modal, Pressable, Animated, Dimensions} from 'react-native';
+import {React, useRef, useState, useContext} from 'react';
+import { View, StyleSheet, Text, Modal, Pressable, Animated, Dimensions, Image} from 'react-native';
+
+import { MusicContext } from '../assets/modules/MusicContext';
 
 function Lose(props) {
+
+    const {contextObj, setContextObj} = useContext(MusicContext);
 
     const [forRefresh, setForRefresh] = useState(false)
     
@@ -52,10 +56,11 @@ function Lose(props) {
                 <View style={styles.container}>
                     <Text style={styles.winText} adjustsFontSizeToFit={true} numberOfLines={1}>{oppName.current}</Text>
                     <Text style={styles.winText}>WINS!</Text>
-                    <View style={styles.imageContainer}>
-                        <Animated.Image source={imgPath.current} style={[styles.image, 
-                            {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}/>
-                    </View>
+                    <Animated.View style={[styles.imageContainer, {opacity: imageOpacity, transform:[{translateY: imageUP}]}]}>
+                        <Image resizeMode='cover' style={styles.image} 
+                        source={{uri: contextObj.oppPictureType == "media" ? 
+                            contextObj.oppPicture: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>                    
+                    </Animated.View>
                     <View style={styles.buttonsContainer}>
                         <Pressable onPress={replay} style={({pressed})=>[styles.buttonRestart, 
                             pressed && {backgroundColor: "#3e135c"}]}>
@@ -126,7 +131,10 @@ const styles = StyleSheet.create({
     imageContainer:{
         width: 200,
         height: 200,
-        marginVertical: 40
+        marginVertical: 40,
+        borderRadius: 30,
+        borderWidth: 3,
+        overflow: "hidden"
     },
     image:{
         width: "100%",

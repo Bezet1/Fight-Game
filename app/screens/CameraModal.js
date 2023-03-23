@@ -25,7 +25,7 @@ function CameraModal(props) {
 
         let newPhoto = await props.cameraRef.current.takePictureAsync(options);
 
-        setContextObj((obj)=> ({...obj, oppPicture: newPhoto}));
+        setContextObj((obj)=> ({...obj, oppPicture: newPhoto, oppPictureType: "camera"}));
         props.setNoElem(false);
     }
 
@@ -43,7 +43,7 @@ function CameraModal(props) {
     }
 
     function screen(){
-        if(!contextObj.oppPicture){
+        if(!contextObj.oppPicture || contextObj.oppPictureType == "media"){
             return(
                 <View>
                     <Camera style={styles.camera} ratio={"4:3"} ref={props.cameraRef} type={cameraType}/>
@@ -64,7 +64,7 @@ function CameraModal(props) {
                     </View>
                     <View style={[styles.buttonsContainer, {marginTop: 20}]}>
                         <Pressable style={({pressed})=>[styles.button, pressed && {backgroundColor: 'rgba(255,255,255, 0.4)'}]} onPress={renew}>
-                            <Text style={styles.backText}>Renew</Text>
+                            <Text style={styles.backText}>Discard</Text>
                         </Pressable>
                         <Pressable style={({pressed})=>[styles.button, pressed && {backgroundColor: 'rgba(255,255,255, 0.4)'}]} onPress={back}>
                             <Text style={styles.backText}>Save</Text>
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
     button: {
         height: 60,
         width: 130,
-        borderColor: 'white',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255, 0.3)',
         borderRadius: 20,
         justifyContent: "center",
         alignItems: "center",

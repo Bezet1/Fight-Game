@@ -210,7 +210,8 @@ const GetDamage = (props) => {
         return (
             <Animated.View style={[{transform: [{translateX: opponentPosition.x}, {translateY: opponentPosition.y}, {rotate: spinOpponent} ]}, styles.opponentContainer]}>
                 <Pressable onPress={(evt) => enemyHit(evt)}>
-                    <Image source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}} style={styles.opponentIMG}/>
+                    <Image resizeMode='cover' style={styles.opponentIMG} source={{uri: contextObj.oppPictureType == "media" ? 
+                    contextObj.oppPicture: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
                 </Pressable>
             </Animated.View>
         ) 

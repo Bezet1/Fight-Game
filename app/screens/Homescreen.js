@@ -45,7 +45,7 @@ function Homescreen({navigation}) {
           setCharPress((obj)=> ({...obj, _1: false, _2: false, _3: false}));
           passValues.current.charID = '';
           passValues.current.oppID = '';
-          setContextObj((obj)=> ({...obj, oppPicture: undefined}));
+          setContextObj((obj)=> ({...obj, oppPicture: undefined, oppPictureType: ""}));
       }, [])
     );
 
@@ -112,7 +112,7 @@ function Homescreen({navigation}) {
         setIsScreen((obj)=>({...obj, chooseOpponent: false, chooseCharacter: true}));
         setNoElem((obj)=> ({...obj, opp: false, oppName: false}));
         setName((obj)=> ({...obj, opp: ''}));
-        setContextObj((obj)=>({...obj, oppPicture: undefined}));
+        setContextObj((obj)=>({...obj, oppPicture: undefined, oppPictureType: ""}));
         Vibration.vibrate(6);
       }
       

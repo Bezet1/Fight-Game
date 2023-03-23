@@ -347,7 +347,8 @@ function EnemyRound({navigation, route}) {
         return(
             <Animated.View style={[styles.opponent, {opacity: oppOpacity, 
             transform: [{translateX: oppPosition.x}, {translateY: oppPosition.y}]}]}>
-                <Image source={{uri: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}  style={styles.image100} />
+                <Image resizeMode='cover' style={styles.image100} source={{uri: contextObj.oppPictureType == "media" ? 
+                contextObj.oppPicture: 'data:image/jpg;base64,' + contextObj.oppPicture?.base64}}/>
             </Animated.View>
         )
     }

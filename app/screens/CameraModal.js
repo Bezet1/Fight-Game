@@ -46,7 +46,11 @@ function CameraModal(props) {
         if(!contextObj.oppPicture || contextObj.oppPictureType == "media"){
             return(
                 <View>
-                    <Camera style={styles.camera} ratio={"4:3"} ref={props.cameraRef} type={cameraType}/>
+                    <Camera style={styles.camera} ratio={"4:3"} ref={props.cameraRef} type={cameraType}>
+                        <View style={styles.aroundCamera}/>
+                        <View style={styles.fieldOfCamera}/>
+                        <View style={styles.aroundCamera}/>
+                    </Camera>
                     <View style={[styles.buttonsContainer, {marginTop: 20}]}>
                         <View style={styles.cameraRotate}/>
                         <Pressable style={({pressed})=>[styles.takePicture, pressed && {backgroundColor: '#cccaca'}]} onPress={takePicture}/>
@@ -109,10 +113,18 @@ const styles = StyleSheet.create({
         width: '100%',
         alignSelf: "center",
         backgroundColor: "black",
+        justifyContent: "center",
+    },
+    fieldOfCamera:{
+        aspectRatio: 1/1,
+    },
+    aroundCamera: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0, 0.7)"
     },
     preview:{
         width: '100%',
-        aspectRatio: 3/4,
+        aspectRatio: 1/1,
         alignSelf: "center",
     },
     takePicture:{

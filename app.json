@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "firstGame",
-    "slug": "firstGame",
+    "name": "FightGame",
+    "slug": "FightGame",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./app/assets/images/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./app/assets/images/logo.jpg",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./app/assets/images/splash.png",
       "resizeMode": "contain",
@@ -25,7 +25,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.FightGame"
     },
     "web": {
       "favicon": "./app/assets/images/favicon.png"
@@ -37,7 +42,11 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
         }
       ]
-    ]
-    
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cdcfc6c2-d59a-4677-8c8e-e6366892a9b3"
+      }
+    }
   }
 }

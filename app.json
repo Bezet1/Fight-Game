@@ -30,7 +30,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.FightGame"
+      "package": "com.FightGame",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./app/assets/images/favicon.png"
